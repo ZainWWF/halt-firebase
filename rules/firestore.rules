@@ -1,0 +1,54 @@
+rules_version = '2';
+
+
+/// helper functions ///
+function isSignedIn() {
+	return request.auth != null;
+}
+function emailVerified() {
+	return request.auth.token.email_verified;
+}
+function userExists() {
+	return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+}
+
+// [READ] Data that exists on the Firestore document
+function existingData() {
+	return resource.data;
+}
+// [WRITE] Data that is sent to a Firestore document
+function incomingData() {
+	return request.resource.data;
+}
+
+function isOwner(userId) {
+	return request.auth.uid == userId;
+}
+
+function userEmail(userId) {
+	return get(/databases/$(database)/documents/users/$(userId)).data.email;
+}
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read: if false;
+			allow write: if false;
+    }
+
+		match /users/{userId} {
+			allow create: if false;
+			allow delete: if false;
+			allow read:	if isSignedIn(); 
+			allow update:	if isSignedIn() && isOwner(userId)
+											//TODO: isAdmin(userId) && isAuditor(userId)
+			 								&& (existingData().profile == incomingData().profile
+											|| existingData().plantations == incomingData().plantations)
+
+		}
+
+
+
+
+  }
+}
