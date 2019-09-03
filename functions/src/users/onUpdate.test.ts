@@ -4,7 +4,7 @@ import * as api from "../index"
 // tslint:disable-next-line: no-implicit-dependencies
 import waitForExpect from "wait-for-expect";
 
-describe("vehicle functions", () => {
+describe("User onUpdate trigger", () => {
 	let adminStub,
 		fakeUserId,
 		fakeVehicleID,
@@ -12,10 +12,9 @@ describe("vehicle functions", () => {
 		removedVehicle,
 		removedVehicleRef,
 		editedVehicleRef,
-		editedVehicle,
-		user,
 		userPath,
-		userRef;
+		editedUser,
+		userRef: FirebaseFirestore.DocumentReference;
 
 	beforeAll(async () => {
 		adminStub = jest.spyOn(admin, "initializeApp");
@@ -40,6 +39,8 @@ describe("vehicle functions", () => {
 	afterEach(async () => {
 		// clean things up
 		await removedVehicleRef.delete()
+
+		
 	});
 
 
@@ -147,12 +148,14 @@ describe("vehicle functions", () => {
 		});
 
 		setTimeout(async () => {
-			userRef = await userRef.get()
+			editedUser = await userRef.get()
+			await userRef.delete()
 		}, 500);
 
 		await waitForExpect(() => {
-			expect(userRef.data()).toHaveProperty("id2.make", "Honda")
+			expect(editedUser.data()).toHaveProperty("id2.make", "Honda")
 		})
+
 
 	});
 

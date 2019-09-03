@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import { testEnv } from "../test-helpers"
 import * as api from "../index"
 
-describe("vehicle functions", () => {
+describe("Vehicle onCreate trigger", () => {
 	let adminStub;
 	
 	beforeAll(async () => {
