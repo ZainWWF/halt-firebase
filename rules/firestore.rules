@@ -25,6 +25,10 @@ function isOwner(userId) {
 	return request.auth.uid == userId;
 }
 
+function isVehicleOwner() {
+	return request.auth.uid == incomingData().userId 
+}
+
 function userEmail(userId) {
 	return get(/databases/$(database)/documents/users/$(userId)).data.email;
 }
@@ -39,14 +43,34 @@ service cloud.firestore {
 		match /users/{userId} {
 			allow create: if false;
 			allow delete: if false;
+
 			allow read:	if isSignedIn(); 
 			allow update:	if isSignedIn() && isOwner(userId)
 											//TODO: isAdmin(userId) && isAuditor(userId)
-			 								&& (existingData().profile == incomingData().profile
-											|| existingData().plantations == incomingData().plantations)
+											&& (existingData().plantations == incomingData().plantations
+											|| existingData().profile == incomingData().profile)
+											// edit of the the vehicles field values will be overwritten
+											// back to previous values by the userOnUpdate cloud function,
+											// only delete of a vehicle map entry is allowed 
+		}
+
+		match /profiles/{userId} {
+						// allow read, write;
+				allow read:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow create:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow delete: if false
 
 		}
 
+		match /vehicles/{vehicleId} {
+			allow read, write;
+				// allow read:	if isSignedIn() && isVehicleOwner() //TODO: isAdmin(userId) && isAuditor(userId)
+				// allow create:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				// allow update:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				// allow delete: if false
+
+		}
 
 
 
