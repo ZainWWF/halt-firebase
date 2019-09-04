@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin";
 
 /** update the vehicle collection when a the user's vehicle map entry is removed*/
-export default functions.firestore
+export default functions.region("asia-east2").firestore
 	.document('users/{userId}').onUpdate((change, context) => {
 
 		const previousUserData = change.before.data() as FirebaseFirestore.DocumentData;
