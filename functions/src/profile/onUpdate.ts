@@ -27,7 +27,7 @@ export default functions.region("asia-east2").firestore
 
 		} catch (error) {
 
-			return error
+			return "Error: " + error
 
 		}
 
