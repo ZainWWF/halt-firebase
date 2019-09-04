@@ -20,7 +20,7 @@ describe('Users rules', () => {
 	test('anyone allow to read when authenticated', async () => {
 		db = await setup({ uid: "mike456" }, {
 			"users/john123": {
-				profile: null
+				profile: {}
 			}
 		});
 		ref = db.collection('users');
@@ -37,40 +37,41 @@ describe('Users rules', () => {
 	test('deny update if profile field has changed', async () => {
 		db = await setup({ uid: "john123" }, {
 			"users/john123": {
-				profile: null
+				profile: {}
 			}
 		});
 		ref = db.collection('users');
-		await expectExtend(ref.doc("john123").update({ profile: {} })).toDeny()
-		await expectExtend(ref.doc("john123").update({ profile: null })).toAllow()
+		await expectExtend(ref.doc("john123").update({ profile: {
+			dummy : null
+		} })).toDeny()
+		await expectExtend(ref.doc("john123").update({})).toAllow()
 	})
 
-	test('deny update if vehicles field has changed', async () => {
+	test('allow update if vehicles field has changed', async () => {
 		db = await setup({ uid: "john123" }, {
 			"users/john123": {
-				vehicles: null
+				vehicles: {},
+				plantations: {},
+				profile: {},
 			}
 		});
 		ref = db.collection('users');
-		await expectExtend(ref.doc("john123").update({ vehicles: {} })).toDeny()
-		await expectExtend(ref.doc("john123").update({ vehicles: null })).toAllow()
+		await expectExtend(ref.doc("john123").update({ vehicles: {
+			dummy : null
+		} })).toAllow()
+		await expectExtend(ref.doc("john123").update({ vehicles: {} })).toAllow()
 	})
 
 	test('deny update if plantations field has changed', async () => {
-		db = await setup({ uid: "john123" }, {
+		db = await setup({ uid: "john123" }, { 
 			"users/john123": {
-				plantations: null
+				plantations: {}
 			}
 		});
 		ref = db.collection('users');
-		await expectExtend(ref.doc("john123").update({ plantations: {} })).toDeny()
-		await expectExtend(ref.doc("john123").update({ plantations: null })).toAllow()
+		await expectExtend(ref.doc("john123").update({ plantations: {
+			dummy : null
+		} })).toDeny()
+		await expectExtend(ref.doc("john123").update({ plantations: {} })).toAllow()
 	})
-
-	// test('allow update if is owner and signed in', async () => {
-	// 	db = await setup(	{ uid: "john123" },{});
-	// 	ref = db.collection('users')
-	// 	await expectExtend(ref.add({})).toDeny()
-	// 	await expectExtend(ref.doc().delete()).toDeny()
-	// })
 })
