@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
 
 /** update User.vehicle map entry when the vehicle document is updated */
-export default functions.firestore
+export default functions.region("asia-east2").firestore
 	.document('vehicles/{vehicleId}').onUpdate((change, context) => {
 
 		const getPropValues = (data: any) => {

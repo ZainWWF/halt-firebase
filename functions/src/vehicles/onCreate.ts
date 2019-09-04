@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
 
 /** add entry into user's vehicle map when a vehicle doc is created*/
-export default functions.firestore
+export default functions.region("asia-east2").firestore
 	.document('vehicles/{vehicleId}').onCreate((snap, context) => {
 
 		const newVehicle = snap.data() as FirebaseFirestore.DocumentData;
