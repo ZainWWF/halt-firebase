@@ -6,6 +6,7 @@ import vehicleOnUpdate from "./vehicles/onUpdate"
 import profileOnCreate from  "./profile/onCreate"
 import profileOnUpdate from  "./profile/onUpdate"
 import plantationOnCreate from "./plantations/onCreate";
+import plantationOnUpdate from "./plantations/onUpdate";
 
 
 admin.initializeApp();
@@ -17,6 +18,7 @@ export {
 	vehicleOnUpdate,
 	profileOnCreate,
 	profileOnUpdate,
-	plantationOnCreate
+	plantationOnCreate,
+	plantationOnUpdate
 }
 
