@@ -25,7 +25,7 @@ function isOwner(userId) {
 	return request.auth.uid == userId;
 }
 
-function isVehicleOwner() {
+function isAssetOwner() {
 	return request.auth.uid == existingData().userId 
 }
 
@@ -65,13 +65,25 @@ service cloud.firestore {
 
 		match /vehicles/{vehicleId} {
 			// allow read, write;
-				allow read:	if isSignedIn() && isVehicleOwner()
+				allow read:	if isSignedIn() && isAssetOwner()
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
-				allow update:	if isSignedIn() && isVehicleOwner() //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
 										&& incomingData().userId == existingData().userId
 				allow delete: if false
 
 		}
+
+
+		match /plantations/{plantationId} {
+			// allow read, write;
+				allow read:	if isSignedIn() && isAssetOwner()
+				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
+										&& incomingData().userId == existingData().userId
+				allow delete: if false
+
+		}
+
 
 
 
