@@ -26,7 +26,7 @@ function isOwner(userId) {
 }
 
 function isVehicleOwner() {
-	return request.auth.uid == incomingData().userId 
+	return request.auth.uid == existingData().userId 
 }
 
 function userEmail(userId) {
@@ -64,11 +64,12 @@ service cloud.firestore {
 		}
 
 		match /vehicles/{vehicleId} {
-			allow read, write;
-				// allow read:	if isSignedIn() && isVehicleOwner() //TODO: isAdmin(userId) && isAuditor(userId)
-				// allow create:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
-				// allow update:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
-				// allow delete: if false
+			// allow read, write;
+				allow read:	if isSignedIn() && isVehicleOwner()
+				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isVehicleOwner() //TODO: isAdmin(userId) && isAuditor(userId)
+										&& incomingData().userId == existingData().userId
+				allow delete: if false
 
 		}
 
