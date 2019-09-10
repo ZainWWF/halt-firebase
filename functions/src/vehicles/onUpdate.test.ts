@@ -38,8 +38,8 @@ describe.only("Vehicle onUpdate trigger", () => {
 
 	afterEach(async () => {
 		// clean things up
-		await userRef.delete()
-		await editedVehicleRef.delete()
+		// await userRef.delete()
+		// await editedVehicleRef.delete()
 
 	});
 
@@ -50,18 +50,24 @@ describe.only("Vehicle onUpdate trigger", () => {
 		await editedVehicleRef.set({})
 
 		const vehiclesBefore = {
-			make: "Honda",
+			make: "Toyota",
 			userId: fakeUserId,
 			license: "fakeLicence",
+			chassis: "",
+			colour: "",
+			loadingCapacity: "",
 			url: "fakeUrl"
 		}
 		const beforeSnap = testEnv.firestore
 		.makeDocumentSnapshot(vehiclesBefore, vehiclePath);
 
 		const vehiclesAfter = {
-			make: "Toyota",
+			make: "Honda",
 			userId: fakeUserId,
 			license: "fakeLicence",
+			chassis: "",
+			colour: "",
+			loadingCapacity: "",
 			url: "fakeUrl"
 		}
 		const afterSnap = testEnv.firestore
@@ -82,7 +88,44 @@ describe.only("Vehicle onUpdate trigger", () => {
 
 			await waitForExpect(() => {
 				expect(editedVehicle.data()).toHaveProperty("updatedAt")
-				expect(editedUser.data()).toHaveProperty(`vehicles.${fakeVehicleID}.make`, "Toyota")
+				expect(editedUser.data()).toHaveProperty(`vehicles.${fakeVehicleID}.make`, "Honda")
+			})
+
+	});
+
+
+	it.only("should not update Users/vehicle when Vehicle has no property values changed", async () => {
+
+		await userRef.set({})
+		await editedVehicleRef.set({})
+
+		const vehiclesBefore = {
+			make: "Toyota",
+			userId: fakeUserId,
+			license: "fakeLicence",
+			chassis: "",
+			colour: "",
+			loadingCapacity: "",
+			url: "fakeUrl"
+		}
+		const snap = testEnv.firestore
+		.makeDocumentSnapshot(vehiclesBefore, vehiclePath);
+
+			const change = testEnv.makeChange(snap, snap);
+			const wrapped = testEnv.wrap(api.vehicleOnUpdate);
+			wrapped(change,{
+				params :{
+					vehicleId: fakeVehicleID
+				}
+			});
+
+			setTimeout(async () => {
+				editedUser = await userRef.get()
+			}, 500);
+
+			
+			await waitForExpect(() => {
+				expect(editedUser.data()).toMatchObject({})
 			})
 
 	});
