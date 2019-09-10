@@ -8,8 +8,8 @@ import { Grid, Button, Typography, Snackbar } from "@material-ui/core";
 import PhoneNumberField from "./PhoneNumberField";
 import * as firebase from "firebase/app";
 import "firebase/auth";
-import { makeStyles } from "@material-ui/styles";
-
+// import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles({
 	button: {

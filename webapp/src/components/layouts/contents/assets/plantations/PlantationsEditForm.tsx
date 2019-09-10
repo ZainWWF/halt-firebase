@@ -1,6 +1,5 @@
 import React, { useState, Dispatch, SetStateAction, FunctionComponent } from "react";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
+
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import PlantationNameField from "./PlantationNameField";
@@ -20,8 +19,11 @@ import PlantationProofOfRightsField from "./PlantationProofOfRightsField";
 import PlantationPreviousLandUseField from "./PlantationPreviousLandUseField";
 import PlantationClearLandMethodField from "./PlantationClearLandMethodField";
 import PlantationSizeDeclaredField from "./PlantationSizeDeclaredField";
-import { DialogContent, DialogActions } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import { makeStyles } from "@material-ui/core/styles";
 import { Plantation } from "../../../../types/Plantation";
 
 const useStyles = makeStyles({

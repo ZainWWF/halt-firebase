@@ -6,7 +6,7 @@
 import React, { useContext, useState, useEffect, FunctionComponent } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Theme  } from '@material-ui/core/styles';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from "@material-ui/core/styles";
 import Divider from '@material-ui/core/Divider';
 import Drawer, { DrawerProps } from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';

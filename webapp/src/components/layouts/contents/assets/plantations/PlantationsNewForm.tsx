@@ -24,7 +24,7 @@ import PlantationProofOfRightsField from "./PlantationProofOfRightsField";
 import PlantationPreviousLandUseField from "./PlantationPreviousLandUseField";
 import PlantationClearLandMethodField from "./PlantationClearLandMethodField";
 import PlantationSizeDeclaredField from "./PlantationSizeDeclaredField";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 
 const useStyles = makeStyles({

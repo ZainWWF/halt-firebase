@@ -1,6 +1,4 @@
 import React, { FunctionComponent, MouseEvent } from 'react';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
-import { grey, green } from '@material-ui/core/colors';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -8,6 +6,8 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssignmentLateIcon from '@material-ui/icons/AssignmentLate';
+import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { grey, green } from '@material-ui/core/colors';
 import classNames from "classnames";
 
 const useStyles = makeStyles((theme: Theme) =>

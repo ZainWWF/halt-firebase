@@ -4,11 +4,10 @@
 
 import React, { useState, useEffect, useRef, FunctionComponent } from "react";
 import {
-	MuiThemeProvider,
 	withWidth,
-	Container
+	Container,
 } from "@material-ui/core";
-import { makeStyles } from '@material-ui/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { Grid } from "@material-ui/core";
 import LoginForm from "../layouts/contents/user/LoginForm";
@@ -16,7 +15,7 @@ import theme from "../../config/theme.config";
 import SMSVerificationForm from "../layouts/contents/user/SMSVerificationForm";
 import * as firebase from "firebase/app";
 import "firebase/auth";
-
+import { makeStyles } from "@material-ui/core/styles";
 import { WithWidth } from "@material-ui/core/withWidth";
 
 const useStyles = makeStyles({

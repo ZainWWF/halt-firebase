@@ -12,7 +12,7 @@ import { DialogContent, DialogActions } from "@material-ui/core";
 import { FirebaseContext, Firebase } from "../../../../providers/Firebase/FirebaseProvider";
 import * as firebase from 'firebase/app';
 import 'firebase/storage';
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import { Vehicle } from "../../../../types/Vehicle";
 
 const useStyles = makeStyles({

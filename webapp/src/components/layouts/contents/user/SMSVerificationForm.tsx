@@ -3,13 +3,14 @@
  *  Registration Page
  */
 import React, { useEffect, useState, FunctionComponent } from 'react';
-import { makeStyles } from '@material-ui/styles';
+// import { makeStyles } from '@material-ui/styles';
 import { Formik, Form, Field } from 'formik';
 import { Grid, Button, Typography, Snackbar, Link } from '@material-ui/core';
 import * as Yup from 'yup';
 import SMSCodeField from './SMSCodeField';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
+import { makeStyles } from "@material-ui/core/styles";
 
 
 

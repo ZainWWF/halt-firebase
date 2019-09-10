@@ -5,7 +5,6 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { makeStyles } from "@material-ui/styles";
 import VehiclesNewDialog from "./VehiclesNewDialog"
 import VehiclesEditDialog from "./VehiclesEditDialog"
 import VehicleDetailModal from "./VehicleDetailModal";
@@ -15,6 +14,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { LinearProgress, Theme } from '@material-ui/core';
 import VehicleList from "./VehicleList";
 import { UserVehicle } from '../../../../types/UserVehicle';
+import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) => ({
 	paper: {

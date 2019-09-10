@@ -10,7 +10,8 @@ import { Theme } from "@material-ui/core/styles";
 import navItems from "../sidenav/nav-items";
 import { Route, Switch } from "react-router-dom";
 import { SideNavContext } from "../../providers/SideNav/SideNavProvider";
-import { makeStyles } from "@material-ui/styles";
+// import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) => ({
 

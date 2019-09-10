@@ -1,24 +1,17 @@
 import React, { useState, useContext, useEffect, useCallback, FunctionComponent } from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { AuthContext } from '../../../../containers/Main';
 import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
-import Snackbar from '@material-ui/core/Snackbar';
-import { LinearProgress, Theme } from '@material-ui/core';
+import { Paper, Grid, LinearProgress, Theme, Button, Typography, Toolbar, AppBar, Snackbar} from '@material-ui/core';
+import { makeStyles } from "@material-ui/core/styles";
+import { AuthContext } from '../../../../containers/Main';
 import PlantationList from "./PlantationList";
 import PlantationsNewDialog from "./PlantationsNewDialog";
 import PlantationDetailModal from "./PlantationDetailModal";
 import PlantationsEditDialog from "./PlantationsEditDialog";
 import PlantationMapModal from "./PlantationMapModal";
-import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles((theme:Theme) => ({
+
+const useStyles = makeStyles((theme: Theme) => ({
 	paper: {
-
 		margin: 'auto',
 		overflow: 'hidden',
 		borderRadius: 0,
@@ -50,7 +43,7 @@ const useStyles = makeStyles((theme:Theme) => ({
 	},
 }));
 
-const View:FunctionComponent = ()=> {
+const View: FunctionComponent = () => {
 
 	const classes = useStyles();
 
@@ -111,7 +104,7 @@ const View:FunctionComponent = ()=> {
 					setEditDialogOpen(false)
 					setUploadInProgress(false)
 					setPlantationEditData(null)
-				}).catch((error:Error) => {
+				}).catch((error: Error) => {
 					setHasError(error)
 					setEditDialogOpen(false)
 					setUploadInProgress(false)
