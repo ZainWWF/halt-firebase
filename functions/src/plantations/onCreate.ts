@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
 
 /** add entry into user's plantation map when a plantation doc is created*/
-export default functions.firestore
+export default functions.region("asia-east2").firestore
 	.document('plantations/{plantationId}').onCreate(async (snap, context) => {
 
 		try {

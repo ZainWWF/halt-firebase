@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
 
 /** update user's plantation map entry when the plantation document is updated */
-export default functions.firestore
+export default functions.region("asia-east2").firestore
 	.document('plantations/{plantationId}').onUpdate(async (change, context) => {
 
 		try {
