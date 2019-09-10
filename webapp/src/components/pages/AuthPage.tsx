@@ -4,10 +4,7 @@
  *  from config file "src/config/nav-items.config.tsx"
  */
 import React, { memo } from 'react';
-import {
-	MuiThemeProvider,
-} from '@material-ui/core/styles';
-import { makeStyles } from '@material-ui/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
 	BrowserRouter as Router,
 } from 'react-router-dom';
@@ -18,6 +15,7 @@ import Header from '../layouts/header/Header';
 import navItems from '../layouts/sidenav/nav-items';
 import theme from '../../config/theme.config';
 import { Grid } from '@material-ui/core';
+import { makeStyles } from "@material-ui/core/styles";
 
 const drawerWidth = 256;
 
@@ -32,12 +30,8 @@ const useStyles = makeStyles({
 			flexShrink: 0
 		}
 	},
-	appContent: {
-		flex: 1,
-		display: 'flex',
-		flexDirection: 'column'
-	},
 	mainContent: {
+		width: "100%",
 		[theme.breakpoints.down('sm')]: {
 			padding: 0,
 		},
@@ -72,7 +66,7 @@ const  AuthPage = memo(()=> {
 				<Grid container direction="column">
 					<Router>
 						<Header />
-						<main data-testid="main-content">
+						<main data-testid="main-content" className={classes.mainContent}>
 							{navItems
 								.reduce((acc: any[], curr) => {
 									return [...acc, ...curr.children];
