@@ -33,7 +33,20 @@ describe('Vehicles rules', () => {
 		ref = db.collection('vehicles')
 		await expectExtend(ref.doc("v456").set(
 			{
-				userId : "john123"
+				userId : "john123",
+				colour: "blue",
+				license: "string",
+			}
+		)).toDeny()
+		await expectExtend(ref.doc("v456").set(
+			{
+				userId : "john123",
+				colour: "blue",
+				license: "string",
+				chassis: "string",
+				model: "string",
+				make: "string",
+				url: "string"
 			}
 		)).toAllow()
 	})
@@ -43,13 +56,18 @@ describe('Vehicles rules', () => {
 		db = await setup({ uid: "mike456" }, {
 			"vehicles/v123" : {
 				userId: "mike456",
-				colour: "blue"
+				colour: "blue",
+				license: "string",
+				chassis: "string",
+				model: "string",
+				make: "string",
+				url: "string"
 			}
 		});
 		ref = db.collection('vehicles');
 		await expectExtend(ref.doc("v123").update({
 			userId: "mike456",
-			colour: "red"
+			colour: "red",
 		})).toAllow()
 		await expectExtend(ref.doc("v123").update({
 			userId: "joe123",
