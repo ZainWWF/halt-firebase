@@ -38,8 +38,8 @@ describe.only("Vehicle onUpdate trigger", () => {
 
 	afterEach(async () => {
 		// clean things up
-		// await userRef.delete()
-		// await editedVehicleRef.delete()
+		await userRef.delete()
+		await editedVehicleRef.delete()
 
 	});
 
@@ -52,11 +52,7 @@ describe.only("Vehicle onUpdate trigger", () => {
 		const vehiclesBefore = {
 			make: "Toyota",
 			userId: fakeUserId,
-			license: "fakeLicence",
-			chassis: "",
-			colour: "",
-			loadingCapacity: "",
-			url: "fakeUrl"
+
 		}
 		const beforeSnap = testEnv.firestore
 		.makeDocumentSnapshot(vehiclesBefore, vehiclePath);
@@ -64,11 +60,6 @@ describe.only("Vehicle onUpdate trigger", () => {
 		const vehiclesAfter = {
 			make: "Honda",
 			userId: fakeUserId,
-			license: "fakeLicence",
-			chassis: "",
-			colour: "",
-			loadingCapacity: "",
-			url: "fakeUrl"
 		}
 		const afterSnap = testEnv.firestore
 			.makeDocumentSnapshot(vehiclesAfter, vehiclePath);
