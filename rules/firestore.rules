@@ -67,8 +67,16 @@ service cloud.firestore {
 			// allow read, write;
 				allow read:	if isSignedIn() && isAssetOwner()
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
+										&& incomingData().size() == 7
+										&& incomingData().license is string
+										&& incomingData().colour is string
+										&& incomingData().chassis is string
+										&& incomingData().model is string
+										&& incomingData().make is string
+										&& incomingData().url is string
 				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
 										&& incomingData().userId == existingData().userId
+
 				allow delete: if false
 
 		}
