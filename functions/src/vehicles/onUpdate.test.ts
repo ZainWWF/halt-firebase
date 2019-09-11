@@ -4,7 +4,7 @@ import * as api from "../index"
 // tslint:disable-next-line: no-implicit-dependencies
 import waitForExpect from "wait-for-expect";
 
-describe.only("Vehicle onUpdate trigger", () => {
+describe("Vehicle onUpdate trigger", () => {
 	// jest.setTimeout(12000);
 	let adminStub,
 		fakeUserId,
@@ -15,7 +15,7 @@ describe.only("Vehicle onUpdate trigger", () => {
 		userPath,
 		userRef,
 		editedUser;
-	
+
 	beforeAll(async () => {
 		// you can use `sinon.stub` instead
 		adminStub = jest.spyOn(admin, "initializeApp");
@@ -30,94 +30,105 @@ describe.only("Vehicle onUpdate trigger", () => {
 	beforeEach(async () => {
 		fakeUserId = `fakeUser${Date.now()}`;
 		fakeVehicleID = `fakeVehicle${Date.now()}`
-		vehiclePath = `vehicles/${fakeVehicleID}`
-		editedVehicleRef = admin.firestore().doc(vehiclePath)
-		userPath = `users/${fakeUserId}`
-		userRef = admin.firestore().doc(userPath)
-	});
+	
 
-	afterEach(async () => {
-		// clean things up
-		await userRef.delete()
-		await editedVehicleRef.delete()
+	vehiclePath = `vehicles/${fakeVehicleID}`
+	editedVehicleRef = admin.firestore().doc(vehiclePath)
+	userPath = `users/${fakeUserId}`
+	userRef = admin.firestore().doc(userPath)
+});
 
-	});
+afterEach(async () => {
+	// clean things up
+	await userRef.delete()
+	await editedVehicleRef.delete()
+
+});
 
 
-	it("should update Users/vehicle when Vehicle is updated", async () => {
+it("should update Users/vehicle when Vehicle is updated", async () => {
 
-		await userRef.set({})
-		await editedVehicleRef.set({})
-
-		const vehiclesBefore = {
-			make: "Toyota",
-			userId: fakeUserId,
-
+	await userRef.set({
+		vehicles: {
+			[fakeVehicleID] : {
+				make: "Toyota",
+				ref: editedVehicleRef
+			}
 		}
-		const beforeSnap = testEnv.firestore
+	})
+	await editedVehicleRef.set({
+	})
+
+	const vehiclesBefore = {
+		make: "Toyota",
+		userId: fakeUserId,
+		ref: editedVehicleRef
+	}
+	const beforeSnap = testEnv.firestore
 		.makeDocumentSnapshot(vehiclesBefore, vehiclePath);
 
-		const vehiclesAfter = {
-			make: "Honda",
-			userId: fakeUserId,
+	const vehiclesAfter = {
+		make: "Nissan",
+		userId: fakeUserId,
+		ref: editedVehicleRef
+	}
+	const afterSnap = testEnv.firestore
+		.makeDocumentSnapshot(vehiclesAfter, vehiclePath);
+
+	const change = testEnv.makeChange(beforeSnap, afterSnap);
+	const wrapped = testEnv.wrap(api.vehicleOnUpdate);
+	wrapped(change, {
+		params: {
+			vehicleId: fakeVehicleID
 		}
-		const afterSnap = testEnv.firestore
-			.makeDocumentSnapshot(vehiclesAfter, vehiclePath);
-
-			const change = testEnv.makeChange(beforeSnap, afterSnap);
-			const wrapped = testEnv.wrap(api.vehicleOnUpdate);
-			wrapped(change,{
-				params :{
-					vehicleId: fakeVehicleID
-				}
-			});
-
-			setTimeout(async () => {
-				editedVehicle = await editedVehicleRef.get()
-				editedUser = await userRef.get()
-			}, 500);
-
-			await waitForExpect(() => {
-				expect(editedVehicle.data()).toHaveProperty("updatedAt")
-				expect(editedUser.data()).toHaveProperty(`vehicles.${fakeVehicleID}.make`, "Honda")
-			})
-
 	});
 
+	setTimeout(async () => {
+		editedVehicle = await editedVehicleRef.get()
+		editedUser = await userRef.get()
+	}, 500);
 
-	it.only("should not update Users/vehicle when Vehicle has no property values changed", async () => {
+	await waitForExpect(() => {
+		expect(editedVehicle.data()).toHaveProperty("updatedAt")
+		expect(editedUser.data()).toHaveProperty(`vehicles.${fakeVehicleID}.make`, "Nissan")
+	})
 
-		await userRef.set({})
-		await editedVehicleRef.set({})
+});
 
-		const vehiclesBefore = {
-			make: "Toyota",
-			userId: fakeUserId,
-			license: "fakeLicence",
-			chassis: "",
-			colour: "",
-			loadingCapacity: "",
-			url: "fakeUrl"
-		}
-		const snap = testEnv.firestore
+
+it.only("should not update Users/vehicle when Vehicle has no property values changed", async () => {
+
+	await userRef.set({})
+	await editedVehicleRef.set({})
+
+	const vehiclesBefore = {
+		make: "Toyota",
+		userId: fakeUserId,
+		license: "fakeLicence",
+		chassis: "",
+		colour: "",
+		loadingCapacity: "",
+		url: "fakeUrl"
+	}
+	const snap = testEnv.firestore
 		.makeDocumentSnapshot(vehiclesBefore, vehiclePath);
 
-			const change = testEnv.makeChange(snap, snap);
-			const wrapped = testEnv.wrap(api.vehicleOnUpdate);
-			wrapped(change,{
-				params :{
-					vehicleId: fakeVehicleID
-				}
-			});
-
-			setTimeout(async () => {
-				editedUser = await userRef.get()
-			}, 500);
-
-			
-			await waitForExpect(() => {
-				expect(editedUser.data()).toMatchObject({})
-			})
-
+	const change = testEnv.makeChange(snap, snap);
+	const wrapped = testEnv.wrap(api.vehicleOnUpdate);
+	wrapped(change, {
+		params: {
+			vehicleId: fakeVehicleID
+		}
 	});
+
+	setTimeout(async () => {
+		editedUser = await userRef.get()
+	}, 500);
+
+
+	await waitForExpect(() => {
+		expect(editedUser.data()).toMatchObject({})
+	})
+
+});
 });
