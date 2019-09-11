@@ -40,7 +40,7 @@ describe("User onUpdate trigger", () => {
 		// clean things up
 		await removedVehicleRef.delete()
 
-		
+
 	});
 
 
@@ -66,7 +66,7 @@ describe("User onUpdate trigger", () => {
 			.makeDocumentSnapshot(userVehiclesAfter, userPath);
 
 		const change = testEnv.makeChange(beforeSnap, afterSnap);
-		const wrapped = testEnv.wrap(api.usersOnUpdate);
+		const wrapped = testEnv.wrap(api.userOnUpdate);
 		wrapped(change);
 
 		setTimeout(async () => {
@@ -100,7 +100,7 @@ describe("User onUpdate trigger", () => {
 			.makeDocumentSnapshot(userVehiclesAfter, userPath);
 
 		const change = testEnv.makeChange(beforeSnap, afterSnap);
-		const wrapped = testEnv.wrap(api.usersOnUpdate);
+		const wrapped = testEnv.wrap(api.userOnUpdate);
 		wrapped(change);
 
 		setTimeout(async () => {
@@ -117,11 +117,18 @@ describe("User onUpdate trigger", () => {
 
 		await userRef.set({})
 
+		await editedVehicleRef.set({
+			ref: editedVehicleRef,
+			make: "Honda",
+			colour: "blue"
+		})
+
 		const userVehiclesBefore = {
 			vehicles: {
-				id2: {
+				[fakeVehicleID]: {
 					ref: editedVehicleRef,
-					make: "Honda"
+					make: "Honda",
+					colour: "blue"
 				}
 			}
 		}
@@ -130,9 +137,10 @@ describe("User onUpdate trigger", () => {
 
 		const userVehiclesAfter = {
 			vehicles: {
-				id2: {
+				[fakeVehicleID]: {
 					ref: editedVehicleRef,
-					make: "Toyota"
+					make: "Toyota",
+					colour: "red"
 				}
 			}
 		}
@@ -140,20 +148,21 @@ describe("User onUpdate trigger", () => {
 			.makeDocumentSnapshot(userVehiclesAfter, userPath);
 
 		const change = testEnv.makeChange(beforeSnap, afterSnap);
-		const wrapped = testEnv.wrap(api.usersOnUpdate);
+		const wrapped = testEnv.wrap(api.userOnUpdate);
 		wrapped(change, {
-			params : {
-				userId : fakeUserId
-			} 
+			params: {
+				userId: fakeUserId
+			}
 		});
 
 		setTimeout(async () => {
 			editedUser = await userRef.get()
+			console.log(editedUser.data())
 			await userRef.delete()
 		}, 500);
 
 		await waitForExpect(() => {
-			expect(editedUser.data()).toHaveProperty("id2.make", "Honda")
+			expect(editedUser.data()).toHaveProperty(`${vehiclePath.replace("/",".")}.make`, "Honda")
 		})
 
 
