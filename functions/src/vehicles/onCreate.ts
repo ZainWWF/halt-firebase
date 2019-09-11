@@ -21,6 +21,7 @@ export default functions.region("asia-east2").firestore
 						ref: admin.firestore().doc(vehicleRef),
 						license: newVehicle.license,
 						make: newVehicle.make,
+						model: newVehicle.model,
 						url: newVehicle.url
 					}
 				}
