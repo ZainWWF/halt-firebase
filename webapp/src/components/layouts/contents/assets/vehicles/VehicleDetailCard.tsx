@@ -88,7 +88,7 @@ const DetailCard: FunctionComponent<IProps> = ({ vehicleModalDetail, vehicleMore
 						<CloseIcon />
 					</IconButton>
 				}
-				title={vehicleModalDetail.make}
+				title={`${vehicleModalDetail.make} ${vehicleModalDetail.model}`}
 				subheader={vehicleModalDetail.license}
 			/>
 			<CardMedia

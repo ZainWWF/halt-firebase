@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import MakeField from "./VehicleMakeField";
+import ModelField from "./VehicleModelField";
 import LicenseField from "./VehicleLicenseField";
 import ColourField from "./VehicleColourField";
 import ChassisField from "./VehicleChassisField";
@@ -44,6 +45,8 @@ const useStyles = makeStyles({
 
 const CreateVehicleSchema = Yup.object().shape({
 	make: Yup.string()
+		.required("Required"),
+	model: Yup.string()
 		.required("Required"),
 	loadingCapacity: Yup.number()
 		.moreThan(0)
@@ -132,6 +135,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 				colour: "",
 				license: "",
 				loadingCapacity: "",
+				model: "",
 				make: "",
 			}}
 
@@ -143,6 +147,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 					colour,
 					license,
 					loadingCapacity,
+					model,
 					make
 				} = values;
 
@@ -151,6 +156,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 					colour,
 					license,
 					loadingCapacity,
+					model,
 					make,
 					url: imageFile.downloadURL
 				})
@@ -167,6 +173,9 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 						<Field
 							name="make" component={MakeField}
 						/>
+						<Field
+							name="model" component={ModelField}
+						/>						
 						<Field
 							name="colour"
 							component={ColourField}

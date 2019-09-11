@@ -38,7 +38,7 @@ const ListView: FunctionComponent<IProps> = ({ vehicleMap, viewVehicleModalCallb
 					return (
 						<ListItem button key={vehicleId} onClick={viewVehicleModalCallback} id={vehicleId} >
 							<ListItemAvatar>
-								<Avatar alt={`${vehicle.make}/${vehicle.license}`} src={vehicle.url} className={classes.bigAvatar} />
+								<Avatar alt={`${vehicle.make} ${vehicle.model}/${vehicle.license}`} src={vehicle.url} className={classes.bigAvatar} />
 							</ListItemAvatar>
 							<ListItemText primary={vehicle.make} secondary={vehicle.license} />
 						</ListItem>

@@ -4,6 +4,7 @@ import Button from "@material-ui/core/Button";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import MakeField from "./VehicleMakeField";
+import ModelField from "./VehicleModelField";
 import LicenseField from "./VehicleLicenseField";
 import ColourField from "./VehicleColourField";
 import ChassisField from "./VehicleChassisField";
@@ -143,6 +144,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 				colour: vehicleMoreDetail.colour,
 				license: vehicleMoreDetail.license,
 				loadingCapacity: vehicleMoreDetail.loadingCapacity,
+				model: vehicleMoreDetail.model,
 				make: vehicleMoreDetail.make,
 			}}
 
@@ -154,6 +156,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 					colour,
 					license,
 					loadingCapacity,
+					model,
 					make
 				} = values;
 
@@ -162,6 +165,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 					colour,
 					license,
 					loadingCapacity,
+					model,
 					make,
 					url: imageFile.downloadURL as string
 				})
@@ -180,6 +184,10 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 							name="make" component={MakeField}
 							disabled={true}
 						/>
+						<Field
+							name="make" component={ModelField}
+							disabled={true}
+						/>						
 						<Field
 							name="chassis"
 							component={ChassisField}
