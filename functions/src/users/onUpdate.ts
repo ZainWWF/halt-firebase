@@ -8,22 +8,21 @@ export default functions.region("asia-east2").firestore
 			const previousUserData = change.before.data() as FirebaseFirestore.DocumentData;
 			const newUserData = change.after.data() as FirebaseFirestore.DocumentData;
 
-			// changes in plantations and profile is not allowed by securty rules 
-			// so we only check for changes in vehicles
+			// check for changes in vehicles
 			const previousVehicleMap = new Map(Object.entries(previousUserData.vehicles));
 			const newVehicleMap = new Map(Object.entries(newUserData.vehicles));
 
-			// newVehicle size is smaller so its is delete
-			if (newVehicleMap.size < previousVehicleMap.size) {
-				const removedVehicleRef = getRemovedVehicleRef(previousVehicleMap, newVehicleMap)
-				if (removedVehicleRef) {
-					// add field to show that Vehicle doc has been removed 
-					await removedVehicleRef.update({
-						isRemoved: true
-					})
-					return
-				}
-			}
+			// check if a User.vehicle entry has been removed and update Vehicle if true
+			if (await syncRemovedMapWithDoc(newVehicleMap, previousVehicleMap)) return;
+
+
+			// check for changes in plantations
+			const previousPlantationMap = new Map(Object.entries(previousUserData.plantations));
+			const newPlantationMap = new Map(Object.entries(newUserData.plantations));
+
+			// check if a User.plantation entry has been removed and update Plantation if true
+			if (await syncRemovedMapWithDoc(newPlantationMap, previousPlantationMap)) return;
+
 
 			// refresh User.vehicle map with unremoved Vehicle docs for the userID
 			const vehiclesSnapshot = await admin.firestore().collection("vehicles")
@@ -43,7 +42,31 @@ export default functions.region("asia-east2").firestore
 				}
 			}, {})
 
-			await admin.firestore().doc(`users/${context.params.userId}`).set({ vehicles: vehiclesMap }, { mergeFields: ["vehicles"] })
+			// refresh User.plantation map with unremoved Vehicle docs for the userID
+			const plantationsSnapshot = await admin.firestore().collection("plantations")
+				.where("userId", "==", context.params.userId)
+				.where("isRemoved", "==", false).get()
+
+			const plantationsMap = plantationsSnapshot.docs.reduce((acc, plantation) => {
+				return {
+					...acc,
+					[plantation.id]: {
+						ref: plantation.ref,
+						name: plantation.data().name,
+						management: plantation.data().unAudited.management,
+						auditAcceptedAt: plantation.data().auditAcceptedAt,
+						isActive: plantation.data().isActive,
+					}
+				}
+			}, {})
+
+
+			await admin.firestore().doc(`users/${context.params.userId}`)
+				.set({
+					vehicles: vehiclesMap,
+					plantations: plantationsMap
+
+				}, { mergeFields: ["vehicles", "plantations"] })
 			return
 
 		} catch (error) {
@@ -55,21 +78,55 @@ export default functions.region("asia-east2").firestore
 
 	});
 
+// check if Doc can be tagged with the removed field by looking at the
+// the control fields for Doc removal
+async function isRemoveDenied(removedRef): Promise<boolean> {
 
-function getRemovedVehicleRef(previousVehicleMap: Map<string, any>, newVehicleMap: Map<string, any>): FirebaseFirestore.DocumentData | null {
+	const removedDoc = await removedRef.get();
+	const removedDocData = removedDoc.data();
+	const removeControlFields = Object.keys(removedDocData)
+		.filter(key => ["isActive", "auditAt"].includes(key))
+		removeControlFields.map(field => console.log(`${field} : ${removedDocData[field]}`))
 
-	const previousVehicleKeys = [...previousVehicleMap.keys()]
+	return removeControlFields
+		.some(field => removedDocData[field] === true || removedDocData[field] !== null)
+}
 
-	// all vehicle items has been deleted 
+
+async function syncRemovedMapWithDoc(newMap, previousMap): Promise<boolean> {
+
+	// new size is smaller so its is delete
+	if (newMap.size < previousMap.size) {
+		const removedRef = getRemovedRef(previousMap, newMap);
+
+		if (await isRemoveDenied(removedRef)) return false;
+
+		if (removedRef) {
+			// add field to show that  doc has been removed 
+			await removedRef.update({
+				isRemoved: true
+			})
+			return true
+		}
+	}
+	return false
+}
+
+
+function getRemovedRef(previousMap: Map<string, any>, newMap: Map<string, any>): FirebaseFirestore.DocumentData | null {
+
+	const previousKeys = [...previousMap.keys()]
+
+	// all items has been deleted 
 	// return the value of the ref field in the removed doc		
-	if (newVehicleMap.size === 0) return previousVehicleMap.get(previousVehicleKeys[0]).ref
+	if (newMap.size === 0) return previousMap.get(previousKeys[0]).ref
 
 	/** compare and filter the maps to get the deleted key*/
-	const [removedVehiclekey] = previousVehicleKeys
-		.filter((previousVehicleKey: any) => ![...newVehicleMap.keys()]
-			.some((newVehicleKey: any) => newVehicleKey === previousVehicleKey))
+	const [removedKey] = previousKeys
+		.filter((previousKey: any) => ![...newMap.keys()]
+			.some((newKey: any) => newKey === previousKey))
 
 	// return the value of the ref field in the removed doc		
-	return previousVehicleMap.get(removedVehiclekey).ref
+	return previousMap.get(removedKey).ref
 }
 
