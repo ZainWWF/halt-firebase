@@ -1,3 +1,18 @@
+export type PlantationDoc = {
+	name:  string
+	isActive : boolean
+	createdAt : string
+	updateAt? : string
+	repIds? : string[]
+	auditAccepted? :  boolean,
+	auditAcceptedAt:  string
+	auditAt? : string
+	auditBy? : string
+	unAudited : Plantation
+	audited? : Plantation
+	userId?: string
+}
+
 export type Plantation = {
 	age: number
 	aveMonthlyYield: number
@@ -11,15 +26,14 @@ export type Plantation = {
 	landClearingMethod: string
 	landPreviousUse: string
 	management: {
-		concessionCompany: string
+		name: string
 		otherDetails: string
 		type: string
 	}
-	name:  string
 	proofOfRights: string
-	sizeDeclared: number
+	area: number
 	treesPlanted: number
 	treesProductive: number
-	userId?: string
 
 }
+

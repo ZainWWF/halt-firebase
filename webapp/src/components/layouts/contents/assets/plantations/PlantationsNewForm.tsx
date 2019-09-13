@@ -9,7 +9,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/storage';
 import PlantationNameField from "./PlantationNameField";
 import PlantationManagementTypeField from "./PlantationManagementTypeField";
-import PlantationManagementConcessionCompanyField from "./PlantationManagementConcessionCompanyField";
+import PlantationManagementNameField from "./PlantationManagementNameField";
 import PlantationManagementOtherField from "./PlantationManagementOtherField";
 import PlantationAssociationTypeField from "./PlantationAssociationTypeField";
 import PlantationAssociationPlasmaField from "./PlantationAssociationPlasmaField";
@@ -23,7 +23,7 @@ import PlantationAveMonthlyYieldField from "./PlantationAveMonthlyYieldField";
 import PlantationProofOfRightsField from "./PlantationProofOfRightsField";
 import PlantationPreviousLandUseField from "./PlantationPreviousLandUseField";
 import PlantationClearLandMethodField from "./PlantationClearLandMethodField";
-import PlantationSizeDeclaredField from "./PlantationSizeDeclaredField";
+import PlantationAreaField from "./PlantationAreaField";
 import { makeStyles } from "@material-ui/core/styles";
 
 
@@ -58,7 +58,7 @@ const useStyles = makeStyles({
 const CreatePlantationSchema = Yup.object().shape({
 	managementType: Yup.string()
 		.required("Required"),
-	concessionCompany: Yup.string().when('managementType', {
+	name: Yup.string().when('managementType', {
 		is: value => value === "CONCESSION_COMPANY",
 		otherwise: Yup.string().notRequired(),
 		then: Yup.string().required('Required'),
@@ -87,7 +87,7 @@ const CreatePlantationSchema = Yup.object().shape({
 	}),
 	certificationType: Yup.string()
 		.required("Required"),
-	sizeDeclared: Yup.number()
+	age: Yup.number()
 		.integer("Invalid Value")
 		.moreThan(0)
 		.required("Required"),
@@ -128,7 +128,7 @@ const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantati
 
 	const classes = useStyles();
 
-	const [concessionCompanyDisabled, setConcessionCompanyDisabled] = useState(true);
+	const [nameDisabled, setNameDisabled] = useState(true);
 	const [otherDisabled, setOtherDisabled] = useState(true);
 	const [plasmaDisabled, setPlasmaDisabled] = useState(true);
 	const [millDisabled, setMillDisabled] = useState(true);
@@ -188,13 +188,13 @@ const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantati
 		<Formik
 			initialValues={{
 				managementType: "",
-				concessionCompany: "",
+				name: "",
 				other: "",
 				associationType: "",
 				plasma: "", mill: "",
 				agreement: "",
 				certificationType: "",
-				sizeDeclared: "",
+				age: "",
 				plantationAge: "",
 				treesPlanted: "",
 				treesProductive: "",
@@ -205,9 +205,9 @@ const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantati
 				plantationName: ""
 			}}
 			validate={values => {
-				values.managementType === "CONCESSION_COMPANY" ?
-					setConcessionCompanyDisabled(false) :
-					setConcessionCompanyDisabled(true)
+				values.managementType === "PRIVATE" ?
+					setNameDisabled(true) :
+					setNameDisabled(false)
 
 				values.managementType === "OTHER" ?
 					setOtherDisabled(false) :
@@ -229,8 +229,8 @@ const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantati
 					setAgreementDisabled(false) :
 					setAgreementDisabled(true)
 
-				if (concessionCompanyDisabled) {
-					values.concessionCompany = ""
+				if (nameDisabled) {
+					values.name = ""
 				}
 
 				if (otherDisabled) {
@@ -255,26 +255,28 @@ const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantati
 				setUploadInProgress(true)
 				setPlantationFormData({
 					name: values.plantationName,
-					management: {
-						type: values.managementType,
-						concessionCompany: values.concessionCompany.length > 0 ? values.concessionCompany : 'N/A',
-						otherDetails: values.other.length > 0 ? values.other : 'N/A',
+					unAudited : {
+						management: {
+							type: values.managementType,
+							name: values.name.length > 0 ? values.name : 'N/A',
+							otherDetails: values.other.length > 0 ? values.other : 'N/A',
+						},
+						buyerAssociation: {
+							type: values.associationType,
+							plasma: values.plasma.length > 0 ? values.plasma : 'N/A',
+							mill: values.mill.length > 0 ? values.mill : 'N/A',
+							agreement: values.agreement.length > 0 ? values.agreement : 'N/A'
+						},
+						certification: values.certificationType,
+						area: values.age,
+						age: values.plantationAge,
+						treesPlanted: values.treesPlanted,
+						treesProductive: values.treesProductive,
+						aveMonthlyYield: values.aveMonthlyYield,
+						proofOfRights: values.proofOfRights,
+						landPreviousUse: values.landPreviousUse,
+						landClearingMethod: values.landClearingMethod
 					},
-					buyerAssociation: {
-						type: values.associationType,
-						plasma: values.plasma.length > 0 ? values.plasma : 'N/A',
-						mill: values.mill.length > 0 ? values.mill : 'N/A',
-						agreement: values.agreement.length > 0 ? values.agreement : 'N/A'
-					},
-					certification: values.certificationType,
-					sizeDeclared: parseInt(values.sizeDeclared.toString()),
-					age: parseInt(values.plantationAge.toString()),
-					treesPlanted: parseInt(values.treesPlanted.toString()),
-					treesProductive: parseInt(values.treesProductive.toString()),
-					aveMonthlyYield: parseInt(values.aveMonthlyYield.toString()),
-					proofOfRights: values.proofOfRights,
-					landPreviousUse: values.landPreviousUse,
-					landClearingMethod: values.landClearingMethod
 				})
 				setNewDialogOpen(false)
 
@@ -291,9 +293,9 @@ const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantati
 						<Field
 							name="managementType" component={PlantationManagementTypeField} />
 						<Field
-							disabled={concessionCompanyDisabled}
-							name="concessionCompany"
-							component={PlantationManagementConcessionCompanyField}
+							disabled={nameDisabled}
+							name="name"
+							component={PlantationManagementNameField}
 						/>
 						<Field
 							disabled={otherDisabled}
@@ -333,7 +335,7 @@ const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantati
 							Plantation
               </Typography>
 						<Field
-							name="sizeDeclared" component={PlantationSizeDeclaredField} />
+							name="age" component={PlantationAreaField} />
 						<Field
 							name="plantationAge" component={PlantationAgeField} />
 						<Field

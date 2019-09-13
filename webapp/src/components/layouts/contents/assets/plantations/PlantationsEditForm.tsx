@@ -1,10 +1,10 @@
-import React, { useState, Dispatch, SetStateAction, FunctionComponent } from "react";
+import React, { useState, Dispatch, SetStateAction, FunctionComponent, useEffect } from "react";
 
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import PlantationNameField from "./PlantationNameField";
 import PlantationManagementTypeField from "./PlantationManagementTypeField";
-import PlantationManagementConcessionCompanyField from "./PlantationManagementConcessionCompanyField";
+import PlantationManagementNameField from "./PlantationManagementNameField";
 import PlantationManagementOtherField from "./PlantationManagementOtherField";
 import PlantationAssociationTypeField from "./PlantationAssociationTypeField";
 import PlantationAssociationPlasmaField from "./PlantationAssociationPlasmaField";
@@ -18,13 +18,13 @@ import PlantationAveMonthlyYieldField from "./PlantationAveMonthlyYieldField";
 import PlantationProofOfRightsField from "./PlantationProofOfRightsField";
 import PlantationPreviousLandUseField from "./PlantationPreviousLandUseField";
 import PlantationClearLandMethodField from "./PlantationClearLandMethodField";
-import PlantationSizeDeclaredField from "./PlantationSizeDeclaredField";
+import PlantationAreaField from "./PlantationAreaField";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
-import { Plantation } from "../../../../types/Plantation";
+import { Plantation, PlantationDoc } from "../../../../types/Plantation";
 
 const useStyles = makeStyles({
 
@@ -58,7 +58,7 @@ const useStyles = makeStyles({
 const UpdatePlantationSchema = Yup.object().shape({
 	managementType: Yup.string()
 		.required("Required"),
-	concessionCompany: Yup.string().when('managementType', {
+	name: Yup.string().when('managementType', {
 		is: value => value === "CONCESSION_COMPANY",
 		otherwise: Yup.string().notRequired(),
 		then: Yup.string().required('Required'),
@@ -87,7 +87,7 @@ const UpdatePlantationSchema = Yup.object().shape({
 	}),
 	certificationType: Yup.string()
 		.required("Required"),
-	sizeDeclared: Yup.number()
+	area: Yup.number()
 		.integer("Invalid Value")
 		.moreThan(0)
 		.required("Required"),
@@ -119,8 +119,8 @@ const UpdatePlantationSchema = Yup.object().shape({
 interface IProps {
 	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationMoreDetail: Plantation
-	setPlantationEditData: Dispatch<SetStateAction<Plantation>>
+	plantationMoreDetail: PlantationDoc
+	setPlantationEditData: Dispatch<SetStateAction< {unAudited: Plantation ,name :string} >>
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
 }
@@ -129,37 +129,64 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 
 	const classes = useStyles();
 
-	const [concessionCompanyDisabled, setConcessionCompanyDisabled] = useState(true);
+	const [nameDisabled, setNameDisabled] = useState(true);
 	const [otherDisabled, setOtherDisabled] = useState(true);
 	const [plasmaDisabled, setPlasmaDisabled] = useState(true);
 	const [millDisabled, setMillDisabled] = useState(true);
 	const [agreementDisabled, setAgreementDisabled] = useState(true);
 
+	useEffect(()=>{
+		plantationMoreDetail.unAudited.management.type === "PRIVATE" ?
+		setNameDisabled(true) :
+		setNameDisabled(false)
+	
+		plantationMoreDetail.unAudited.management.type=== "OTHER" ?
+		setOtherDisabled(false) :
+		setOtherDisabled(true)
+
+		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_LEGAL_DOCUMENT" ||
+		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ?
+		setPlasmaDisabled(false) :
+		setPlasmaDisabled(true)
+
+		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_LEGAL_DOCUMENT" ||
+		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ||
+		plantationMoreDetail.unAudited.buyerAssociation.type === "THIRD_PARTY_WITH_AGREEMENT" ?
+		setMillDisabled(false) :
+		setMillDisabled(true)
+
+		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ||
+		plantationMoreDetail.unAudited.buyerAssociation.type === "THIRD_PARTY_WITH_AGREEMENT" ?
+		setAgreementDisabled(false) :
+		setAgreementDisabled(true)
+
+	},[plantationMoreDetail])
+
 	return (
 		<Formik
 			initialValues={{
-				managementType: plantationMoreDetail.management.type,
-				concessionCompany: plantationMoreDetail.management.concessionCompany === "N/A" ? "" : plantationMoreDetail.management.concessionCompany,
-				other: plantationMoreDetail.management.otherDetails === "N/A" ? "" : plantationMoreDetail.management.otherDetails,
-				associationType: plantationMoreDetail.buyerAssociation.type,
-				plasma: plantationMoreDetail.buyerAssociation.plasma === "N/A" ? "" : plantationMoreDetail.buyerAssociation.plasma,
-				mill: plantationMoreDetail.buyerAssociation.mill === "N/A" ? "" : plantationMoreDetail.buyerAssociation.mill,
-				agreement: plantationMoreDetail.buyerAssociation.agreement === "N/A" ? "" : plantationMoreDetail.buyerAssociation.agreement,
-				certificationType: plantationMoreDetail.certification,
-				sizeDeclared: plantationMoreDetail.sizeDeclared,
-				plantationAge: plantationMoreDetail.age,
-				treesPlanted: plantationMoreDetail.treesPlanted,
-				treesProductive: plantationMoreDetail.treesProductive,
-				aveMonthlyYield: plantationMoreDetail.aveMonthlyYield,
-				proofOfRights: plantationMoreDetail.proofOfRights,
-				landPreviousUse: plantationMoreDetail.landPreviousUse,
-				landClearingMethod: plantationMoreDetail.landClearingMethod,
+				managementType: plantationMoreDetail.unAudited.management.type,
+				managementName: plantationMoreDetail.unAudited.management.name === "N/A" ? "" : plantationMoreDetail.unAudited.management.name,
+				other: plantationMoreDetail.unAudited.management.otherDetails === "N/A" ? "" : plantationMoreDetail.unAudited.management.otherDetails,
+				associationType: plantationMoreDetail.unAudited.buyerAssociation.type,
+				plasma: plantationMoreDetail.unAudited.buyerAssociation.plasma === "N/A" ? "" : plantationMoreDetail.unAudited.buyerAssociation.plasma,
+				mill: plantationMoreDetail.unAudited.buyerAssociation.mill === "N/A" ? "" : plantationMoreDetail.unAudited.buyerAssociation.mill,
+				agreement: plantationMoreDetail.unAudited.buyerAssociation.agreement === "N/A" ? "" : plantationMoreDetail.unAudited.buyerAssociation.agreement,
+				certificationType: plantationMoreDetail.unAudited.certification,
+				area: plantationMoreDetail.unAudited.area,
+				plantationAge: plantationMoreDetail.unAudited.age,
+				treesPlanted: plantationMoreDetail.unAudited.treesPlanted,
+				treesProductive: plantationMoreDetail.unAudited.treesProductive,
+				aveMonthlyYield: plantationMoreDetail.unAudited.aveMonthlyYield,
+				proofOfRights: plantationMoreDetail.unAudited.proofOfRights,
+				landPreviousUse: plantationMoreDetail.unAudited.landPreviousUse,
+				landClearingMethod: plantationMoreDetail.unAudited.landClearingMethod,
 				plantationName: plantationMoreDetail.name
 			}}
 			validate={values => {
-				values.managementType === "CONCESSION_COMPANY" ?
-					setConcessionCompanyDisabled(false) :
-					setConcessionCompanyDisabled(true)
+				values.managementType === "PRIVATE" ?
+					setNameDisabled(true) :
+					setNameDisabled(false)
 
 				values.managementType === "OTHER" ?
 					setOtherDisabled(false) :
@@ -181,8 +208,8 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 					setAgreementDisabled(false) :
 					setAgreementDisabled(true)
 
-				if (concessionCompanyDisabled) {
-					values.concessionCompany = ""
+				if (nameDisabled) {
+					values.managementName = ""
 				}
 
 				if (otherDisabled) {
@@ -206,26 +233,29 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 			onSubmit={(values) => {
 				setPlantationEditData({
 					name: values.plantationName,
-					management: {
-						type: values.managementType,
-						concessionCompany: values.concessionCompany ? values.concessionCompany : 'N/A',
-						otherDetails: values.other ? values.other : 'N/A',
-					},
-					buyerAssociation: {
-						type: values.associationType,
-						plasma: values.plasma ? values.plasma : 'N/A',
-						mill: values.mill ? values.mill : 'N/A',
-						agreement: values.agreement ? values.agreement : 'N/A'
-					},
-					certification: values.certificationType,
-					sizeDeclared: values.sizeDeclared,
-					age: values.plantationAge,
-					treesPlanted: values.treesPlanted,
-					treesProductive: values.treesProductive,
-					aveMonthlyYield: values.aveMonthlyYield,
-					proofOfRights: values.proofOfRights,
-					landPreviousUse: values.landPreviousUse,
-					landClearingMethod: values.landClearingMethod,
+					unAudited : {
+						management: {
+							type: values.managementType,
+							name: values.managementName ? values.managementName : 'N/A',
+							otherDetails: values.other ? values.other : 'N/A',
+						},
+						buyerAssociation: {
+							type: values.associationType,
+							plasma: values.plasma ? values.plasma : 'N/A',
+							mill: values.mill ? values.mill : 'N/A',
+							agreement: values.agreement ? values.agreement : 'N/A'
+						},
+						certification: values.certificationType,
+						area: values.area,
+						age: values.plantationAge,
+						treesPlanted: values.treesPlanted,
+						treesProductive: values.treesProductive,
+						aveMonthlyYield: values.aveMonthlyYield,
+						proofOfRights: values.proofOfRights,
+						landPreviousUse: values.landPreviousUse,
+						landClearingMethod: values.landClearingMethod,
+					}
+
 				})
 				setEditDialogOpen(false)
 			}}
@@ -241,9 +271,9 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 						<Field
 							name="managementType" component={PlantationManagementTypeField} />
 						<Field
-							disabled={concessionCompanyDisabled}
-							name="concessionCompany"
-							component={PlantationManagementConcessionCompanyField}
+							disabled={nameDisabled}
+							name="managementName"
+							component={PlantationManagementNameField}
 						/>
 						<Field
 							disabled={otherDisabled}
@@ -283,7 +313,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 							Plantation
               </Typography>
 						<Field
-							name="sizeDeclared" component={PlantationSizeDeclaredField} />
+							name="area" component={PlantationAreaField} />
 						<Field
 							name="plantationAge" component={PlantationAgeField} />
 						<Field

@@ -4,14 +4,14 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import PlantationsEditForm from './PlantationsEditForm';
 import  useMediaQuery  from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
-import { Plantation } from '../../../../types/Plantation';
+import { Plantation, PlantationDoc } from '../../../../types/Plantation';
 
 
 interface IProps {
 	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationMoreDetail: Plantation
-	setPlantationEditData: Dispatch<SetStateAction<Plantation>>
+	plantationMoreDetail: PlantationDoc
+	setPlantationEditData: Dispatch<SetStateAction< {unAudited: Plantation ,name :string} >>
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	editDialogOpen: boolean
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
