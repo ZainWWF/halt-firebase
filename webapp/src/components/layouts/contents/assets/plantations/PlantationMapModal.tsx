@@ -3,7 +3,7 @@ import Dialog from "@material-ui/core/Dialog";
 import PlantationMapCard from "./PlantationMapCard";
 import  useMediaQuery  from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import { Plantation } from "../../../../types/Plantation";
+import { PlantationDoc } from "../../../../types/Plantation";
 import { UserPlantation } from "../../../../types/UserPlantation";
 
 
@@ -11,8 +11,8 @@ interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
 	mapModalOpen: boolean
-	plantationMoreDetail: Plantation
-	setPlantationMoreDetail: Dispatch<SetStateAction<Plantation>>
+	plantationMoreDetail: Omit<PlantationDoc,'audited' | "unAudited">
+	setPlantationMoreDetail: Dispatch<SetStateAction<PlantationDoc>>
 	plantationModalDetail: UserPlantation
 	removePlantationCallback: (path: string) => void
 	editPlantationCallback: (path: string) => void

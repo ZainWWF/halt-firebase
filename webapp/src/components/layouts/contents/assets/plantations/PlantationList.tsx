@@ -49,11 +49,11 @@ const ListView: FunctionComponent<IProps> = ({  plantationMap, viewPlantationMod
 					return (
 						<ListItem button key={plantationId} onClick={viewPlantationModalCallback} id={plantationId} >
 							<ListItemAvatar>
-								<Avatar alt={plantation.name} className={plantation.AuditedAt ? classNames(classes.bigAvatar, classes.auditedAvatar) : classNames(classes.bigAvatar, classes.nonAuditedAvatar)} >
-									{plantation.AuditedAt ? <AssignmentTurnedInIcon /> : <AssignmentLateIcon />}
+								<Avatar alt={plantation.name} className={plantation.auditAcceptedAt ? classNames(classes.bigAvatar, classes.auditedAvatar) : classNames(classes.bigAvatar, classes.nonAuditedAvatar)} >
+									{plantation.auditAcceptedAt ? <AssignmentTurnedInIcon /> : <AssignmentLateIcon />}
 								</Avatar>
 							</ListItemAvatar>
-							<ListItemText primary={plantation.name} secondary={plantation.owner ? `owned by ${plantation.owner}` : "owned by Me"} />
+							<ListItemText primary={plantation.name} secondary={plantation.management.type === "PRIVATE" ? "owned by Me" : `owned by ${plantation.management.name}`}/>
 						</ListItem>
 					)
 				})

@@ -38,26 +38,24 @@ const Field : FunctionComponent<IProps> = ({ field, form, ...props }) => {
 	return (
 		<>
       <FormControl className={classNames(classes.margin, classes.textField)}>
-        <InputLabel htmlFor="adornment-size-declared">size (hectares)</InputLabel>
+        <InputLabel htmlFor="adornment-management-name">management name</InputLabel>
         <Input
-          data-testid="form-field-size-declared"
+          data-testid="form-field-management-name"
           {...field}
           {...props}
-          id="adornment-size-declared"
-          error={errors.sizeDeclared && touched.sizeDeclared}  
-          type="number"
+          id="adornment-management-name"
+          error={errors.name && touched.name}  
+          type="text"
           aria-describedby="component-error-text"
         />
-        {errors.sizeDeclared && touched.sizeDeclared ? (
-        <FormHelperText className={classes.formHelperText} >{errors.sizeDeclared}</FormHelperText>
+        {errors.name && touched.name ? (
+        <FormHelperText className={classes.formHelperText} >{errors.name}</FormHelperText>
         ) : null}
       </FormControl>
 		</>
 	);
 };
 
-
 export default Field;
-
 
 

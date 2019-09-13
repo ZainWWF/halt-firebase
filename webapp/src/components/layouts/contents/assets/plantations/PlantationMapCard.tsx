@@ -8,7 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Button from '@material-ui/core/Button';
 import PlantationMap from './PlantationMap';
-import { Plantation } from '../../../../types/Plantation';
+import { Plantation, PlantationDoc } from '../../../../types/Plantation';
 import { UserPlantation } from '../../../../types/UserPlantation';
 import Typography from '@material-ui/core/Typography';
 
@@ -35,7 +35,7 @@ interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
 	mapModalOpen: boolean
-	setPlantationMoreDetail: Dispatch<SetStateAction<Plantation>>
+	setPlantationMoreDetail: Dispatch<SetStateAction<PlantationDoc>>
 	plantationModalDetail: UserPlantation
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 
@@ -43,13 +43,21 @@ interface IProps {
 
 const DetailCard: FunctionComponent<IProps> = ({ plantationModalDetail, setPlantationMoreDetail, setViewModalOpen, setMapModalOpen, setHasError }) => {
 	const classes = useStyles();
+	const [ plantationItem, setPlantationItem] = useState<Plantation>()
 
 	const [canUpload, setCanUpload] = useState(false)
 
 	const detailPlantationCallback = useCallback(() => {
 		plantationModalDetail.ref.get().then((doc) => {
-			const result = doc.data() as Plantation
+			const result = doc.data() as PlantationDoc
 			if (result) {
+				console.log(result)
+				const {audited, unAudited } = result;
+				if(result.auditAcceptedAt){
+					setPlantationItem(audited)
+				}else{
+					setPlantationItem(unAudited)
+				}
 				setPlantationMoreDetail(result)
 			}
 		}).catch((error: Error) => {
@@ -71,7 +79,7 @@ const DetailCard: FunctionComponent<IProps> = ({ plantationModalDetail, setPlant
 					</IconButton>
 				}
 				title={plantationModalDetail.name}
-				subheader={plantationModalDetail.owner ? `owned by ${plantationModalDetail.owner}` : "owned by Me"}
+				subheader={!!plantationItem && plantationItem.management.type === "PRIVATE"?  "owned by Me" : `owned by ${!!plantationItem ? plantationItem.management.name : ""} ` }
 			/>
 			<CardActions >
 				<Button variant="contained" color="primary" className={classes.button} onClick={() => { }} disabled={!canUpload}>
