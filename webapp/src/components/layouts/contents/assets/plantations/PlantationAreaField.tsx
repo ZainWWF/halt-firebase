@@ -38,18 +38,18 @@ const Field : FunctionComponent<IProps> = ({ field, form, ...props }) => {
 	return (
 		<>
       <FormControl className={classNames(classes.margin, classes.textField)}>
-        <InputLabel htmlFor="adornment-size-declared">size (hectares)</InputLabel>
+        <InputLabel htmlFor="adornment-area">area (hectares)</InputLabel>
         <Input
-          data-testid="form-field-size-declared"
+          data-testid="form-field-area"
           {...field}
           {...props}
-          id="adornment-size-declared"
-          error={errors.sizeDeclared && touched.sizeDeclared}  
+          id="adornment-area"
+          error={errors.area && touched.area}  
           type="number"
           aria-describedby="component-error-text"
         />
-        {errors.sizeDeclared && touched.sizeDeclared ? (
-        <FormHelperText className={classes.formHelperText} >{errors.sizeDeclared}</FormHelperText>
+        {errors.area && touched.area ? (
+        <FormHelperText className={classes.formHelperText} >{errors.area}</FormHelperText>
         ) : null}
       </FormControl>
 		</>
