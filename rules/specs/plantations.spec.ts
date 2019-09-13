@@ -28,12 +28,35 @@ describe('Plantations rules', () => {
 		await expectExtend(ref.doc("v123").get()).toDeny()
 	})
 
-	test('allow Owner create when authenticated', async () => {
+	test.only('allow Owner create when authenticated', async () => {
 		db = await setup({ uid: "john123" }, {});
 		ref = db.collection('plantations')
 		await expectExtend(ref.doc("v456").set(
 			{
-				userId : "john123"
+				userId: "john123",
+				name: "abc",
+				unAudited : {
+					management: {
+						type: "aaa",
+						name: "aaa",
+						otherDetails: "aaa",
+					},
+					buyerAssociation: {
+						type: "aaa",
+						plasma: "aaa",
+						mill: "aaa",
+						agreement: "aaa"
+					},
+					certification: "aaa",
+					area: 111,
+					age: 111,
+					treesPlanted: 111,
+					treesProductive: 111,
+					aveMonthlyYield: 111,
+					proofOfRights: "aaa",
+					landPreviousUse: "aaa",
+					landClearingMethod: "aaa",
+				}
 			}
 		)).toAllow()
 	})
