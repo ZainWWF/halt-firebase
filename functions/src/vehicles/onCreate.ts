@@ -12,7 +12,8 @@ export default functions.region("asia-east2").firestore
 
 			await admin.firestore().doc(vehicleRef)
 				.update({
-					createdAt: admin.firestore.Timestamp.fromMillis(Date.now())
+					createdAt: admin.firestore.Timestamp.fromMillis(Date.now()),
+					isRemoved: false
 				})
 
 			await admin.firestore().doc('users/' + newVehicle.userId).set({

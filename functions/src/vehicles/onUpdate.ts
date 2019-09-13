@@ -15,8 +15,8 @@ export default functions.region("asia-east2").firestore
 		const newData = change.after.data() as FirebaseFirestore.DocumentData;;
 
 		// do not check for changes in timestamp fields
-		const { updatedAt, createdAt, removedAt, ...restNewData } = newData
-		const vehicleRef = 'vehicles/' + context.params.vehicleId
+		const { updatedAt, createdAt, ...restNewData } = newData
+		const vehiclePath = 'vehicles/' + context.params.vehicleId
 
 		try {
 			// check for changes in the Vehicle fields
@@ -25,27 +25,32 @@ export default functions.region("asia-east2").firestore
 
 			// update doc with updatedAt fields
 			await admin.firestore()
-				.doc(vehicleRef)
+				.doc(vehiclePath)
 				.update({
 					updatedAt: admin.firestore.Timestamp.fromMillis(Date.now())
 				})
 
-			// extract the fields to 	update to User.vehicle map
-			const updatedFields = ["license", "make", "model", "url"]
-				.filter(field => restNewData[field] !== undefined)
-				.reduce((acc, field) => {
-					return { ...acc, [field]: restNewData[field] }
-				}, {})
+	
+			// refresh User.vehicle map with unremoved Vehicle docs for the userID
+			const vehiclesSnapshot = await admin.firestore().collection("vehicles")
+				.where("userId", "==", previousData.userId)
+				.where("isRemoved", "==", false).get()
 
-
-			await admin.firestore().doc(`users/${restNewData.userId}`).update({
-				[`vehicles.${context.params.vehicleId}`]: {
-					ref: admin.firestore().doc(vehicleRef),
-					...updatedFields
+			const vehiclesMap = vehiclesSnapshot.docs.reduce((acc, vehicle) => {
+				return {
+					...acc,
+					[vehicle.id]: {
+						ref: vehicle.ref,
+						license: vehicle.data().license,
+						make: vehicle.data().make,
+						model: vehicle.data().model,
+						url: vehicle.data().url,
+					}
 				}
+			}, {})
 
-			})
 
+			await admin.firestore().doc(`users/${previousData.userId}`).set({ vehicles: vehiclesMap }, { mergeFields: ["vehicles"] })
 			return
 
 		} catch (error) {
