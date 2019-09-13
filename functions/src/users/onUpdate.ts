@@ -122,6 +122,7 @@ function getRemovedRef(previousMap: Map<string, any>, newMap: Map<string, any>):
 	if (newMap.size === 0) return previousMap.get(previousKeys[0]).ref
 
 	/** compare and filter the maps to get the deleted key*/
+	/** only support a single entry delete  */
 	const [removedKey] = previousKeys
 		.filter((previousKey: any) => ![...newMap.keys()]
 			.some((newKey: any) => newKey === previousKey))
