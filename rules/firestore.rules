@@ -43,15 +43,15 @@ service cloud.firestore {
 		match /users/{userId} {
 			allow create: if false;
 			allow delete: if false;
-
 			allow read:	if isSignedIn(); 
 			allow update:	if isSignedIn() && isOwner(userId)
-											//TODO: isAdmin(userId) && isAuditor(userId)
-											&& (existingData().plantations == incomingData().plantations
-											|| existingData().profile == incomingData().profile)
-											// edit of the the vehicles field values will be overwritten
-											// back to previous values by the userOnUpdate cloud function,
-											// only delete of a vehicle map entry is allowed 
+											// //TODO: isAdmin(userId) && isAuditor(userId)
+											// && (existingData().plantations == incomingData().plantations
+											// || existingData().profile == incomingData().profile)
+											// // edit of the the vehicles field values will be overwritten
+											// // back to previous values by the userOnUpdate cloud function,
+											// // only delete of a vehicle map entry is allowed 
+
 		}
 
 		match /profiles/{userId} {
@@ -77,6 +77,10 @@ service cloud.firestore {
 										&& incomingData().loadingCapacity is number
 				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
 										&& incomingData().userId == existingData().userId
+										&& incomingData().isRemoved == existingData().isRemoved
+										&& incomingData().createdAt == existingData().createdAt
+										&& incomingData().updatedAt == existingData().updatedAt
+				
 
 				allow delete: if false
 
@@ -87,8 +91,37 @@ service cloud.firestore {
 			// allow read, write;
 				allow read:	if isSignedIn() && isAssetOwner()
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
+											&& incomingData().size() == 3
+											&& incomingData().unAudited.size() == 11
+											&& incomingData().name is string
+											&& incomingData().unAudited.management.type is string
+											&& incomingData().unAudited.management.name is string
+											&& incomingData().unAudited.management.otherDetails is string
+											&& incomingData().unAudited.buyerAssociation.type is string
+											&& incomingData().unAudited.buyerAssociation.plasma is string
+											&& incomingData().unAudited.buyerAssociation.mill is string
+											&& incomingData().unAudited.buyerAssociation.agreement is string
+											&& incomingData().unAudited.certification is string
+											&& incomingData().unAudited.area is number
+											&& incomingData().unAudited.age is number
+											&& incomingData().unAudited.treesPlanted is number
+											&& incomingData().unAudited.treesProductive is number
+											&& incomingData().unAudited.aveMonthlyYield is number
+											&& incomingData().unAudited.proofOfRights is string
+											&& incomingData().unAudited.landPreviousUse is string
+											&& incomingData().unAudited.landClearingMethod is string
 				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
-										&& incomingData().userId == existingData().userId
+											&& incomingData().userId == existingData().userId
+											&& incomingData().isRemoved == existingData().isRemoved
+											&& incomingData().createdAt == existingData().createdAt
+											&& incomingData().updatedAt == existingData().updatedAt
+											&& incomingData().isActive == existingData().isActive
+											&& incomingData().auditAcceptedAt == existingData().auditAcceptedAt
+											&& incomingData().auditAt == existingData().auditAt
+											&& incomingData().auditBy == existingData().auditBy
+
+
+											
 				allow delete: if false
 
 		}
