@@ -4,14 +4,13 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import VehiclesEditForm from './VehiclesEditForm';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
-import { Vehicle } from '../../../../types/Vehicle';
-
+import {  VehicleDoc } from '../../../../types/Vehicle';
 
 interface IProps {
 	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	vehicleMoreDetail: Vehicle
-	setVehicleEditData: Dispatch<SetStateAction<Vehicle>>
+	vehicleMoreDetail: VehicleDoc
+	setVehicleEditData: Dispatch<SetStateAction<VehicleDoc>>
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	editDialogOpen: boolean
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
