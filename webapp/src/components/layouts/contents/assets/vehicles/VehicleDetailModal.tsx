@@ -3,16 +3,16 @@ import Dialog from "@material-ui/core/Dialog";
 import VehicleDetailCard from "./VehicleDetailCard";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import { Vehicle } from "../../../../types/Vehicle";
-import { UserVehicle } from "../../../../types/UserVehicle";
+import { VehicleSummary, VehicleDoc } from '../../../../types/Vehicle';
+
 
 
 interface IProps {
 	viewModalOpen : boolean
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	vehicleMoreDetail: Vehicle
-	setVehicleMoreDetail: Dispatch<SetStateAction<Vehicle>>
-	vehicleModalDetail: UserVehicle
+	vehicleMoreDetail: VehicleDoc
+	setVehicleMoreDetail: Dispatch<SetStateAction<VehicleDoc>>
+	vehicleModalDetail: VehicleSummary
 	removeVehicleCallback: (path: string) => void
 	editVehicleCallback: (path: string) => void
 	setHasError: Dispatch<SetStateAction<Error | undefined>>

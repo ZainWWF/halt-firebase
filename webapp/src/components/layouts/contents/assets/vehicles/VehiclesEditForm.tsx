@@ -14,8 +14,7 @@ import { FirebaseContext, Firebase } from "../../../../providers/Firebase/Fireba
 import * as firebase from 'firebase/app';
 import 'firebase/storage';
 import { makeStyles } from "@material-ui/core/styles";
-import { Vehicle } from "../../../../types/Vehicle";
-
+import {  VehicleDoc } from '../../../../types/Vehicle';
 const useStyles = makeStyles({
 	form: {
 		margin: 50
@@ -63,8 +62,8 @@ const CreateVehicleSchema = Yup.object().shape({
 interface IProps {
 	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	vehicleMoreDetail: Vehicle
-	setVehicleEditData: Dispatch<SetStateAction<Vehicle>>
+	vehicleMoreDetail: VehicleDoc
+	setVehicleEditData: Dispatch<SetStateAction<VehicleDoc>>
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
 }

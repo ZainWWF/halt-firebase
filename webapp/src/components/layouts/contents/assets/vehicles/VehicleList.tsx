@@ -5,8 +5,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
+import { VehicleSummary } from '../../../../types/Vehicle';
 
-import { UserVehicle } from '../../../../types/UserVehicle';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -34,7 +34,7 @@ const ListView: FunctionComponent<IProps> = ({ vehicleMap, viewVehicleModalCallb
 		<List className={classes.root}>
 			{
 				[...vehicleMap.keys()].map((vehicleId: string) => {
-					const vehicle: UserVehicle = vehicleMap.get(vehicleId);
+					const vehicle: VehicleSummary = vehicleMap.get(vehicleId);
 					return (
 						<ListItem button key={vehicleId} onClick={viewVehicleModalCallback} id={vehicleId} >
 							<ListItemAvatar>

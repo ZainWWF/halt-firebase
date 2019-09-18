@@ -13,7 +13,7 @@ import { FirebaseContext, Firebase } from '../../../../providers/Firebase/Fireba
 import Snackbar from '@material-ui/core/Snackbar';
 import { LinearProgress, Theme } from '@material-ui/core';
 import VehicleList from "./VehicleList";
-import { UserVehicle } from '../../../../types/UserVehicle';
+import { VehicleSummary } from '../../../../types/Vehicle';
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -59,14 +59,14 @@ const View = () => {
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const [vehicleFormData, setVehicleFormData] = useState();
 	const [vehicleEditData, setVehicleEditData] = useState();
-	const [vehicleModalDetail, setVehicleModalDetail] = useState<UserVehicle>();
+	const [vehicleModalDetail, setVehicleModalDetail] = useState<VehicleSummary>();
 	const [vehicleMoreDetail, setVehicleMoreDetail] = useState();
 	const [vehicleMap, setVehicleMap] = useState<Record<string, any>>();
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
 	const [uploadInProgress, setUploadInProgress] = useState(false);
 
-	const user = useContext(AuthContext);
+	const user = useContext(AuthContext) as firebase.User;
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 
 	const newVehicleCallback = useCallback(() => {
@@ -213,7 +213,7 @@ const View = () => {
 			<VehicleDetailModal
 				viewModalOpen={viewModalOpen}
 				setViewModalOpen={setViewModalOpen}
-				vehicleModalDetail={vehicleModalDetail as UserVehicle}
+				vehicleModalDetail={vehicleModalDetail as VehicleSummary}
 				vehicleMoreDetail={vehicleMoreDetail}
 				setVehicleMoreDetail={setVehicleMoreDetail}
 				removeVehicleCallback={removeVehicleCallback}

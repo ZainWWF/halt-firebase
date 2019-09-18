@@ -11,8 +11,8 @@ import { red } from '@material-ui/core/colors';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Vehicle } from '../../../../types/Vehicle';
-import { UserVehicle } from '../../../../types/UserVehicle';
+import { VehicleSummary, VehicleDoc } from '../../../../types/Vehicle';
+
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -52,9 +52,9 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	vehicleMoreDetail: Vehicle
-	setVehicleMoreDetail: Dispatch<SetStateAction<Vehicle>>
-	vehicleModalDetail: UserVehicle
+	vehicleMoreDetail: VehicleDoc
+	setVehicleMoreDetail: Dispatch<SetStateAction<VehicleDoc>>
+	vehicleModalDetail: VehicleSummary
 	removeVehicleCallback: (path: string) => void
 	editVehicleCallback: (path: string) => void
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
@@ -66,7 +66,7 @@ const DetailCard: FunctionComponent<IProps> = ({ vehicleModalDetail, vehicleMore
 
 	const detailVehicleCallback = useCallback(() => {
 		vehicleModalDetail.ref.get().then((doc) => {
-			const result = doc.data() as Vehicle
+			const result = doc.data() as VehicleDoc
 			if (result) {
 				setVehicleMoreDetail(result)
 			}
