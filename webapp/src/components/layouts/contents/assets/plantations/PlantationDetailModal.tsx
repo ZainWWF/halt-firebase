@@ -1,43 +1,44 @@
 import React, { Dispatch, SetStateAction, FunctionComponent } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import PlantationDetailCard from "./PlantationDetailCard";
-import  useMediaQuery  from "@material-ui/core/useMediaQuery";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import { PlantationDoc } from "../../../../types/Plantation";
-import { UserPlantation } from "../../../../types/UserPlantation";
+import { PlantationDoc, PlantationSummary,PlantationDetails } from '../../../../types/Plantation';
 
 
 interface IProps {
-	viewModalOpen : boolean
+	viewModalOpen: boolean
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationMoreDetail: Omit<PlantationDoc,'audited' | "unAudited">
-	setPlantationMoreDetail: Dispatch<SetStateAction<PlantationDoc>>
-	plantationModalDetail: UserPlantation
+	setRepsModalOpen: Dispatch<SetStateAction<boolean>>
+	plantationDetails: PlantationDetails | undefined
+	setPlantationDoc: Dispatch<SetStateAction<PlantationDoc | undefined>>
+	plantationSummary: PlantationSummary | undefined
 	removePlantationCallback: (path: string) => void
 	editPlantationCallback: (path: string) => void
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 }
 
-const ModalView: FunctionComponent<IProps> = ({ viewModalOpen, setViewModalOpen, setMapModalOpen, plantationMoreDetail, setPlantationMoreDetail, plantationModalDetail, editPlantationCallback, removePlantationCallback, setHasError})=> {
+const ModalView: FunctionComponent<IProps> = ({ viewModalOpen, setViewModalOpen, setMapModalOpen, setRepsModalOpen, plantationDetails, setPlantationDoc, plantationSummary, editPlantationCallback, removePlantationCallback, setHasError }) => {
 	const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
+	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
-  return (
-    <div>
-      <Dialog fullScreen={fullScreen} open={viewModalOpen} onClose={()=>setViewModalOpen(false)} aria-labelledby="view-modal-detail">
-				<PlantationDetailCard 
-					plantationModalDetail={plantationModalDetail} 
-					editPlantationCallback={editPlantationCallback}
-					plantationMoreDetail={plantationMoreDetail}
-					setPlantationMoreDetail={setPlantationMoreDetail} 
-					removePlantationCallback={removePlantationCallback} 
+	return (
+		<div>
+			<Dialog fullScreen={fullScreen} open={viewModalOpen} onClose={() => setViewModalOpen(false)} aria-labelledby="view-modal-detail">
+				<PlantationDetailCard
 					setViewModalOpen={setViewModalOpen}
-					setMapModalOpen={setMapModalOpen} 
-					setHasError={setHasError}/>
-      </Dialog>
-    </div>
-  );
+					setMapModalOpen={setMapModalOpen}
+					setRepsModalOpen={setRepsModalOpen}
+					setPlantationDoc={setPlantationDoc}
+					plantationSummary={plantationSummary}
+					editPlantationCallback={editPlantationCallback}
+					plantationDetails={plantationDetails}
+					removePlantationCallback={removePlantationCallback}
+				/>
+			</Dialog>
+		</div>
+	);
 }
 
 export default ModalView

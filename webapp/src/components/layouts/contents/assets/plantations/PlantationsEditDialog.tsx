@@ -4,21 +4,21 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import PlantationsEditForm from './PlantationsEditForm';
 import  useMediaQuery  from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
-import { Plantation, PlantationDoc } from '../../../../types/Plantation';
+import { PlantationDoc, PlantationDetails } from '../../../../types/Plantation';
 
 
 interface IProps {
 	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationMoreDetail: PlantationDoc
-	setPlantationEditData: Dispatch<SetStateAction< {unAudited: Plantation ,name :string} >>
+	plantationDoc: PlantationDoc | undefined
+	setPlantationEditData: Dispatch<SetStateAction< {unAudited: PlantationDetails ,name :string} >>
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	editDialogOpen: boolean
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
 }
 
 
-const FormDialog: FunctionComponent<IProps> = ({editDialogOpen, setEditDialogOpen, setViewModalOpen, plantationMoreDetail, setPlantationEditData, setHasError, setUploadInProgress})=> {
+const FormDialog: FunctionComponent<IProps> = ({editDialogOpen, setEditDialogOpen, setViewModalOpen, plantationDoc, setPlantationEditData, setHasError, setUploadInProgress})=> {
 	const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
@@ -29,7 +29,7 @@ const FormDialog: FunctionComponent<IProps> = ({editDialogOpen, setEditDialogOpe
 						<PlantationsEditForm 
 							setEditDialogOpen={setEditDialogOpen} 
 							setViewModalOpen={setViewModalOpen}
-							plantationMoreDetail={plantationMoreDetail}
+							plantationDoc={plantationDoc}
 							setPlantationEditData={setPlantationEditData}
 							setHasError={setHasError}
 							setUploadInProgress={setUploadInProgress}

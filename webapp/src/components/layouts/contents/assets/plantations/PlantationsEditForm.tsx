@@ -24,7 +24,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
-import { Plantation, PlantationDoc } from "../../../../types/Plantation";
+import { PlantationDoc, PlantationDetails } from '../../../../types/Plantation';
 
 const useStyles = makeStyles({
 
@@ -119,13 +119,13 @@ const UpdatePlantationSchema = Yup.object().shape({
 interface IProps {
 	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationMoreDetail: PlantationDoc
-	setPlantationEditData: Dispatch<SetStateAction< {unAudited: Plantation ,name :string} >>
+	plantationDoc: PlantationDoc | undefined
+	setPlantationEditData: Dispatch<SetStateAction< {unAudited: PlantationDetails ,name :string} >>
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
 }
 
-const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModalOpen, plantationMoreDetail, setPlantationEditData, setHasError, setUploadInProgress }) => {
+const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModalOpen, plantationDoc, setPlantationEditData, setHasError, setUploadInProgress }) => {
 
 	const classes = useStyles();
 
@@ -136,52 +136,54 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 	const [agreementDisabled, setAgreementDisabled] = useState(true);
 
 	useEffect(()=>{
-		plantationMoreDetail.unAudited.management.type === "PRIVATE" ?
-		setNameDisabled(true) :
-		setNameDisabled(false)
+		if(plantationDoc){
+			plantationDoc.unAudited.management.type === "PRIVATE" ?
+			setNameDisabled(true) :
+			setNameDisabled(false)
+		
+			plantationDoc.unAudited.management.type=== "OTHER" ?
+			setOtherDisabled(false) :
+			setOtherDisabled(true)
 	
-		plantationMoreDetail.unAudited.management.type=== "OTHER" ?
-		setOtherDisabled(false) :
-		setOtherDisabled(true)
+			plantationDoc.unAudited.buyerAssociation.type === "PLASMA_WITH_LEGAL_DOCUMENT" ||
+			plantationDoc.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ?
+			setPlasmaDisabled(false) :
+			setPlasmaDisabled(true)
+	
+			plantationDoc.unAudited.buyerAssociation.type === "PLASMA_WITH_LEGAL_DOCUMENT" ||
+			plantationDoc.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ||
+			plantationDoc.unAudited.buyerAssociation.type === "THIRD_PARTY_WITH_AGREEMENT" ?
+			setMillDisabled(false) :
+			setMillDisabled(true)
+	
+			plantationDoc.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ||
+			plantationDoc.unAudited.buyerAssociation.type === "THIRD_PARTY_WITH_AGREEMENT" ?
+			setAgreementDisabled(false) :
+			setAgreementDisabled(true)
+		}
 
-		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_LEGAL_DOCUMENT" ||
-		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ?
-		setPlasmaDisabled(false) :
-		setPlasmaDisabled(true)
-
-		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_LEGAL_DOCUMENT" ||
-		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ||
-		plantationMoreDetail.unAudited.buyerAssociation.type === "THIRD_PARTY_WITH_AGREEMENT" ?
-		setMillDisabled(false) :
-		setMillDisabled(true)
-
-		plantationMoreDetail.unAudited.buyerAssociation.type === "PLASMA_WITH_AGREEMENT" ||
-		plantationMoreDetail.unAudited.buyerAssociation.type === "THIRD_PARTY_WITH_AGREEMENT" ?
-		setAgreementDisabled(false) :
-		setAgreementDisabled(true)
-
-	},[plantationMoreDetail])
+	},[plantationDoc])
 
 	return (
 		<Formik
 			initialValues={{
-				managementType: plantationMoreDetail.unAudited.management.type,
-				managementName: plantationMoreDetail.unAudited.management.name === "N/A" ? "" : plantationMoreDetail.unAudited.management.name,
-				other: plantationMoreDetail.unAudited.management.otherDetails === "N/A" ? "" : plantationMoreDetail.unAudited.management.otherDetails,
-				associationType: plantationMoreDetail.unAudited.buyerAssociation.type,
-				plasma: plantationMoreDetail.unAudited.buyerAssociation.plasma === "N/A" ? "" : plantationMoreDetail.unAudited.buyerAssociation.plasma,
-				mill: plantationMoreDetail.unAudited.buyerAssociation.mill === "N/A" ? "" : plantationMoreDetail.unAudited.buyerAssociation.mill,
-				agreement: plantationMoreDetail.unAudited.buyerAssociation.agreement === "N/A" ? "" : plantationMoreDetail.unAudited.buyerAssociation.agreement,
-				certificationType: plantationMoreDetail.unAudited.certification,
-				area: plantationMoreDetail.unAudited.area,
-				plantationAge: plantationMoreDetail.unAudited.age,
-				treesPlanted: plantationMoreDetail.unAudited.treesPlanted,
-				treesProductive: plantationMoreDetail.unAudited.treesProductive,
-				aveMonthlyYield: plantationMoreDetail.unAudited.aveMonthlyYield,
-				proofOfRights: plantationMoreDetail.unAudited.proofOfRights,
-				landPreviousUse: plantationMoreDetail.unAudited.landPreviousUse,
-				landClearingMethod: plantationMoreDetail.unAudited.landClearingMethod,
-				plantationName: plantationMoreDetail.name
+				managementType: plantationDoc!.unAudited.management.type,
+				managementName: plantationDoc!.unAudited.management.name === "N/A" ? "" : plantationDoc!.unAudited.management.name,
+				other: plantationDoc!.unAudited.management.otherDetails === "N/A" ? "" : plantationDoc!.unAudited.management.otherDetails,
+				associationType: plantationDoc!.unAudited.buyerAssociation.type,
+				plasma: plantationDoc!.unAudited.buyerAssociation.plasma === "N/A" ? "" : plantationDoc!.unAudited.buyerAssociation.plasma,
+				mill: plantationDoc!.unAudited.buyerAssociation.mill === "N/A" ? "" : plantationDoc!.unAudited.buyerAssociation.mill,
+				agreement: plantationDoc!.unAudited.buyerAssociation.agreement === "N/A" ? "" : plantationDoc!.unAudited.buyerAssociation.agreement,
+				certificationType: plantationDoc!.unAudited.certification,
+				area: plantationDoc!.unAudited.area,
+				plantationAge: plantationDoc!.unAudited.age,
+				treesPlanted: plantationDoc!.unAudited.treesPlanted,
+				treesProductive: plantationDoc!.unAudited.treesProductive,
+				aveMonthlyYield: plantationDoc!.unAudited.aveMonthlyYield,
+				proofOfRights: plantationDoc!.unAudited.proofOfRights,
+				landPreviousUse: plantationDoc!.unAudited.landPreviousUse,
+				landClearingMethod: plantationDoc!.unAudited.landClearingMethod,
+				plantationName: plantationDoc!.name
 			}}
 			validate={values => {
 				values.managementType === "PRIVATE" ?

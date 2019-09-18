@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction, FunctionComponent } from 'react';
+import React, { useState, Dispatch, SetStateAction, FunctionComponent } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import AssignmentIcon from '@material-ui/icons/Assignment';
 import Button from '@material-ui/core/Button';
 import PlantationMap from './PlantationMap';
-import { Plantation, PlantationDoc } from '../../../../types/Plantation';
-import { UserPlantation } from '../../../../types/UserPlantation';
+import { PlantationDoc, PlantationSummary } from '../../../../types/Plantation';
+
 import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -35,39 +35,16 @@ interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
 	mapModalOpen: boolean
-	setPlantationMoreDetail: Dispatch<SetStateAction<PlantationDoc>>
-	plantationModalDetail: UserPlantation
+	setPlantationDoc: Dispatch<SetStateAction<PlantationDoc | undefined>>
+	plantationSummary: PlantationSummary | undefined
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 
 }
 
-const DetailCard: FunctionComponent<IProps> = ({ plantationModalDetail, setPlantationMoreDetail, setViewModalOpen, setMapModalOpen, setHasError }) => {
+const DetailCard: FunctionComponent<IProps> = ({ plantationSummary, setViewModalOpen, setMapModalOpen, setHasError }) => {
 	const classes = useStyles();
-	const [ plantationItem, setPlantationItem] = useState<Plantation>()
 
 	const [canUpload, setCanUpload] = useState(false)
-
-	const detailPlantationCallback = useCallback(() => {
-		plantationModalDetail.ref.get().then((doc) => {
-			const result = doc.data() as PlantationDoc
-			if (result) {
-				console.log(result)
-				const {audited, unAudited } = result;
-				if(result.auditAcceptedAt){
-					setPlantationItem(audited)
-				}else{
-					setPlantationItem(unAudited)
-				}
-				setPlantationMoreDetail(result)
-			}
-		}).catch((error: Error) => {
-			setHasError(error)
-		})
-	}, [plantationModalDetail, setPlantationMoreDetail, setHasError])
-
-	useEffect(() => {
-		detailPlantationCallback();
-	}, [detailPlantationCallback])
 
 
 	return (
@@ -75,11 +52,11 @@ const DetailCard: FunctionComponent<IProps> = ({ plantationModalDetail, setPlant
 			<CardHeader
 				action={
 					<IconButton aria-label="settings" onClick={() => { setViewModalOpen(true); setMapModalOpen(false) }}>
-						<CloseIcon />
+						<AssignmentIcon />
 					</IconButton>
 				}
-				title={plantationModalDetail.name}
-				subheader={!!plantationItem && plantationItem.management.type === "PRIVATE"?  "owned by Me" : `owned by ${!!plantationItem ? plantationItem.management.name : ""} ` }
+				title={plantationSummary!.name}
+				subheader={plantationSummary!.management.type === "PRIVATE"?  "owned by Me" : `owned by ${plantationSummary!.management.name}` }
 			/>
 			<CardActions >
 				<Button variant="contained" color="primary" className={classes.button} onClick={() => { }} disabled={!canUpload}>

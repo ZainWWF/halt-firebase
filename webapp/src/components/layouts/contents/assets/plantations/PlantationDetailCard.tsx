@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, Dispatch, SetStateAction, FunctionComponent, useState } from 'react';
+import React, {  Dispatch, SetStateAction, FunctionComponent } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -11,8 +11,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
-import { UserPlantation } from '../../../../types/UserPlantation';
-import { PlantationDoc, Plantation } from '../../../../types/Plantation';
+import { PlantationDoc, PlantationSummary,PlantationDetails } from '../../../../types/Plantation';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -60,41 +59,17 @@ const useStyles = makeStyles((theme: Theme) =>
 interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationMoreDetail: Omit<PlantationDoc,'audited' | "unAudited">
-	setPlantationMoreDetail: Dispatch<SetStateAction<PlantationDoc>>
-	plantationModalDetail: UserPlantation
+	setRepsModalOpen: Dispatch<SetStateAction<boolean>>
+	setPlantationDoc: Dispatch<SetStateAction<PlantationDoc | undefined>>
+	plantationSummary: PlantationSummary | undefined
+	plantationDetails: PlantationDetails | undefined
 	removePlantationCallback: (path: string) => void
 	editPlantationCallback: (path: string) => void
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
 
 }
 
-const DetailCard: FunctionComponent<IProps> = ({plantationModalDetail, plantationMoreDetail, setPlantationMoreDetail, removePlantationCallback, editPlantationCallback, setViewModalOpen, setMapModalOpen, setHasError }) =>{
+const DetailCard: FunctionComponent<IProps> = ({plantationSummary, plantationDetails, removePlantationCallback, editPlantationCallback, setViewModalOpen, setMapModalOpen, setRepsModalOpen }) =>{
 	const classes = useStyles();
-	const [ plantationItem, setPlantationItem] = useState<Plantation>()
-
-	const detailPlantationCallback = useCallback(() => {
-		plantationModalDetail.ref.get().then((doc) => {
-			const result = doc.data() as PlantationDoc
-			if (result) {
-				console.log(result)
-				const {audited, unAudited } = result;
-				if(result.auditAcceptedAt){
-					setPlantationItem(audited)
-				}else{
-					setPlantationItem(unAudited)
-				}
-				setPlantationMoreDetail(result)
-			}
-		}).catch((error) => {
-			setHasError(error)
-		})
-	}, [plantationModalDetail, setPlantationMoreDetail, setHasError])
-
-	useEffect(() => {
-		detailPlantationCallback();
-	}, [detailPlantationCallback])
-
 
 	return (
 		<Card className={classes.card}>
@@ -104,61 +79,61 @@ const DetailCard: FunctionComponent<IProps> = ({plantationModalDetail, plantatio
 						<CloseIcon />
 					</IconButton>
 				}
-				title={plantationModalDetail.name}
-				subheader={!!plantationItem && plantationItem.management.type === "PRIVATE"?  "owned by Me" : `owned by ${!!plantationItem ? plantationItem.management.name : ""} ` }
+				title={plantationSummary!.name}
+				subheader={plantationSummary!.management.type === "PRIVATE"?  "owned by Me" : `owned by ${plantationSummary!.management.name}` }
 			/>
 			<CardActions >
 				<Button size="small" color="primary" className={classes.button} onClick={() => {setMapModalOpen(true); setViewModalOpen(false) }}>
 					Map
 				</Button>
-				<Button size="small" color="primary" className={classes.button}>
+				<Button size="small" color="primary" className={classes.button} onClick={() => {setRepsModalOpen(true); setViewModalOpen(false) }}>
 					Reps
 				</Button>
 			</CardActions>
-			{plantationItem  &&
+			{plantationDetails  &&
 				<CardContent className={classes.content}>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Management
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						type: {plantationItem.management.type}<br />
-						other: {plantationItem.management.otherDetails}<br />
+						type: {plantationDetails.management.type}<br />
+						other: {plantationDetails.management.otherDetails}<br />
 					</Typography>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Association
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						type: {plantationItem.buyerAssociation.type}<br />
-						plasma: {plantationItem.buyerAssociation.plasma}<br />
-						mill: {plantationItem.buyerAssociation.mill}<br />
-						agreement: {plantationItem.buyerAssociation.agreement}<br />
+						type: {plantationDetails.buyerAssociation.type}<br />
+						plasma: {plantationDetails.buyerAssociation.plasma}<br />
+						mill: {plantationDetails.buyerAssociation.mill}<br />
+						agreement: {plantationDetails.buyerAssociation.agreement}<br />
 					</Typography>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Certification
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						type: {plantationItem.certification}<br />
+						type: {plantationDetails.certification}<br />
 					</Typography>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Plantation
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						area: {plantationItem.area}<br />
-						age: {plantationItem.age}<br />
-						planted: {plantationItem.treesPlanted}<br />
-						productive: {plantationItem.treesProductive}<br />
-						ave. monthly yield: {plantationItem.aveMonthlyYield}<br />
-						proof of rights: {plantationItem.proofOfRights}<br />
-						previous land use: {plantationItem.landPreviousUse}<br />
-						land clearing method: {plantationItem.landClearingMethod}<br />
+						area: {plantationDetails.area}<br />
+						age: {plantationDetails.age}<br />
+						planted: {plantationDetails.treesPlanted}<br />
+						productive: {plantationDetails.treesProductive}<br />
+						ave. monthly yield: {plantationDetails.aveMonthlyYield}<br />
+						proof of rights: {plantationDetails.proofOfRights}<br />
+						previous land use: {plantationDetails.landPreviousUse}<br />
+						land clearing method: {plantationDetails.landClearingMethod}<br />
 					</Typography>
 				</CardContent>
 			}
 			<CardActions >
-				<IconButton aria-label="edit" onClick={() => editPlantationCallback(plantationModalDetail.ref.path)} className={classes.edit}>
+				<IconButton aria-label="edit" onClick={() => plantationSummary && editPlantationCallback(plantationSummary.ref.path)} className={classes.edit}>
 					<EditIcon />
 				</IconButton>
-				<IconButton aria-label="delete" onClick={() => removePlantationCallback(plantationModalDetail.ref.path)} className={classes.delete}>
+				<IconButton aria-label="delete" onClick={() => plantationSummary && removePlantationCallback(plantationSummary.ref.path)} className={classes.delete}>
 					<DeleteIcon />
 				</IconButton>
 			</CardActions>

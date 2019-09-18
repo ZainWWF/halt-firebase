@@ -35,25 +35,35 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface IProps {
 	plantationMap: Record<string, any>
-	viewPlantationModalCallback: (e: MouseEvent<HTMLDivElement | MouseEvent>) => void
+	viewPlantationSummaryCallback: (e: MouseEvent<HTMLDivElement | MouseEvent>) => void
 }
 
-const ListView: FunctionComponent<IProps> = ({  plantationMap, viewPlantationModalCallback }) => {
+const ListView: FunctionComponent<IProps> = ({ plantationMap, viewPlantationSummaryCallback }) => {
 	const classes = useStyles();
 
 	return (
 		<List className={classes.root}>
 			{
 				[...plantationMap.keys()].map((plantationId: any) => {
+
 					const plantation = plantationMap.get(plantationId);
+
+					let ownershipLabel: string
+
+					if (!plantation.repOfId) {
+						ownershipLabel = plantation.management.type === "PRIVATE" ? "owned by Me" : `owned by ${plantation.management.name}`
+					} else {
+						ownershipLabel = plantation.management.type === "PRIVATE" ? `owned by ${plantation.repOfName ? plantation.repOfName : "Unknown"}` : `owned by ${plantation.management.name}`
+					}
+
 					return (
-						<ListItem button key={plantationId} onClick={viewPlantationModalCallback} id={plantationId} >
+						<ListItem button key={plantationId} onClick={viewPlantationSummaryCallback} id={plantationId} >
 							<ListItemAvatar>
 								<Avatar alt={plantation.name} className={plantation.auditAcceptedAt ? classNames(classes.bigAvatar, classes.auditedAvatar) : classNames(classes.bigAvatar, classes.nonAuditedAvatar)} >
 									{plantation.auditAcceptedAt ? <AssignmentTurnedInIcon /> : <AssignmentLateIcon />}
 								</Avatar>
 							</ListItemAvatar>
-							<ListItemText primary={plantation.name} secondary={plantation.management.type === "PRIVATE" ? "owned by Me" : `owned by ${plantation.management.name}`}/>
+							<ListItemText primary={plantation.name} secondary={ownershipLabel} />
 						</ListItem>
 					)
 				})

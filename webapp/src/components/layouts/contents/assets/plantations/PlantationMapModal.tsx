@@ -3,17 +3,16 @@ import Dialog from "@material-ui/core/Dialog";
 import PlantationMapCard from "./PlantationMapCard";
 import  useMediaQuery  from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import { PlantationDoc } from "../../../../types/Plantation";
-import { UserPlantation } from "../../../../types/UserPlantation";
+import { PlantationDoc, PlantationSummary } from '../../../../types/Plantation';
+
 
 
 interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
 	mapModalOpen: boolean
-	plantationMoreDetail: Omit<PlantationDoc,'audited' | "unAudited">
-	setPlantationMoreDetail: Dispatch<SetStateAction<PlantationDoc>>
-	plantationModalDetail: UserPlantation
+	setPlantationDoc: Dispatch<SetStateAction<PlantationDoc | undefined>>
+	plantationSummary: PlantationSummary | undefined
 	removePlantationCallback: (path: string) => void
 	editPlantationCallback: (path: string) => void
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
@@ -21,7 +20,7 @@ interface IProps {
 }
 
 
-const ModalView: FunctionComponent<IProps> = ({mapModalOpen, setMapModalOpen,plantationMoreDetail, setPlantationMoreDetail, plantationModalDetail, editPlantationCallback, removePlantationCallback,setViewModalOpen, setHasError}) => {
+const ModalView: FunctionComponent<IProps> = ({mapModalOpen, setMapModalOpen, setPlantationDoc, plantationSummary, editPlantationCallback, removePlantationCallback,setViewModalOpen, setHasError}) => {
 	const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
@@ -29,8 +28,8 @@ const ModalView: FunctionComponent<IProps> = ({mapModalOpen, setMapModalOpen,pla
     <div>
       <Dialog disableBackdropClick={true} fullScreen={fullScreen} open={mapModalOpen} onClose={()=>setMapModalOpen(false)} aria-labelledby="view-modal-detail">
 				<PlantationMapCard 
-					plantationModalDetail={plantationModalDetail} 
-					setPlantationMoreDetail={setPlantationMoreDetail} 
+					plantationSummary={plantationSummary} 
+					setPlantationDoc={setPlantationDoc} 
 					mapModalOpen={mapModalOpen}
 					setViewModalOpen={setViewModalOpen}
 					setMapModalOpen={setMapModalOpen} 

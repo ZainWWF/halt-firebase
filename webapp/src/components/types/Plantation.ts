@@ -1,26 +1,28 @@
+import { firestore } from "firebase";
 export type PlantationDoc = {
-	name:  string
-	isActive : boolean
-	createdAt : string
-	updateAt? : string
-	repIds? : string[]
-	auditAccepted? :  boolean,
-	auditAcceptedAt:  string
-	auditAt? : string
-	auditBy? : string
-	unAudited : Plantation
-	audited? : Plantation
+	name: string
+	isActive: boolean
+	createdAt: string
+	updateAt?: string
+	repIds?: string[]
+	auditAccepted?: boolean
+	auditAcceptedAt: string
+	auditAt?: string
+	auditBy?: string
+	unAudited: PlantationDetails
+	audited?: PlantationDetails
 	userId?: string
 }
 
-export type Plantation = {
+
+export type PlantationDetails = {
 	age: number
 	aveMonthlyYield: number
-	buyerAssociation : {
+	buyerAssociation: {
 		agreement: string
 		mill: string
 		plasma: string
-		type : string
+		type: string
 	}
 	certification: string
 	landClearingMethod: string
@@ -37,3 +39,22 @@ export type Plantation = {
 
 }
 
+export type PlantationSummary = {
+	name: string
+	management: {
+		name: string
+		type: string
+		otherDetails: string
+	}
+	auditAcceptedAt: string | null,
+	isActive: boolean
+	ref: firestore.DocumentReference
+
+}
+
+export type PlantationRep = {
+
+	name: string
+	mobile: string
+
+}
