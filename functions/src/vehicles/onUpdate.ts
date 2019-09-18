@@ -1,5 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
+import vehicleMapBuilder from "./mapBuilder";
+
 
 const isPropValueChanged = (restNewData, previousData): boolean => {
 	return Object.keys(restNewData).some((key) => {
@@ -30,27 +32,13 @@ export default functions.region("asia-east2").firestore
 					updatedAt: admin.firestore.Timestamp.fromMillis(Date.now())
 				})
 
-	
-			// refresh User.vehicle map with unremoved Vehicle docs for the userID
-			const vehiclesSnapshot = await admin.firestore().collection("vehicles")
-				.where("userId", "==", previousData.userId)
-				.where("isRemoved", "==", false).get()
 
-			const vehiclesMap = vehiclesSnapshot.docs.reduce((acc, vehicle) => {
-				return {
-					...acc,
-					[vehicle.id]: {
-						ref: vehicle.ref,
-						license: vehicle.data().license,
-						make: vehicle.data().make,
-						model: vehicle.data().model,
-						url: vehicle.data().url,
-					}
-				}
-			}, {})
+			const vehiclesMap = await vehicleMapBuilder(previousData.userId)
+
+			await admin.firestore().doc(`users/${previousData.userId}`)
+				.set({ vehicles: vehiclesMap }, { mergeFields: ["vehicles"] })
 
 
-			await admin.firestore().doc(`users/${previousData.userId}`).set({ vehicles: vehiclesMap }, { mergeFields: ["vehicles"] })
 			return
 
 		} catch (error) {

@@ -7,14 +7,20 @@ export default functions.region("asia-east2").firestore
 
 		try {
 
-			const { userId, name, management, owner } = snap.data() as FirebaseFirestore.DocumentData;
+			const { userId, name, unAudited } = snap.data() as FirebaseFirestore.DocumentData;
+
 
 			const plantationRef = 'plantations/' + context.params.plantationId
 
 			await admin.firestore().doc(plantationRef)
 				.update({
 					createdAt: admin.firestore.Timestamp.fromMillis(Date.now()),
-					isActive: false
+					isActive: false,
+					auditAcceptedAt: null,
+					auditAt: null,
+					auditBy: null,
+					isRemoved: false,
+
 				})
 
 			await admin.firestore().doc('users/' + userId).set({
@@ -22,14 +28,13 @@ export default functions.region("asia-east2").firestore
 					[context.params.plantationId]: {
 						ref: admin.firestore().doc(plantationRef),
 						name,
-						owner,
-						management,
-						isAudited: false,
-						isActive: false
+						management: unAudited.management,
+						auditAcceptedAt: null,
+						isActive: false,
 
 					}
 				}
-			}, { merge: true })
+			})
 
 			return;
 

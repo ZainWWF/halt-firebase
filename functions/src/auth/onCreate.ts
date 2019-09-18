@@ -7,6 +7,10 @@ export default functions.region("asia-east2").auth.user()
 		return admin.firestore().doc('users/' + user.uid).set({
 			vehicles : {},
 			plantations : {},
-			profile: {}
+			profile: {
+				phoneNumber: user.phoneNumber
+			}
 		});
 	});
+
+	
