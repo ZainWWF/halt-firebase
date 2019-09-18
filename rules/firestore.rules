@@ -29,6 +29,11 @@ function isAssetOwner() {
 	return request.auth.uid == existingData().userId 
 }
 
+
+function isProducerRep() {
+	return [request.auth.uid].hasAny(existingData().repIds)
+}
+
 function userEmail(userId) {
 	return get(/databases/$(database)/documents/users/$(userId)).data.email;
 }
@@ -67,14 +72,14 @@ service cloud.firestore {
 			// allow read, write;
 				allow read:	if isSignedIn() && isAssetOwner()
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
-										&& incomingData().size() == 8
-										&& incomingData().license is string
-										&& incomingData().colour is string
-										&& incomingData().chassis is string
-										&& incomingData().model is string
-										&& incomingData().make is string
-										&& incomingData().url is string
-										&& incomingData().loadingCapacity is number
+										// && incomingData().size() == 8
+										// && incomingData().license is string
+										// && incomingData().colour is string
+										// && incomingData().chassis is string
+										// && incomingData().model is string
+										// && incomingData().make is string
+										// && incomingData().url is string
+										// && incomingData().loadingCapacity is number
 				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
 										&& incomingData().userId == existingData().userId
 										&& incomingData().isRemoved == existingData().isRemoved
@@ -89,28 +94,30 @@ service cloud.firestore {
 
 		match /plantations/{plantationId} {
 			// allow read, write;
-				allow read:	if isSignedIn() && isAssetOwner()
+				allow read:	if isSignedIn() &&  ( isAssetOwner() || isProducerRep() )
+				
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
-											&& incomingData().size() == 3
-											&& incomingData().unAudited.size() == 11
-											&& incomingData().name is string
-											&& incomingData().unAudited.management.type is string
-											&& incomingData().unAudited.management.name is string
-											&& incomingData().unAudited.management.otherDetails is string
-											&& incomingData().unAudited.buyerAssociation.type is string
-											&& incomingData().unAudited.buyerAssociation.plasma is string
-											&& incomingData().unAudited.buyerAssociation.mill is string
-											&& incomingData().unAudited.buyerAssociation.agreement is string
-											&& incomingData().unAudited.certification is string
-											&& incomingData().unAudited.area is number
-											&& incomingData().unAudited.age is number
-											&& incomingData().unAudited.treesPlanted is number
-											&& incomingData().unAudited.treesProductive is number
-											&& incomingData().unAudited.aveMonthlyYield is number
-											&& incomingData().unAudited.proofOfRights is string
-											&& incomingData().unAudited.landPreviousUse is string
-											&& incomingData().unAudited.landClearingMethod is string
-				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
+											// && incomingData().size() == 3
+											// && incomingData().unAudited.size() == 11
+											// && incomingData().name is string
+											// && incomingData().unAudited.management.type is string
+											// && incomingData().unAudited.management.name is string
+											// && incomingData().unAudited.management.otherDetails is string
+											// && incomingData().unAudited.buyerAssociation.type is string
+											// && incomingData().unAudited.buyerAssociation.plasma is string
+											// && incomingData().unAudited.buyerAssociation.mill is string
+											// && incomingData().unAudited.buyerAssociation.agreement is string
+											// && incomingData().unAudited.certification is string
+											// && incomingData().unAudited.area is number
+											// && incomingData().unAudited.age is number
+											// && incomingData().unAudited.treesPlanted is number
+											// && incomingData().unAudited.treesProductive is number
+											// && incomingData().unAudited.aveMonthlyYield is number
+											// && incomingData().unAudited.proofOfRights is string
+											// && incomingData().unAudited.landPreviousUse is string
+											// && incomingData().unAudited.landClearingMethod is string
+
+				allow update:	if isSignedIn() &&  ( isAssetOwner() || isProducerRep() ) //TODO: isAdmin(userId) && isAuditor(userId)
 											&& incomingData().userId == existingData().userId
 											&& incomingData().isRemoved == existingData().isRemoved
 											&& incomingData().createdAt == existingData().createdAt
@@ -120,8 +127,6 @@ service cloud.firestore {
 											&& incomingData().auditAt == existingData().auditAt
 											&& incomingData().auditBy == existingData().auditBy
 
-
-											
 				allow delete: if false
 
 		}
