@@ -12,7 +12,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import { CircularProgress, Grid } from '@material-ui/core';
 
-export const AuthContext = createContext<any>(null);
+export const AuthContext = createContext<firebase.User | null>(null);
 
 const Main: FunctionComponent<RouteComponentProps> = ({ location}) => {
 

@@ -10,8 +10,8 @@ import { Theme } from "@material-ui/core/styles";
 import navItems from "../sidenav/nav-items";
 import { Route, Switch } from "react-router-dom";
 import { SideNavContext } from "../../providers/SideNav/SideNavProvider";
-// import { makeStyles } from "@material-ui/styles";
 import { makeStyles } from "@material-ui/core/styles";
+import { AuthContext } from  "../../containers/Main";
 
 const useStyles = makeStyles((theme: Theme) => ({
 
@@ -27,6 +27,7 @@ const Header: FunctionComponent = () => {
 
 	const classes = useStyles();
 	const { dispatchSideNav } = useContext(SideNavContext);
+	const user = useContext(AuthContext) as firebase.User;
 
 	return (
 		<>
@@ -50,7 +51,7 @@ const Header: FunctionComponent = () => {
 						</Grid>
 						<Grid item>
 							<Typography color="inherit" variant="subtitle1">
-								{/* { `${group && group.length > 0 ? `(${group[0].replace('_',' ')})` : ''}  Hi, ${user.attributes.given_name}` } */}
+									{user.phoneNumber}
 							</Typography>
 						</Grid>
 					</Grid>

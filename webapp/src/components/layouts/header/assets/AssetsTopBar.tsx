@@ -1,8 +1,9 @@
 import React from "react";
 import { Typography, Grid, AppBar } from "@material-ui/core";
 import AssetsNavTabs from "./AssetsNavTabs";
-// import { makeStyles } from "@material-ui/styles";
 import { makeStyles } from "@material-ui/core/styles";
+
+
 
 const useStyle = makeStyles({
 	root: {
@@ -31,7 +32,9 @@ const useStyle = makeStyles({
 
 
 const  TopBar = () => {
-	
+
+
+
 	const classes = useStyle();
   return (
 		<Grid container direction="column" justify="space-between">
