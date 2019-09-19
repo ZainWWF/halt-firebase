@@ -11,6 +11,7 @@ import PlantationMapModal from "./PlantationMapModal";
 import PlantationRepsModal from "./PlantationRepsModal";
 import { PlantationDoc, PlantationSummary, PlantationDetails } from '../../../../types/Plantation';
 
+
 const useStyles = makeStyles((theme: Theme) => ({
 	paper: {
 		margin: 'auto',
@@ -63,6 +64,7 @@ const View: FunctionComponent = () => {
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
 	const [uploadInProgress, setUploadInProgress] = useState(false);
+	const [refreshGeometry, setRefreshGeometry] = useState(false)
 
 	const user = useContext(AuthContext) as firebase.User;
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
@@ -158,10 +160,10 @@ const View: FunctionComponent = () => {
 				const result = doc.data() as PlantationDoc
 				if (result) {
 					const { audited, unAudited, repIds } = result;
-	
+
 					if (result.auditAcceptedAt) {
 						setPlantationDetails(audited)
-		
+
 					} else {
 						setPlantationDetails(unAudited)
 					}
@@ -178,6 +180,14 @@ const View: FunctionComponent = () => {
 	useEffect(() => {
 		detailPlantationCallback();
 	}, [detailPlantationCallback])
+
+	useEffect(() => {
+		if(refreshGeometry){
+			detailPlantationCallback();
+			setRefreshGeometry(false)
+		}
+	}, [detailPlantationCallback, refreshGeometry, setRefreshGeometry])
+
 
 
 	useEffect(() => {
@@ -205,7 +215,7 @@ const View: FunctionComponent = () => {
 					</Grid>
 				</Toolbar>
 			</AppBar>
-			{uploadInProgress &&  <LinearProgress />}
+			{uploadInProgress && <LinearProgress />}
 
 			{plantationMap && plantationMap.size > 0 ?
 				<PlantationList
@@ -249,17 +259,15 @@ const View: FunctionComponent = () => {
 				setHasError={setHasError}
 			/>
 			<PlantationMapModal
+				setRefreshGeometry={setRefreshGeometry}
 				setViewModalOpen={setViewModalOpen}
 				mapModalOpen={mapModalOpen}
 				setMapModalOpen={setMapModalOpen}
 				plantationSummary={plantationSummary}
-				setPlantationDoc={setPlantationDoc}
-				removePlantationCallback={removePlantationCallback}
-				editPlantationCallback={editPlantationCallback}
+				plantationDetails={plantationDetails}
 				setHasError={setHasError}
 			/>
 			<PlantationRepsModal
-				// viewModalOpen={viewModalOpen}
 				setViewModalOpen={setViewModalOpen}
 				setPlantationReps={setPlantationReps}
 				repsModalOpen={repsModalOpen}
@@ -267,9 +275,6 @@ const View: FunctionComponent = () => {
 				plantationSummary={plantationSummary}
 				plantationDetails={plantationDetails}
 				plantationReps={plantationReps}
-				// setPlantationDoc={setPlantationDoc}
-				// removePlantationCallback={removePlantationCallback}
-				// editPlantationCallback={editPlantationCallback}
 				setHasError={setHasError}
 			/>
 			<Snackbar

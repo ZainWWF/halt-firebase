@@ -1,4 +1,4 @@
-import React, { useState, Dispatch, SetStateAction, FunctionComponent } from 'react';
+import React, { useState, Dispatch, SetStateAction, FunctionComponent, useEffect } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -8,9 +8,10 @@ import IconButton from '@material-ui/core/IconButton';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import Button from '@material-ui/core/Button';
 import PlantationMap from './PlantationMap';
-import { PlantationDoc, PlantationSummary } from '../../../../types/Plantation';
-
+import { PlantationSummary, PlantationDetails } from '../../../../types/Plantation';
+import * as turfHelpers from "@turf/helpers";
 import Typography from '@material-ui/core/Typography';
+
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -35,16 +36,42 @@ interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
 	mapModalOpen: boolean
-	setPlantationDoc: Dispatch<SetStateAction<PlantationDoc | undefined>>
 	plantationSummary: PlantationSummary | undefined
+	plantationDetails: PlantationDetails | undefined
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
-
+	setRefreshGeometry: Dispatch<SetStateAction<boolean>>
 }
 
-const DetailCard: FunctionComponent<IProps> = ({ plantationSummary, setViewModalOpen, setMapModalOpen, setHasError }) => {
+const DetailCard: FunctionComponent<IProps> = ({ setRefreshGeometry, plantationSummary, plantationDetails, setViewModalOpen, setMapModalOpen, setHasError  }) => {
 	const classes = useStyles();
 
 	const [canUpload, setCanUpload] = useState(false)
+	const [newGeometry, setNewGeometry] = useState<turfHelpers.Geometry>()
+
+
+	const submitPlantationGeometry = () => {
+
+		console.log(newGeometry)
+		plantationSummary!.ref.update({
+			"unAudited.geometry": JSON.stringify(newGeometry)
+		})
+			.then(() => {
+				console.log("upload success")
+				setRefreshGeometry(true)
+				setCanUpload(false)
+			}).catch((error) => {
+				setHasError(error)
+			})
+	}
+
+	useEffect(() => {
+		if (newGeometry) {
+			setCanUpload(true)
+		}
+	}, [newGeometry, setCanUpload])
+
+
+
 
 
 	return (
@@ -56,19 +83,19 @@ const DetailCard: FunctionComponent<IProps> = ({ plantationSummary, setViewModal
 					</IconButton>
 				}
 				title={plantationSummary!.name}
-				subheader={plantationSummary!.management.type === "PRIVATE"?  "owned by Me" : `owned by ${plantationSummary!.management.name}` }
+				subheader={plantationSummary!.management.type === "PRIVATE" ? "owned by Me" : `owned by ${plantationSummary!.management.name}`}
 			/>
 			<CardActions >
-				<Button variant="contained" color="primary" className={classes.button} onClick={() => { }} disabled={!canUpload}>
+				<Button variant="contained" color="primary" className={classes.button} onClick={() => submitPlantationGeometry()} disabled={!canUpload}>
 					Upload Geometry
       </Button>
 
 			</CardActions>
 			<CardContent>
-			<Typography display={"block"} variant={"caption"}>
+				<Typography display={"block"} variant={"caption"}>
 					drag and drop the Geojson geometry of the plantation into the map.
 				</Typography>
-				<PlantationMap setHasError={setHasError} setCanUpload={setCanUpload} />
+				<PlantationMap setHasError={setHasError} setNewGeometry={setNewGeometry} updatedGeometryData={plantationDetails!.geometry}/>
 			</CardContent>
 		</Card>
 	);

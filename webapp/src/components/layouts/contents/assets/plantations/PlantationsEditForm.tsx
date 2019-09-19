@@ -167,6 +167,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 	return (
 		<Formik
 			initialValues={{
+				geometry: plantationDoc!.unAudited.geometry,
 				managementType: plantationDoc!.unAudited.management.type,
 				managementName: plantationDoc!.unAudited.management.name === "N/A" ? "" : plantationDoc!.unAudited.management.name,
 				other: plantationDoc!.unAudited.management.otherDetails === "N/A" ? "" : plantationDoc!.unAudited.management.otherDetails,
@@ -236,6 +237,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 				setPlantationEditData({
 					name: values.plantationName,
 					unAudited : {
+						geometry : values.geometry,
 						management: {
 							type: values.managementType,
 							name: values.managementName ? values.managementName : 'N/A',
