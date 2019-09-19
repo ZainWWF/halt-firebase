@@ -17,6 +17,7 @@ export type PlantationDoc = {
 
 export type PlantationDetails = {
 	age: number
+	geometry: string
 	aveMonthlyYield: number
 	buyerAssociation: {
 		agreement: string

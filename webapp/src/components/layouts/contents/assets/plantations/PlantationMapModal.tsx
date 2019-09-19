@@ -3,33 +3,31 @@ import Dialog from "@material-ui/core/Dialog";
 import PlantationMapCard from "./PlantationMapCard";
 import  useMediaQuery  from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import { PlantationDoc, PlantationSummary } from '../../../../types/Plantation';
-
-
+import { PlantationSummary, PlantationDetails } from '../../../../types/Plantation';
 
 interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	setMapModalOpen: Dispatch<SetStateAction<boolean>>
 	mapModalOpen: boolean
-	setPlantationDoc: Dispatch<SetStateAction<PlantationDoc | undefined>>
 	plantationSummary: PlantationSummary | undefined
-	removePlantationCallback: (path: string) => void
-	editPlantationCallback: (path: string) => void
+	plantationDetails: PlantationDetails | undefined
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
+	setRefreshGeometry: Dispatch<SetStateAction<boolean>>
 
 }
 
 
-const ModalView: FunctionComponent<IProps> = ({mapModalOpen, setMapModalOpen, setPlantationDoc, plantationSummary, editPlantationCallback, removePlantationCallback,setViewModalOpen, setHasError}) => {
+const ModalView: FunctionComponent<IProps> = ({  setRefreshGeometry, mapModalOpen, setMapModalOpen, plantationSummary, plantationDetails ,setViewModalOpen, setHasError}) => {
 	const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
   return (
     <div>
       <Dialog disableBackdropClick={true} fullScreen={fullScreen} open={mapModalOpen} onClose={()=>setMapModalOpen(false)} aria-labelledby="view-modal-detail">
-				<PlantationMapCard 
+				<PlantationMapCard
+					setRefreshGeometry={setRefreshGeometry}
 					plantationSummary={plantationSummary} 
-					setPlantationDoc={setPlantationDoc} 
+					plantationDetails={plantationDetails}
 					mapModalOpen={mapModalOpen}
 					setViewModalOpen={setViewModalOpen}
 					setMapModalOpen={setMapModalOpen} 

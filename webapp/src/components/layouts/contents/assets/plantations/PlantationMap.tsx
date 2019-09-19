@@ -39,16 +39,14 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface IProps {
-	setCanUpload: Dispatch<SetStateAction<boolean>>
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
-
+	setNewGeometry: Dispatch<SetStateAction<turfHelpers.Geometry | undefined>>
+	updatedGeometryData: string 
 }
-const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
+const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedGeometryData }) => {
 	const classes = useStyles();
 
 	const [map, setMap] = useState<google.maps.Map>();
-	const [newGeometry, setNewGeometry] = useState(null)
-	const [mapViewBounds, setMapViewBounds] = useState<google.maps.LatLngBounds>()
 	const [mapPolygonBounds, setMapPolygonBounds] = useState<turfHelpers.Feature<turfHelpers.Polygon>>()
 	const mapRef = useRef(null)
 	const dropContainerRef = useRef(null)
@@ -91,7 +89,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 			}
 		});
 
-		initMap.setZoom(5)
+		initMap.setZoom(6)
 		setMap(initMap)
 	}, [])
 
@@ -102,13 +100,12 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 		if (map) {
 			map.data.forEach(function (feature) {
 				feature.getGeometry().forEachLatLng(function (g) {
-					console.log(g.toUrlValue())
 					bounds.extend(g)
 				});
 			});
 			map.fitBounds(bounds);
 			const listener = google.maps.event.addListener(map, "idle", function () {
-				map.setZoom(12);
+				map.setZoom(6);
 				google.maps.event.removeListener(listener);
 			});
 		}
@@ -130,7 +127,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 	}, [map])
 
 	// clear the map of any drawn polygon
-	const removeAllFeatures = useCallback(() => {
+	const clearMap = useCallback(() => {
 		if (map) {
 			map.data.forEach(function (feature) {
 				map.data.remove(feature)
@@ -142,17 +139,17 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 	//load the geojson into the map and render if it passes the checks
 	const loadGeoJsonStringCallback = useCallback((geoString) => {
 		try {
-			const geojson = JSON.parse(geoString);
+			const geojson: turfHelpers.FeatureCollection<turfHelpers.Geometry> = JSON.parse(geoString);
 			if (map) {
-				removeAllFeatures();
+				clearMap();
 				map.data.addGeoJson(geojson);
 				checkFeatureHasSinglePolygon()
 				const { features: [{ geometry }] } = geojson
+				const coordinates = geometry.coordinates as number[][][]
+				const userPolygon = turfHelpers.polygon(coordinates)
 
-				const userPolygon = turfHelpers.polygon(geometry.coordinates)
 				if (mapPolygonBounds) {
 					const isInBound = turfContains.default(mapPolygonBounds, userPolygon)
-
 					if (isInBound) {
 						setNewGeometry(geometry)
 					} else {
@@ -164,8 +161,21 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 		} catch (e) {
 			setHasError(e)
 		}
-	}, [setHasError, checkFeatureHasSinglePolygon, removeAllFeatures, zoomCallback, map, mapViewBounds, mapPolygonBounds])
+	}, [setHasError, checkFeatureHasSinglePolygon, clearMap, zoomCallback, map, mapPolygonBounds, setNewGeometry])
 
+	useEffect(() => {
+		if (updatedGeometryData && map) {
+			clearMap()
+			map.data.addGeoJson({
+				"type": "FeatureCollection",
+				"features": [{
+					"type": "Feature",
+					"geometry": JSON.parse(updatedGeometryData)
+				}]
+			})
+			zoomCallback();
+		}
+	}, [updatedGeometryData, zoomCallback, clearMap, map])
 
 	const showPanelCallback = useCallback((e) => {
 		e.stopPropagation();
@@ -259,11 +269,6 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 		loadMapsApiCallback()
 	}, [loadMapsApiCallback])
 
-	useEffect(() => {
-		if (newGeometry) {
-			setCanUpload(true)
-		}
-	}, [newGeometry, setCanUpload])
 
 	return (
 		<>
