@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useCallback, useState, FunctionComponent, Dispatch, SetStateAction, } from "react"
 import { makeStyles, Theme, createStyles } from "@material-ui/core";
-
+import * as SumatraMapBounds from "./PlantationMapBounds.json"
+import * as turfHelpers from "@turf/helpers";
+import * as turfContains from "@turf/boolean-contains";
 declare global {
 	interface Window { google: any; }
 }
@@ -46,32 +48,35 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 
 	const [map, setMap] = useState<google.maps.Map>();
 	const [newGeometry, setNewGeometry] = useState(null)
+	const [mapViewBounds, setMapViewBounds] = useState<google.maps.LatLngBounds>()
+	const [mapPolygonBounds, setMapPolygonBounds] = useState<turfHelpers.Feature<turfHelpers.Polygon>>()
 	const mapRef = useRef(null)
 	const dropContainerRef = useRef(null)
 	const dropSilhoutteRef = useRef(null)
 
+	// initalise the drawable bounds for the polygon
+	const initMapPolygonBound = () => {
+		const { features: [{ geometry: { coordinates } }] } = SumatraMapBounds;
+		const boundPolygon = turfHelpers.polygon(coordinates)
+		setMapPolygonBounds(boundPolygon)
+	}
 
+	// initialise the Map
 	const initMapCallback = useCallback(() => {
-		// var SUMATRA_BOUNDS = {
-		// 	north: 5.5611863,
-		// 	south: -6.2293867,
-		// 	east: 106.6894321,
-		// 	west: 95.2936829,
-		// };
 
-		var MAP_BOUNDS = {
+		// initalise the drawable bounds for the polygon
+		initMapPolygonBound()
 
-			north: 10.157370240316464,
-			east: 111.5384325,
-			south: -10.817901109645993,
-			west: 90.4446825,
+		// the viewable bounds for the map
+		const MAP_BOUNDS = {
+			north: 14,
+			east: 130,
+			south: -14,
+			west: 70,
 		};
 
-
-
-
 		const mapEl: any = mapRef.current;
-		const map = new google.maps.Map(mapEl, {
+		const initMap = new google.maps.Map(mapEl, {
 			center: { lat: -0.0758334, lng: 101.6230565 },
 			restriction: {
 				latLngBounds: MAP_BOUNDS,
@@ -86,42 +91,31 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 			}
 		});
 
-		map.addListener('bounds_changed', function () {
-			const lalLng = map.getBounds()
-			if (lalLng) {
-				console.log(lalLng.getNorthEast().toString());
-				console.log(lalLng.getSouthWest().toString());
-			}
-		});
-		map.setZoom(1)
-		setMap(map)
+		initMap.setZoom(5)
+		setMap(initMap)
 	}, [])
 
 
-	const processPointsCallBack = useCallback((geometry, callback, thisArg) => {
-		if (geometry instanceof google.maps.LatLng) {
-			callback.call(thisArg, geometry);
-		} else if (geometry instanceof google.maps.Data.Point) {
-			callback.call(thisArg, geometry.get());
-		} else {
-			geometry.getArray().forEach(function (g:any) {
-				processPointsCallBack(g, callback, thisArg);
-			});
-		}
-	}, [])
-
-
+	// zoom into the area of the polygon
 	const zoomCallback = useCallback(() => {
-		var bounds = new google.maps.LatLngBounds();
+		const bounds = new google.maps.LatLngBounds();
 		if (map) {
 			map.data.forEach(function (feature) {
-				processPointsCallBack(feature.getGeometry(), bounds.extend, bounds);
+				feature.getGeometry().forEachLatLng(function (g) {
+					console.log(g.toUrlValue())
+					bounds.extend(g)
+				});
 			});
 			map.fitBounds(bounds);
+			const listener = google.maps.event.addListener(map, "idle", function () {
+				map.setZoom(12);
+				google.maps.event.removeListener(listener);
+			});
 		}
-	}, [processPointsCallBack, map])
+	}, [map])
 
 
+	// only a single feature/polygon is allowed to be mapped
 	const checkFeatureHasSinglePolygon = useCallback(() => {
 		let featureCount = 0;
 		if (map) {
@@ -135,6 +129,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 		}
 	}, [map])
 
+	// clear the map of any drawn polygon
 	const removeAllFeatures = useCallback(() => {
 		if (map) {
 			map.data.forEach(function (feature) {
@@ -143,22 +138,33 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 		}
 	}, [map]);
 
+
+	//load the geojson into the map and render if it passes the checks
 	const loadGeoJsonStringCallback = useCallback((geoString) => {
 		try {
-			var geojson = JSON.parse(geoString);
+			const geojson = JSON.parse(geoString);
 			if (map) {
 				removeAllFeatures();
 				map.data.addGeoJson(geojson);
 				checkFeatureHasSinglePolygon()
+				const { features: [{ geometry }] } = geojson
+
+				const userPolygon = turfHelpers.polygon(geometry.coordinates)
+				if (mapPolygonBounds) {
+					const isInBound = turfContains.default(mapPolygonBounds, userPolygon)
+
+					if (isInBound) {
+						setNewGeometry(geometry)
+					} else {
+						throw new Error("geometry is out of bounds!")
+					}
+				}
 				zoomCallback();
-				const { features: [{ geometry }] } = geojson;
-				console.log(geometry)
-				setNewGeometry(geometry)
 			}
 		} catch (e) {
 			setHasError(e)
 		}
-	}, [setHasError, checkFeatureHasSinglePolygon, removeAllFeatures, zoomCallback, map])
+	}, [setHasError, checkFeatureHasSinglePolygon, removeAllFeatures, zoomCallback, map, mapViewBounds, mapPolygonBounds])
 
 
 	const showPanelCallback = useCallback((e) => {
@@ -173,21 +179,19 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 	const hidePanel = () => {
 		const dropContainerEl: any = dropContainerRef.current;
 		dropContainerEl.style.display = 'none';
-
 	}
-
 
 	const handleDropCallback = useCallback((e) => {
 		e.preventDefault();
 		e.stopPropagation();
 		hidePanel();
 
-		var files = e.dataTransfer.files;
+		const files = e.dataTransfer.files;
 		if (files.length) {
 			// process file(s) being dropped
 			// grab the file data from each file
-			for (var i = 0, file; (file = files[i]); i++) {
-				var reader = new FileReader();
+			for (let i = 0, file; (file = files[i]); i++) {
+				const reader = new FileReader();
 				reader.onload = function (e: any) {
 					loadGeoJsonStringCallback(e.target.result);
 				};
@@ -200,7 +204,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 		else {
 			// process non-file (e.g. text or html) content being dropped
 			// grab the plain text version of the data
-			var plainText = e.dataTransfer.getData('text/plain');
+			const plainText = e.dataTransfer.getData('text/plain');
 			if (plainText) {
 				loadGeoJsonStringCallback(plainText);
 			}
@@ -225,7 +229,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setCanUpload }) => {
 
 	const getBoundsCallback = useCallback(() => {
 		if (map) {
-			var bounds = map.getBounds();
+			const bounds = map.getBounds();
 
 			console.log(bounds)
 		};
