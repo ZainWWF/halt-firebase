@@ -1,0 +1,162 @@
+{
+	"fields": [
+		{
+			"name": "userId",
+			"type": "STRING",
+			"mode": "REQUIRED"
+		},
+		{
+			"name": "auditAcceptedAt",
+			"type": "TIMESTAMP",
+			"mode": "REQUIRED"
+		},
+		{
+			"name": "name",
+			"type": "STRING",
+			"mode": "REQUIRED"
+		},
+		{
+			"name": "isActive",
+			"type": "BOOLEAN",
+			"mode": "REQUIRED"
+		},
+		{
+			"name": "createdAt",
+			"type": "TIMESTAMP",
+			"mode": "REQUIRED"
+		},
+		{
+			"name": "updatedAt",
+			"type": "TIMESTAMP",
+			"mode": "REQUIRED"
+		},
+		{
+			"name": "isRemoved",
+			"type": "BOOLEAN",
+			"mode": "REQUIRED"
+		},
+		{
+			"name": "geoLocation",
+			"type": "GEOGRAPHY",
+			"mode": "NULLABLE"
+		},
+		{
+			"name": "geometry",
+			"type": "GEOGRAPHY",
+			"mode": "NULLABLE"
+		},
+		{
+			"name": "age",
+			"type": "NUMERIC",
+			"mode": "NULLABLE"
+		},		{
+			"name": "treesPlanted",
+			"type": "NUMERIC",
+			"mode": "NULLABLE"
+		},
+		{
+			"name": "treesProductive",
+			"type": "NUMERIC",
+			"mode": "NULLABLE"
+		},
+		{
+			"name": "harvestMonthly",
+			"type": "NUMERIC",
+			"mode": "NULLABLE"
+		},
+		{
+			"name": "landClearingMethod",
+			"type": "STRING",
+			"mode": "NULLABLE"
+		},
+	
+		{
+			"name": "management",
+			"type": "RECORD",
+			"mode": "REQUIRED",
+			"fields": [
+				{
+					"name": "type",
+					"type": "STRING",
+					"mode": "REQUIRED"
+				},
+				{
+					"name": "name",
+					"type": "STRING",
+					"mode": "NULLABLE"
+				},
+				{
+					"name": "rep",
+					"type": "STRING",
+					"mode": "NULLABLE"
+				},
+				{
+					"name": "contact",
+					"type": "STRING",
+					"mode": "NULLABLE"
+				},
+				{
+					"name": "detail",
+					"type": "STRING",
+					"mode": "NULLABLE"
+				}
+			]
+		},
+		{
+			"name": "certification",
+			"type": "RECORD",
+			"mode": "REQUIRED",
+			"fields": [
+				{
+					"name": "type",
+					"type": "STRING",
+					"mode": "REQUIRED"
+				},
+				{
+					"name": "serial",
+					"type": "STRING",
+					"mode": "NULLABLE"
+				}
+			]
+		},
+		{
+			"name": "license",
+			"type": "RECORD",
+			"mode": "REQUIRED",
+			"fields": [
+				{
+					"name": "type",
+					"type": "STRING",
+					"mode": "REQUIRED"
+				},
+				{
+					"name": "area",
+					"type": "STRING",
+					"mode": "REQUIRED"
+				},
+				{
+					"name": "detail",
+					"type": "STRING",
+					"mode": "NULLABLE"
+				}
+			]
+		},
+		{
+			"name": "previousLandCover",
+			"type": "RECORD",
+			"mode": "REQUIRED",
+			"fields": [
+				{
+					"name": "type",
+					"type": "STRING",
+					"mode": "REQUIRED"
+				},
+				{
+					"name": "detail",
+					"type": "STRING",
+					"mode": "NULLABLE"
+				}
+			]
+		}
+	]
+}
