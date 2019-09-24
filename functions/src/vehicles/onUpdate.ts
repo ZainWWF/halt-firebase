@@ -5,9 +5,8 @@ import vehicleMapBuilder from "./mapBuilder";
 
 const isPropValueChanged = (restNewData, previousData): boolean => {
 	return Object.keys(restNewData).some((key) => {
-		return restNewData[key] !== previousData[key]
+		return JSON.stringify(restNewData[key]) !== JSON.stringify(previousData[key])
 	})
-
 }
 
 /** update User.vehicle map entry when the vehicle document is updated */
