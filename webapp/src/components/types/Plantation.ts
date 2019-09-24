@@ -16,28 +16,34 @@ export type PlantationDoc = {
 
 
 export type PlantationDetails = {
-	age: number
-	geometry: string
-	aveMonthlyYield: number
-	buyerAssociation: {
-		agreement: string
-		mill: string
-		plasma: string
-		type: string
-	}
-	certification: string
-	landClearingMethod: string
-	landPreviousUse: string
+	geometry?: string
+	geoLocation?: firestore.GeoPoint
 	management: {
-		name: string
-		otherDetails: string
 		type: string
-	}
-	proofOfRights: string
-	area: number
+		name: string
+		rep: string
+		contact: string
+		detail: string
+	},
+	certification: {
+		type: string
+		detail: string
+		serial: string
+	},
+	// license: {
+	// 	area: number
+	// 	type: string
+	// 	detail: string
+	// },
+	previousLandCover: {
+		type: string,
+		detail: string
+	},
+	landClearingMethod: string
+	age: number
 	treesPlanted: number
 	treesProductive: number
-
+	aveMonthlyYield: number
 }
 
 export type PlantationSummary = {

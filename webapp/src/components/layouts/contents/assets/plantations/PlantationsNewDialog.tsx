@@ -8,12 +8,11 @@ import { useTheme } from '@material-ui/core/styles';
 interface IProps {
 	setNewDialogOpen: Dispatch<SetStateAction<boolean>>
 	newDialogOpen: boolean
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
 	setPlantationFormData: Dispatch<SetStateAction<any>>
 }
 
-const FormDialog: FunctionComponent<IProps> = ({newDialogOpen, setNewDialogOpen, setPlantationFormData, setHasError, setUploadInProgress}) =>{
+const FormDialog: FunctionComponent<IProps> = ({newDialogOpen, setNewDialogOpen, setPlantationFormData, setUploadInProgress}) =>{
 	const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
@@ -24,7 +23,6 @@ const FormDialog: FunctionComponent<IProps> = ({newDialogOpen, setNewDialogOpen,
 						<PlantationsNewForm 
 							setNewDialogOpen={setNewDialogOpen} 
 							setPlantationFormData={setPlantationFormData}
-							setHasError={setHasError}
 							setUploadInProgress={setUploadInProgress}
 						/>
       </Dialog>

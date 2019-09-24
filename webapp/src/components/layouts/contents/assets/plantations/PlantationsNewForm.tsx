@@ -1,380 +1,182 @@
-import React, { useState, useEffect, useContext, useCallback, FunctionComponent, Dispatch, SetStateAction } from "react";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import { DialogContent, DialogActions } from "@material-ui/core";
-import { FirebaseContext, Firebase } from "../../../../providers/Firebase/FirebaseProvider";
+import React, { useState, FunctionComponent, Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import { Formik } from "formik";
+import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
+import plantationValidationSchema from "./plantationValidationSchema";
+import * as turfHelpers from "@turf/helpers";
+import * as turfPointInPolygon from "@turf/boolean-point-in-polygon";
 import * as firebase from 'firebase/app';
-import 'firebase/storage';
-import PlantationNameField from "./PlantationNameField";
-import PlantationManagementTypeField from "./PlantationManagementTypeField";
-import PlantationManagementNameField from "./PlantationManagementNameField";
-import PlantationManagementOtherField from "./PlantationManagementOtherField";
-import PlantationAssociationTypeField from "./PlantationAssociationTypeField";
-import PlantationAssociationPlasmaField from "./PlantationAssociationPlasmaField";
-import PlantationAssociationMillField from "./PlantationAssociationMillField";
-import PlantationAssociationAgreementField from "./PlantationAssociationAgreementField";
-import PlantationCertificationField from "./PlantationCertificationField";
-import PlantationAgeField from "./PlantationAgeField";
-import PlantationTreesPlantedField from "./PlantationTreesPlantedField";
-import PlantationTreesProductiveField from "./PlantationTreesProductiveField";
-import PlantationAveMonthlyYieldField from "./PlantationAveMonthlyYieldField";
-import PlantationProofOfRightsField from "./PlantationProofOfRightsField";
-import PlantationPreviousLandUseField from "./PlantationPreviousLandUseField";
-import PlantationClearLandMethodField from "./PlantationClearLandMethodField";
-import PlantationAreaField from "./PlantationAreaField";
-import { makeStyles } from "@material-ui/core/styles";
+import PlantationForm from "./PlantationForm";
 
 
-const useStyles = makeStyles({
-	form: {
-		margin: 50
+const initialValues = {
+	plantationName: "",
+	geoLocation: {
+		latitude: 0,
+		longitude: 0
 	},
-
-	inputLabel: {
-		cursor: "pointer",
-
+	management: {
+		type: "",
+		name: "",
+		rep: "",
+		contact: "",
+		detail: ""
 	},
-	imageLabel: {
-		margin: "20px auto",
-		fontWeight: 400,
-		fontSize: "1em",
-		color: "rgba(0, 0, 0, 0.54)"
+	certification: {
+		type: "",
+		detail: "",
+		serial: ""
 	},
-	formButton: {
-		margin: "0 10px 0 10px"
+	landClearingMethod: "",
+	previousLandCover: {
+		type: "",
+		detail: ""
 	},
-	image: {
-		objectFit: "contain" as "contain",
-		height: "auto",
-		width: "100%",
-		maxWidth: 480,
-		margin: "10px 20px"
-	}
-});
-
-
-const CreatePlantationSchema = Yup.object().shape({
-	managementType: Yup.string()
-		.required("Required"),
-	name: Yup.string().when('managementType', {
-		is: value => value === "CONCESSION_COMPANY",
-		otherwise: Yup.string().notRequired(),
-		then: Yup.string().required('Required'),
-	}),
-	other: Yup.string().when('managementType', {
-		is: value => value === "OTHER",
-		otherwise: Yup.string().notRequired(),
-		then: Yup.string().required('Required'),
-	}),
-	associationType: Yup.string()
-		.required("Required"),
-	plasma: Yup.string().when('associationType', {
-		is: value => value === "PLASMA_WITH_LEGAL_DOCUMENT" || value === "PLASMA_WITH_AGREEMENT",
-		otherwise: Yup.string().notRequired(),
-		then: Yup.string().required('Required'),
-	}),
-	mill: Yup.string().when('associationType', {
-		is: value => value === "PLASMA_WITH_LEGAL_DOCUMENT" || value === "PLASMA_WITH_AGREEMENT" || value === "THIRD_PARTY_WITH_AGREEMENT",
-		otherwise: Yup.string().notRequired(),
-		then: Yup.string().required('Required'),
-	}),
-	agreement: Yup.string().when('associationType', {
-		is: value => value === "PLASMA_WITH_AGREEMENT" || value === "THIRD_PARTY_WITH_AGREEMENT",
-		otherwise: Yup.string().notRequired(),
-		then: Yup.string().required('Required'),
-	}),
-	certificationType: Yup.string()
-		.required("Required"),
-	age: Yup.number()
-		.integer("Invalid Value")
-		.moreThan(0)
-		.required("Required"),
-	plantationAge: Yup.number()
-		.integer("Invalid Value")
-		.moreThan(0)
-		.integer("Required"),
-	treesPlanted: Yup.number()
-		.integer("Invalid Value")
-		.moreThan(0)
-		.required("Required"),
-	treesProductive: Yup.number()
-		.integer("Invalid Value")
-		.moreThan(0)
-		.required("Required"),
-	aveMonthlyYield: Yup.number()
-		.moreThan(0)
-		.required("Required"),
-	proofOfRights: Yup.string()
-		.required("Required"),
-	landPreviousUse: Yup.string()
-		.required("Required"),
-	landClearingMethod: Yup.string()
-		.required("Required"),
-	plantationName: Yup.string()
-		.required("Required")
-});
-
+	license: {
+		area: 0,
+		type: "",
+		detail: ""
+	},
+	age: 0,
+	treesPlanted: 0,
+	treesProductive: 0,
+	aveMonthlyYield: 0,
+}
 
 interface IProps {
 	setNewDialogOpen: Dispatch<SetStateAction<boolean>>
 	setPlantationFormData: Dispatch<SetStateAction<any>>
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
 }
 
-const  DialogForm:FunctionComponent<IProps> =  ({  setNewDialogOpen, setPlantationFormData, setHasError, setUploadInProgress }) =>{
+const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setPlantationFormData, setUploadInProgress }) => {
 
-	const classes = useStyles();
+	const [mapPolygonBounds, setMapPolygonBounds] = useState<turfHelpers.Feature<turfHelpers.Polygon>>()
+	const [enteredValues, setEnteredValues] = useState(initialValues);
+	
 
-	const [nameDisabled, setNameDisabled] = useState(true);
-	const [otherDisabled, setOtherDisabled] = useState(true);
-	const [plasmaDisabled, setPlasmaDisabled] = useState(true);
-	const [millDisabled, setMillDisabled] = useState(true);
-	const [agreementDisabled, setAgreementDisabled] = useState(true);
-
-	const [imageFile, setImageFile] = useState();
-	const [image, setImage] = useState();
-	const firebaseApp = useContext(FirebaseContext) as Firebase;
-	const storageRef = firebaseApp.storage.ref();
-
-	const imageReader = new FileReader();
-	imageReader.onload = () => {
-		setImage(imageReader.result)
+	const dialogOnCancel = () => {
+		setNewDialogOpen(false)
 	}
 
-
-	const uploadPlantationImageCallback = useCallback(() => {
-
-		if (imageFile.downloadURL) return;
-
-		const uploadTask = storageRef.child(`images/${imageFile.name}_${Date.now()}`).putString(image, 'data_url');
-
-		// Listen for state changes, errors, and completion of the upload.
-		uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
-			function (snapshot) {
-				// Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-				var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-				console.log('Upload is ' + progress + '% done');
-				switch (snapshot.state) {
-					case firebase.storage.TaskState.PAUSED: // or 'paused'
-						console.log('Upload is paused');
-						break;
-					case firebase.storage.TaskState.RUNNING: // or 'running'
-						console.log('Upload is running');
-						break;
-				}
-			}, function (error) {
-				setHasError(error)
-			}, function () {
-				// Upload completed successfully, now we can get the download URL
-				uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
-					setImageFile({ ...imageFile, downloadURL })
-				});
-			});
+	// initalise the drawable bounds for the polygon
+	const initMapPolygonBound = () => {
+		const { features: [{ geometry: { coordinates } }] } = SumatraMapBounds;
+		const boundPolygon = turfHelpers.polygon(coordinates)
+		setMapPolygonBounds(boundPolygon)
 	}
 
-		, [storageRef, image, imageFile, setHasError])
-
+	const initMapCallback = useCallback(() => {
+		// initalise the drawable bounds for the polygon
+		initMapPolygonBound()
+	}, [])
 
 	useEffect(() => {
-		if (image) {
-			uploadPlantationImageCallback()
-		}
-	}, [image, uploadPlantationImageCallback])
+		initMapCallback()
+	}, [initMapCallback])
+
 
 	return (
 		<Formik
-			initialValues={{
-				managementType: "",
-				name: "",
-				other: "",
-				associationType: "",
-				plasma: "", mill: "",
-				agreement: "",
-				certificationType: "",
-				age: "",
-				plantationAge: "",
-				treesPlanted: "",
-				treesProductive: "",
-				aveMonthlyYield: "",
-				proofOfRights: "",
-				landPreviousUse: "",
-				landClearingMethod: "",
-				plantationName: ""
-			}}
+			initialValues={initialValues}
 			validate={values => {
-				values.managementType === "PRIVATE" ?
-					setNameDisabled(true) :
-					setNameDisabled(false)
-
-				values.managementType === "OTHER" ?
-					setOtherDisabled(false) :
-					setOtherDisabled(true)
-
-				values.associationType === "PLASMA_WITH_LEGAL_DOCUMENT" ||
-					values.associationType === "PLASMA_WITH_AGREEMENT" ?
-					setPlasmaDisabled(false) :
-					setPlasmaDisabled(true)
-
-				values.associationType === "PLASMA_WITH_LEGAL_DOCUMENT" ||
-					values.associationType === "PLASMA_WITH_AGREEMENT" ||
-					values.associationType === "THIRD_PARTY_WITH_AGREEMENT" ?
-					setMillDisabled(false) :
-					setMillDisabled(true)
-
-				values.associationType === "PLASMA_WITH_AGREEMENT" ||
-					values.associationType === "THIRD_PARTY_WITH_AGREEMENT" ?
-					setAgreementDisabled(false) :
-					setAgreementDisabled(true)
-
-				if (nameDisabled) {
-					values.name = ""
+				setEnteredValues(values)
+				if (values.management.type === "Pribadi") {
+					values.management.name = ""
+					values.management.rep = ""
+					values.management.contact = ""
+					values.management.detail = ""
 				}
 
-				if (otherDisabled) {
-					values.other = ""
+				if (values.management.type !== "Lainnya") {
+					values.management.detail = ""
 				}
 
-				if (plasmaDisabled) {
-					values.plasma = ""
+				if (values.certification.type !== "Lainnya") {
+					values.certification.detail = ""
 				}
 
-				if (millDisabled) {
-					values.mill = ""
+				if (values.license.area <= 25) {
+					values.license.type = ""
+					values.license.detail = ""
 				}
 
-				if (agreementDisabled) {
-					values.agreement = ""
+				if (values.license.type !== "Lainnya") {
+					values.license.detail = ""
 				}
 
+				if (values.previousLandCover.type !== "Lainnya") {
+					values.previousLandCover.detail = ""
+				}
+
+				let geoLocation = turfHelpers.point([values.geoLocation.longitude, values.geoLocation.latitude])
+				if (mapPolygonBounds && !turfPointInPolygon.default(geoLocation, mapPolygonBounds)) {
+					return {
+						geoLocation: {
+							latitude: "not within bounds!",
+							longitude: "not within bounds!"
+						}
+					}
+				}
+
+				return {}
 			}}
-			validationSchema={CreatePlantationSchema}
+			validationSchema={plantationValidationSchema}
 			onSubmit={(values) => {
 				setUploadInProgress(true)
 				setPlantationFormData({
 					name: values.plantationName,
-					unAudited : {
+					unAudited: {
+						geoLocation: new firebase.firestore.GeoPoint(
+							values.geoLocation.latitude,
+							values.geoLocation.longitude
+						),
 						management: {
-							type: values.managementType,
-							name: values.name.length > 0 ? values.name : 'N/A',
-							otherDetails: values.other.length > 0 ? values.other : 'N/A',
+							type: values.management.type,
+							name: values.management.name.length > 0 ? values.management.name : 'N/A',
+							rep: values.management.rep.length > 0 ? values.management.rep : 'N/A',
+							contact: values.management.contact.length > 0 ? values.management.contact : 'N/A',
+							detail: values.management.detail.length > 0 ? values.management.detail : 'N/A'
 						},
-						buyerAssociation: {
-							type: values.associationType,
-							plasma: values.plasma.length > 0 ? values.plasma : 'N/A',
-							mill: values.mill.length > 0 ? values.mill : 'N/A',
-							agreement: values.agreement.length > 0 ? values.agreement : 'N/A'
+						certification: {
+							type: values.certification.type,
+							detail: values.certification.detail.length > 0 ? values.certification.detail : 'N/A',
+							serial: values.certification.serial.length > 0 ? values.certification.serial : 'N/A'
 						},
-						certification: values.certificationType,
-						area: values.age,
-						age: values.plantationAge,
-						treesPlanted: values.treesPlanted,
-						treesProductive: values.treesProductive,
-						aveMonthlyYield: values.aveMonthlyYield,
-						proofOfRights: values.proofOfRights,
-						landPreviousUse: values.landPreviousUse,
-						landClearingMethod: values.landClearingMethod
-					},
+						license: {
+							area: Number(values.license.area),
+							type: values.license.type.length > 0 ? values.license.type : 'N/A',
+							detail: values.license.detail.length > 0 ? values.license.detail : 'N/A'
+						},
+						previousLandCover: {
+							type: values.previousLandCover.type,
+							detail: values.previousLandCover.detail.length > 0 ? values.previousLandCover.detail : 'N/A'
+						},
+						landClearingMethod: values.landClearingMethod,
+						age: Number(values.age),
+						treesPlanted: Number(values.treesPlanted),
+						treesProductive: Number(values.treesProductive),
+						aveMonthlyYield: Number(values.aveMonthlyYield)
+					}
 				})
 				setNewDialogOpen(false)
 
 			}}
 		>
-			{(isValid) => (
-				<Form>
-					<DialogContent>
-						<Field
-							name="plantationName" component={PlantationNameField} />
-						<Typography color="textSecondary" variant="caption" >
-							Management
-            </Typography>
-						<Field
-							name="managementType" component={PlantationManagementTypeField} />
-						<Field
-							disabled={nameDisabled}
-							name="name"
-							component={PlantationManagementNameField}
-						/>
-						<Field
-							disabled={otherDisabled}
-							name="other"
-							component={PlantationManagementOtherField}
-						/>
+			{({ isValid, errors, touched }) => {
 
-						<Typography color="textSecondary" variant="caption">
-							Association
-            </Typography>
-						<Field
-							name="associationType" component={PlantationAssociationTypeField} />
-						<Field
-							disabled={plasmaDisabled}
-							name="plasma"
-							component={PlantationAssociationPlasmaField}
-						/>
-						<Field
-							disabled={millDisabled}
-							name="mill"
-							component={PlantationAssociationMillField}
-						/>
-						<Field
-							disabled={agreementDisabled}
-							name="agreement"
-							component={PlantationAssociationAgreementField}
-						/>
-
-						<Typography color="textSecondary" variant="caption">
-							Certification
-            </Typography>
-						<Field
-							name="certificationType" component={PlantationCertificationField} />
-
-
-						<Typography color="textSecondary" variant="caption">
-							Plantation
-              </Typography>
-						<Field
-							name="age" component={PlantationAreaField} />
-						<Field
-							name="plantationAge" component={PlantationAgeField} />
-						<Field
-							name="treesPlanted" component={PlantationTreesPlantedField} />
-						<Field
-							name="treesProductive" component={PlantationTreesProductiveField} />
-						<Field
-							name="aveMonthlyYield" component={PlantationAveMonthlyYieldField} />
-						<Field
-							name="proofOfRights" component={PlantationProofOfRightsField} />
-						<Field
-							name="landPreviousUse" component={PlantationPreviousLandUseField} />
-						<Field
-							name="landClearingMethod" component={PlantationClearLandMethodField} />
-
-					</DialogContent>
-					<DialogActions>
-						<Button variant="contained"
-							data-testid="plantation-button-cancel"
-							color="primary"
-							className={classes.formButton}
-							onClick={() => setNewDialogOpen(false)}
-						>
-							Cancel
-            </Button>
-						<Button variant="contained"
-							data-testid="plantation-button-submit"
-							type="submit"
-							color="primary"
-							className={classes.formButton}
-							disabled={!isValid}
-						>
-							Submit
-            </Button>
-					</DialogActions>
-				</Form>
-			)}
+				return (
+					< PlantationForm
+						errors={errors}
+						touched={touched}
+						isValid={isValid}
+						enteredValues={enteredValues}
+						dialogOnCancel={dialogOnCancel} />
+				)
+			}}
 		</Formik>
 	);
 }
 
 export default DialogForm;
+
+

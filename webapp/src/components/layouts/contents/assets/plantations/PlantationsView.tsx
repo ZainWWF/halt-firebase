@@ -234,7 +234,6 @@ const View: FunctionComponent = () => {
 				newDialogOpen={newDialogOpen}
 				setNewDialogOpen={setNewDialogOpen}
 				setPlantationFormData={setPlantationFormData}
-				setHasError={setHasError}
 				setUploadInProgress={setUploadInProgress}
 			/>
 			<PlantationsEditDialog

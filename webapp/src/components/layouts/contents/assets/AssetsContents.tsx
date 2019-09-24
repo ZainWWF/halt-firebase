@@ -4,6 +4,7 @@ import VehiclesView from './vehicles/VehiclesView';
 import PlantationsView from './plantations/PlantationsView';
 
 const VehiclesContents = memo(() => {
+
 	return (
 		<Switch>
 			<Route

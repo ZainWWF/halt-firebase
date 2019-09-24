@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState, FunctionComponent, Dispatch, SetStateAction, } from "react"
 import { makeStyles, Theme, createStyles } from "@material-ui/core";
-import * as SumatraMapBounds from "./PlantationMapBounds.json"
+import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
 import * as turfHelpers from "@turf/helpers";
 import * as turfContains from "@turf/boolean-contains";
 declare global {
@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
 interface IProps {
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	setNewGeometry: Dispatch<SetStateAction<turfHelpers.Geometry | undefined>>
-	updatedGeometryData: string 
+	updatedGeometryData: string  | undefined
 }
 const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedGeometryData }) => {
 	const classes = useStyles();
