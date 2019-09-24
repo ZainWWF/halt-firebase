@@ -22,13 +22,13 @@ const FormDialog: FunctionComponent<IProps> = ({ editDialogOpen, setEditDialogOp
 
 	return (
 		<div>
-			<Dialog fullScreen={fullScreen} open={editDialogOpen} onClose={() => setEditDialogOpen(false)} aria-labelledby="form-dialog-edit">
+			<Dialog  fullScreen={fullScreen} open={editDialogOpen} onClose={() => setEditDialogOpen(false)} aria-labelledby="form-dialog-edit">
 				<DialogTitle id="form-dialog-title">Edit Vehicle</DialogTitle>
 				<VehiclesEditForm
 					setEditDialogOpen={setEditDialogOpen}
 					setViewModalOpen={setViewModalOpen}
-					vehicleMoreDetail={vehicleMoreDetail}
 					setVehicleEditData={setVehicleEditData}
+					vehicleMoreDetail={vehicleMoreDetail}
 					setHasError={setHasError}
 					setUploadInProgress={setUploadInProgress}
 				/>

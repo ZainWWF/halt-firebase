@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, Dispatch, SetStateAction, FunctionComponent } from 'react';
+import React, { memo, useCallback, useEffect, Dispatch, SetStateAction, FunctionComponent } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -12,8 +12,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { VehicleSummary, VehicleDoc } from '../../../../types/Vehicle';
-
-
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -49,19 +47,17 @@ const useStyles = makeStyles((theme: Theme) =>
 	}),
 );
 
-
 interface IProps {
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
 	vehicleMoreDetail: VehicleDoc
 	setVehicleMoreDetail: Dispatch<SetStateAction<VehicleDoc>>
 	vehicleModalDetail: VehicleSummary
 	removeVehicleCallback: (path: string) => void
-	editVehicleCallback: (path: string) => void
+	editVehicleCallback: () => void
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
-
 }
 
-const DetailCard: FunctionComponent<IProps> = ({ vehicleModalDetail, vehicleMoreDetail, setVehicleMoreDetail, removeVehicleCallback, editVehicleCallback, setViewModalOpen, setHasError }) => {
+const DetailCard: FunctionComponent<IProps> = memo(({ vehicleModalDetail, vehicleMoreDetail, setVehicleMoreDetail, removeVehicleCallback, editVehicleCallback, setViewModalOpen, setHasError }) => {
 	const classes = useStyles();
 
 	const detailVehicleCallback = useCallback(() => {
@@ -80,7 +76,15 @@ const DetailCard: FunctionComponent<IProps> = ({ vehicleModalDetail, vehicleMore
 	}, [detailVehicleCallback])
 
 
-	return (
+	const editVehicleOnClick = () => {
+		editVehicleCallback()
+	}
+
+	const removeVehicleOnClick = () => {
+		removeVehicleCallback(vehicleModalDetail.ref.path)
+	}
+
+	return ( vehicleMoreDetail &&
 		<Card className={classes.card}>
 			<CardHeader
 				action={
@@ -88,33 +92,32 @@ const DetailCard: FunctionComponent<IProps> = ({ vehicleModalDetail, vehicleMore
 						<CloseIcon />
 					</IconButton>
 				}
-				title={`${vehicleModalDetail.make} ${vehicleModalDetail.model}`}
-				subheader={vehicleModalDetail.license}
+				title={`${vehicleMoreDetail.make.type !=="Lainnya" ? vehicleMoreDetail.make.type : vehicleMoreDetail.make.detail} ${vehicleMoreDetail.model}`}
+				subheader={vehicleMoreDetail.license}
 			/>
 			<CardMedia
 				className={classes.media}
-				image={vehicleModalDetail.url}
+				image={vehicleMoreDetail.url}
 				title="Vehicle"
 			/>
-			{vehicleMoreDetail ?
+
 				<CardContent>
 					<Typography variant="body2" color="textSecondary" component="p">
-						chassis: {vehicleMoreDetail.chassis}<br />
-						colour: {vehicleMoreDetail.colour}<br />
-						loading capacity: {vehicleMoreDetail.loadingCapacity}<br />
+						colour: {vehicleMoreDetail && vehicleMoreDetail.colour}<br />
+						loading capacity: {vehicleMoreDetail && vehicleMoreDetail.loadingCapacity}<br />
 					</Typography>
 				</CardContent>
-				: null}
+			
 			<CardActions disableSpacing>
-				<IconButton aria-label="edit" onClick={() => editVehicleCallback(vehicleModalDetail.ref.path)}>
+				<IconButton aria-label="edit" onClick={editVehicleOnClick}>
 					<EditIcon />
 				</IconButton>
-				<IconButton aria-label="delete" onClick={() => removeVehicleCallback(vehicleModalDetail.ref.path)} className={classes.delete}>
+				<IconButton aria-label="delete" onClick={removeVehicleOnClick} className={classes.delete}>
 					<DeleteIcon />
 				</IconButton>
 			</CardActions>
 		</Card>
 	);
-}
+})
 
 export default DetailCard;

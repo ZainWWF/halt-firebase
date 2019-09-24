@@ -1,4 +1,4 @@
-import React, { FunctionComponent, SetStateAction, Dispatch } from "react";
+import React, { memo,FunctionComponent, SetStateAction, Dispatch } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import VehicleDetailCard from "./VehicleDetailCard";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
@@ -14,13 +14,13 @@ interface IProps {
 	setVehicleMoreDetail: Dispatch<SetStateAction<VehicleDoc>>
 	vehicleModalDetail: VehicleSummary
 	removeVehicleCallback: (path: string) => void
-	editVehicleCallback: (path: string) => void
+	editVehicleCallback: () => void
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 
 
 }
 
-const ModalView: FunctionComponent<IProps> = ({ viewModalOpen, setViewModalOpen, vehicleMoreDetail, setVehicleMoreDetail, vehicleModalDetail, editVehicleCallback, removeVehicleCallback, setHasError }) => {
+const ModalView: FunctionComponent<IProps> = memo(({ viewModalOpen, setViewModalOpen, vehicleMoreDetail, setVehicleMoreDetail, vehicleModalDetail, editVehicleCallback, removeVehicleCallback, setHasError }) => {
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
@@ -38,6 +38,6 @@ const ModalView: FunctionComponent<IProps> = ({ viewModalOpen, setViewModalOpen,
 			</Dialog>
 		</div>
 	);
-}
+})
 
 export default ModalView
