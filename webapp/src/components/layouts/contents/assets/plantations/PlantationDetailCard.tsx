@@ -68,11 +68,11 @@ interface IProps {
 const DetailCard: FunctionComponent<IProps> = ({ plantationSummary, plantationDetails, removePlantationCallback, editPlantationCallback, setViewModalOpen, setMapModalOpen, setRepsModalOpen }) => {
 	const classes = useStyles();
 
-	const editPlantationOnClick = ()=>{
+	const editPlantationOnClick = () => {
 		editPlantationCallback(plantationSummary!.ref.path)
 	}
 
-	const removePlantationOnClick = ()=>{
+	const removePlantationOnClick = () => {
 		removePlantationCallback(plantationSummary!.ref.path)
 	}
 
@@ -137,8 +137,16 @@ const DetailCard: FunctionComponent<IProps> = ({ plantationSummary, plantationDe
 						type: {plantationDetails.license.type}<br />
 						detail: {plantationDetails.license.detail}<br />
 					</Typography> */}
+					<Typography variant="body2" color="textPrimary" component="p">
+						Land Clearing Method
+					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						land clearing method: {plantationDetails.landClearingMethod}<br />
+						detail: {plantationDetails.landClearingMethod}<br />
+					</Typography>
+					<Typography variant="body2" color="textPrimary" component="p">
+						Yield
+					</Typography>
+					<Typography variant="body2" color="textSecondary" component="p">
 						age: {plantationDetails.age}<br />
 						planted: {plantationDetails.treesPlanted}<br />
 						productive: {plantationDetails.treesProductive}<br />
