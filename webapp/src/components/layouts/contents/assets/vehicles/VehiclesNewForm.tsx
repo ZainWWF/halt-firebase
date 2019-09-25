@@ -10,7 +10,7 @@ import vehicleValidationSchema from "./vehicleValidationSchema";
 const initialValues = {
 	colour: "",
 	license: "",
-	loadingCapacity: "",
+	loadingCapacity: 0,
 	model: "",
 	make: {
 		type: "",
@@ -118,7 +118,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 				setVehicleFormData({
 					colour,
 					license,
-					loadingCapacity,
+					loadingCapacity : Number(loadingCapacity),
 					model,
 					make : {
 						type,
