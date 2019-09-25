@@ -88,7 +88,7 @@ const VehicleForm: FunctionComponent<IProps> = memo(({ image, isImage, enteredVa
 					as={SingleField}
 					error={errors.loadingCapacity}
 					touched={touched.loadingCapacity}
-					type="text"
+					type="number"
 					label="loadingCapacity" />
 
 				<label className={classes.inputLabel}>
