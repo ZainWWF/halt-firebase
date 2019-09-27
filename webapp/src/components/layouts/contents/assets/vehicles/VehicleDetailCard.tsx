@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, Dispatch, SetStateAction, FunctionComponent } from 'react';
+import React, { memo, FunctionComponent, useContext } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -11,7 +11,7 @@ import { red } from '@material-ui/core/colors';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { VehicleSummary, VehicleDoc } from '../../../../types/Vehicle';
+import { AssetContext } from '../AssetsContents';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -47,67 +47,52 @@ const useStyles = makeStyles((theme: Theme) =>
 	}),
 );
 
-interface IProps {
-	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	vehicleMoreDetail: VehicleDoc
-	setVehicleMoreDetail: Dispatch<SetStateAction<VehicleDoc>>
-	vehicleModalDetail: VehicleSummary
-	removeVehicleCallback: (path: string) => void
-	editVehicleCallback: () => void
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-}
 
-const DetailCard: FunctionComponent<IProps> = memo(({ vehicleModalDetail, vehicleMoreDetail, setVehicleMoreDetail, removeVehicleCallback, editVehicleCallback, setViewModalOpen, setHasError }) => {
+const DetailCard: FunctionComponent = memo(() => {
 	const classes = useStyles();
 
-	const detailVehicleCallback = useCallback(() => {
-		vehicleModalDetail.ref.get().then((doc) => {
-			const result = doc.data() as VehicleDoc
-			if (result) {
-				setVehicleMoreDetail(result)
-			}
-		}).catch((error) => {
-			setHasError(error)
-		})
-	}, [vehicleModalDetail, setVehicleMoreDetail, setHasError])
+	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
+	const { selectedVehicleSummaryState } = stateAssetContext
+	const closeVehicleDetailOnClick = () => dispatchAssetContext({ 
+		viewDetail: false ,
+		removedVehicleId:"",
+		selectedVehicleSummary:{}
+	})
 
-	useEffect(() => {
-		detailVehicleCallback();
-	}, [detailVehicleCallback])
-
-
-	const editVehicleOnClick = () => {
-		editVehicleCallback()
-	}
+	const editVehicleOnClick = () => dispatchAssetContext({ editDialog: true, viewDetail: false })
 
 	const removeVehicleOnClick = () => {
-		removeVehicleCallback(vehicleModalDetail.ref.path)
+		const [, vehicleId] = selectedVehicleSummaryState.ref.path.split("/")
+		dispatchAssetContext({ 
+			removedVehicleId: vehicleId,
+			viewDetail: false 
+		 })
 	}
 
-	return ( vehicleMoreDetail &&
+	return (selectedVehicleSummaryState &&
 		<Card className={classes.card}>
 			<CardHeader
 				action={
-					<IconButton aria-label="settings" onClick={() => setViewModalOpen(false)}>
+					<IconButton aria-label="settings" onClick={closeVehicleDetailOnClick}>
 						<CloseIcon />
 					</IconButton>
 				}
-				title={`${vehicleMoreDetail.make.type !=="Lainnya" ? vehicleMoreDetail.make.type : vehicleMoreDetail.make.detail} ${vehicleMoreDetail.model}`}
-				subheader={vehicleMoreDetail.license}
+				title={`${selectedVehicleSummaryState.make.type !== "Lainnya" ? selectedVehicleSummaryState.make.type : selectedVehicleSummaryState.make.detail} ${selectedVehicleSummaryState.model}`}
+				subheader={selectedVehicleSummaryState.license}
 			/>
 			<CardMedia
 				className={classes.media}
-				image={vehicleMoreDetail.url}
+				image={selectedVehicleSummaryState.url}
 				title="Vehicle"
 			/>
 
-				<CardContent>
-					<Typography variant="body2" color="textSecondary" component="p">
-						colour: {vehicleMoreDetail && vehicleMoreDetail.colour}<br />
-						loading capacity: {vehicleMoreDetail && vehicleMoreDetail.loadingCapacity}<br />
-					</Typography>
-				</CardContent>
-			
+			<CardContent>
+				<Typography variant="body2" color="textSecondary" component="p">
+					colour: {selectedVehicleSummaryState && selectedVehicleSummaryState.colour}<br />
+					loading capacity: {selectedVehicleSummaryState && selectedVehicleSummaryState.loadingCapacity}<br />
+				</Typography>
+			</CardContent>
+
 			<CardActions disableSpacing>
 				<IconButton aria-label="edit" onClick={editVehicleOnClick}>
 					<EditIcon />

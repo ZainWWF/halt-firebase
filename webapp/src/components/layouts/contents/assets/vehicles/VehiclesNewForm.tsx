@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useContext, useCallback, FunctionComponent, SetStateAction, Dispatch } from "react";
+import React, { useState, useEffect, useContext, useCallback, FunctionComponent } from "react";
 import { Formik } from "formik";
 import { FirebaseContext, Firebase } from "../../../../providers/Firebase/FirebaseProvider";
 import * as firebase from 'firebase/app';
 import 'firebase/storage';
 import VehicleForm from "./VehicleForm";
 import vehicleValidationSchema from "./vehicleValidationSchema";
-
+import { VehicleDoc } from "../../../../types/Vehicle";
+import { AssetContext } from "../AssetsContents";
+import { AuthContext } from "../../../../containers/Main";
+import { Grid, CircularProgress } from "@material-ui/core";
 
 const initialValues = {
 	colour: "",
@@ -18,22 +21,15 @@ const initialValues = {
 	}
 };
 
-
-
-interface IProps {
-	setNewDialogOpen: Dispatch<SetStateAction<boolean>>
-	setVehicleFormData: Dispatch<SetStateAction<any>>
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-	setUploadInProgress: Dispatch<SetStateAction<boolean>>
-
-}
-
-const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFormData, setHasError, setUploadInProgress }) => {
+const DialogForm: FunctionComponent = () => {
 
 	const [imageFile, setImageFile] = useState();
 	const [image, setImage] = useState();
 	const [enteredValues, setEnteredValues] = useState(initialValues);
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
+	const user = useContext(AuthContext) as firebase.User;
+	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
+	const { uploadInProgressState } = stateAssetContext;
 	const storageRef = firebaseApp.storage.ref();
 
 	const imageReader = new FileReader();
@@ -42,9 +38,24 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 	}
 
 	const dialogOnCancel = () => {
-		setNewDialogOpen(false)
+		dispatchAssetContext({ newDialog: false })
 	}
 
+	const newVehicleUpload = (vehicleDoc: VehicleDoc) => {
+		dispatchAssetContext({ uploadInProgress: true })
+		firebaseApp.db.collection('vehicles')
+			.add({ ...vehicleDoc, userId: user.uid })
+			.then(() => {
+				console.log("upload success")
+				dispatchAssetContext({
+					uploadInProgress: false,
+					newDialog: false
+				})
+			}).catch((error) => {
+				console.log(error)
+				// setHasError(error)
+			})
+	}
 
 	const changeInputFile = (files: FileList) => {
 		setImageFile(files[0])
@@ -56,7 +67,6 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 	const uploadVehicleImageCallback = useCallback(() => {
 
 		if (imageFile.downloadURL) return;
-
 		const uploadTask = storageRef.child(`images/${imageFile.name}_${Date.now()}`).putString(image, 'data_url');
 
 		// Listen for state changes, errors, and completion of the upload.
@@ -74,16 +84,14 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 						break;
 				}
 			}, function (error) {
-				setHasError(error)
+				// setHasError(error)
 			}, function () {
 				// Upload completed successfully, now we can get the download URL
 				uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
 					setImageFile({ ...imageFile, downloadURL })
 				});
 			});
-	}
-
-		, [storageRef, image, imageFile, setHasError])
+	}, [storageRef, image, imageFile])
 
 
 	useEffect(() => {
@@ -92,7 +100,16 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 		}
 	}, [image, uploadVehicleImageCallback])
 
-	return (
+	return (uploadInProgressState ?
+		<Grid
+			container
+			justify="center"
+			alignItems="center"
+			style={{ height: 100, width: 140, margin: "auto", paddingBottom: 20 }}
+		>
+			<CircularProgress />
+		</Grid>
+		:
 		<Formik
 			initialValues={initialValues}
 			validate={values => {
@@ -103,36 +120,30 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 			}}
 			validationSchema={vehicleValidationSchema}
 			onSubmit={(values) => {
-				setUploadInProgress(true)
 				const {
 					colour,
 					license,
 					loadingCapacity,
 					model,
-					make : {
+					make: {
 						type,
 						detail
 					},
 				} = values;
-
-				setVehicleFormData({
+				newVehicleUpload({
 					colour,
 					license,
-					loadingCapacity : Number(loadingCapacity),
+					loadingCapacity: Number(loadingCapacity),
 					model,
-					make : {
+					make: {
 						type,
-						detail: detail.length > 0 ? detail : 'N/A',
+						detail,
 					},
 					url: imageFile.downloadURL
 				})
-				setNewDialogOpen(false)
-
 			}}
 		>
-
 			{({ isValid, errors, touched }) => {
-
 				return (
 					< VehicleForm
 						errors={errors}
@@ -150,5 +161,4 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setVehicleFor
 		</Formik>
 	);
 }
-
 export default DialogForm;

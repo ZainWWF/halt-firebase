@@ -6,29 +6,82 @@ import 'firebase/storage';
 import VehicleForm from "./VehicleForm";
 import vehicleValidationSchema from "./vehicleValidationSchema";
 import { VehicleDoc } from "../../../../types/Vehicle";
+import { AssetContext } from "../AssetsContents";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { Grid } from "@material-ui/core";
+
+// const useStyles = makeStyles((theme: Theme) =>
+// 	createStyles({
+// 		progress: {
+// 			margin: theme.spacing(2),
+// 			display: "block",
+// 			marginLeft: "auto",
+// 			marginRight: "auto",
+// 		},
+// 		progressContainer : {
+// 			width : 120,
+// 			height: 120
+// 		}
+// 	}),
+// );
+
 
 
 interface IProps {
 	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
 	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	setVehicleEditData: Dispatch<SetStateAction<any>>
+	setVehicleEditData: (vehicle: VehicleDoc) => void
 	setHasError: Dispatch<SetStateAction<Error | undefined>>
 	setUploadInProgress: Dispatch<SetStateAction<boolean>>
-	vehicleMoreDetail: VehicleDoc
+	selectedVehicleDetail: VehicleDoc
 }
 
-const DialogForm: FunctionComponent<IProps> = ({ vehicleMoreDetail, setViewModalOpen, setEditDialogOpen, setVehicleEditData, setHasError, setUploadInProgress }) => {
-
-	const [updatedImageFile, setUpdatedImageFile] = useState();
-	const [imageFile, setImageFile] = useState<{ name: string | null, downloadURL: string | null }>({
-		name: null,
-		downloadURL: vehicleMoreDetail.url
-	});
-	const [image, setImage] = useState(vehicleMoreDetail.url);
-	const [enteredValues, setEnteredValues] = useState(vehicleMoreDetail);
-
+const DialogForm: FunctionComponent = () => {
+	// const classes = useStyles();
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const storageRef = firebaseApp.storage.ref();
+	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
+	const { selectedVehicleSummaryState, selectedVehicleDetailState } = stateAssetContext
+	const [selectedVehicleDetail, setSelectedVehicleDetail] = useState();
+	const [imageFile, setImageFile] = useState()
+	const [image, setImage] = useState();
+	const [updatedImageFile, setUpdatedImageFile] = useState();
+
+
+
+	useEffect(() => {
+		selectedVehicleSummaryState.ref.get().then((doc: firebase.firestore.DocumentData) => {
+			const result = doc.data() as VehicleDoc
+			if (result) {
+
+				setSelectedVehicleDetail(result)
+				setImageFile({
+					name: null,
+					downloadURL: result.url
+				});
+				setImage(result.url)
+
+			}
+		}).catch((error: Error) => {
+			// setHasError(error)
+		})
+	}, [selectedVehicleSummaryState])
+
+	const editedVehicleUpload = (vehicleDoc: VehicleDoc) => {
+		dispatchAssetContext({ uploadInProgress: true })
+		selectedVehicleSummaryState.ref.update(vehicleDoc)
+			.then(() => {
+				console.log("upload success")
+				dispatchAssetContext({
+					uploadInProgress: false,
+					editDialog: false
+				})
+			}).catch((error: Error) => {
+				console.log(error)
+				// setHasError(error)
+			})
+	}
 
 	const imageReader = new FileReader();
 	imageReader.onload = () => {
@@ -37,18 +90,15 @@ const DialogForm: FunctionComponent<IProps> = ({ vehicleMoreDetail, setViewModal
 			setImageFile({ ...imageFile, downloadURL: null })
 		}
 	}
-	
-	const dialogOnCancel = () => {
-		setEditDialogOpen(false);
-		setViewModalOpen(true)
-	}
 
+	const dialogOnCancel = () => {
+		dispatchAssetContext({ editDialog: false })
+	}
 
 	const changeInputFile = (files: FileList) => {
 		if (files[0]) {
 			imageReader.readAsDataURL(files[0]);
 			setUpdatedImageFile(files[0])
-
 		}
 	}
 
@@ -73,16 +123,14 @@ const DialogForm: FunctionComponent<IProps> = ({ vehicleMoreDetail, setViewModal
 						break;
 				}
 			}, function (error) {
-				setHasError(error)
+				// setHasError(error)
 			}, function () {
 				// Upload completed successfully, now we can get the download URL
 				uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
 					setImageFile({ ...imageFile, downloadURL })
 				});
 			});
-	}
-
-		, [storageRef, image, imageFile, updatedImageFile, setHasError])
+	}, [storageRef, image, imageFile, updatedImageFile])
 
 
 	useEffect(() => {
@@ -91,62 +139,44 @@ const DialogForm: FunctionComponent<IProps> = ({ vehicleMoreDetail, setViewModal
 		}
 	}, [image, uploadVehicleImageCallback])
 
-	return (
+	return (!selectedVehicleDetail ?
+		 <Grid
+			container
+			justify="center"
+			alignItems="center"
+			style={{ height: 100, width : 140, margin: "auto", paddingBottom: 20 }}
+		>
+			<CircularProgress />
+		</Grid>
+		:
 		<Formik
-		initialValues={{
-				colour: vehicleMoreDetail.colour,
-				license: vehicleMoreDetail.license,
-				loadingCapacity: vehicleMoreDetail.loadingCapacity,
-				model: vehicleMoreDetail.model,
-				make: vehicleMoreDetail.make,
-				url: vehicleMoreDetail.url,
+			initialValues={{
+				colour: selectedVehicleDetail.colour,
+				license: selectedVehicleDetail.license,
+				loadingCapacity: selectedVehicleDetail.loadingCapacity,
+				model: selectedVehicleDetail.model,
+				make: selectedVehicleDetail.make,
+				url: selectedVehicleDetail.url
 			}}
-			validate={values=>		{ 
-				setEnteredValues(values)
+			validate={values => {
+				setSelectedVehicleDetail(values)
 				if (values.make.type !== "Lainnya") {
 					values.make.detail = ""
 				}
 			}}
 			validationSchema={vehicleValidationSchema}
 			onSubmit={(values) => {
-				setUploadInProgress(true)
-				const {
-					colour,
-					license,
-					loadingCapacity,
-					model,
-					make : {
-						type,
-						detail
-					},
-				} = values;
-
 				const url = imageFile.downloadURL as string
-				setEnteredValues({...values, url})
-				setVehicleEditData({
-					colour,
-					license,
-					loadingCapacity,
-					model,
-					make : {
-						type,
-						detail: detail.length > 0 ? detail : 'N/A',
-					},
-					url
-				})
-				setEditDialogOpen(false)
-
+				editedVehicleUpload({ ...values, url })
 			}}
 		>
-
 			{({ isValid, errors, touched }) => {
-
 				return (
 					< VehicleForm
 						errors={errors}
 						touched={touched}
 						isValid={isValid}
-						enteredValues={enteredValues}
+						enteredValues={selectedVehicleDetail}
 						dialogOnCancel={dialogOnCancel}
 						changeInputFile={changeInputFile}
 						image={image}
@@ -154,7 +184,6 @@ const DialogForm: FunctionComponent<IProps> = ({ vehicleMoreDetail, setViewModal
 					/>
 				)
 			}}
-
 		</Formik>
 	);
 }
