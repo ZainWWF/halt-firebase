@@ -6,7 +6,7 @@ import 'firebase/storage';
 import VehicleForm from "./VehicleForm";
 import vehicleValidationSchema from "./vehicleValidationSchema";
 import { VehicleDoc } from "../../../../types/Vehicle";
-import { AssetContext } from "../AssetsContents";
+import { VehicleAssetContext } from "../AssetsContents";
 import { AuthContext } from "../../../../containers/Main";
 import { Grid, CircularProgress } from "@material-ui/core";
 
@@ -28,8 +28,8 @@ const DialogForm: FunctionComponent = () => {
 	const [enteredValues, setEnteredValues] = useState(initialValues);
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const user = useContext(AuthContext) as firebase.User;
-	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
-	const { uploadInProgressState } = stateAssetContext;
+	const { stateVehicleAssetContext, dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
+	const { uploadInProgressState } = stateVehicleAssetContext;
 	const storageRef = firebaseApp.storage.ref();
 
 	const imageReader = new FileReader();
@@ -38,16 +38,16 @@ const DialogForm: FunctionComponent = () => {
 	}
 
 	const dialogOnCancel = () => {
-		dispatchAssetContext({ newDialog: false })
+		dispatchVehicleAssetContext({ newDialog: false })
 	}
 
 	const newVehicleUpload = (vehicleDoc: VehicleDoc) => {
-		dispatchAssetContext({ uploadInProgress: true })
+		dispatchVehicleAssetContext({ uploadInProgress: true })
 		firebaseApp.db.collection('vehicles')
 			.add({ ...vehicleDoc, userId: user.uid })
 			.then(() => {
 				console.log("upload success")
-				dispatchAssetContext({
+				dispatchVehicleAssetContext({
 					uploadInProgress: false,
 					newDialog: false
 				})

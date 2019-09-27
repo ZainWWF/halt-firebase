@@ -3,20 +3,20 @@ import Dialog from "@material-ui/core/Dialog";
 import VehicleDetailCard from "./VehicleDetailCard";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import { AssetContext } from "../AssetsContents";
+import { VehicleAssetContext } from "../AssetsContents";
 
 
 const ModalView: FunctionComponent = memo(() => {
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
-	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
-	const onClose = () => dispatchAssetContext({ viewDetail: false })
+	const { stateVehicleAssetContext, dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
+	const onClose = () => dispatchVehicleAssetContext({ viewDetail: false })
 
 	return (
 		<div>
 			<Dialog fullScreen={fullScreen}
-				open={stateAssetContext.viewDetailState}
+				open={stateVehicleAssetContext.viewDetailState}
 				onClose={onClose}
 				aria-labelledby="view-modal-detail">
 				<VehicleDetailCard />

@@ -6,7 +6,7 @@ import 'firebase/storage';
 import VehicleForm from "./VehicleForm";
 import vehicleValidationSchema from "./vehicleValidationSchema";
 import { VehicleDoc } from "../../../../types/Vehicle";
-import { AssetContext } from "../AssetsContents";
+import { VehicleAssetContext } from "../AssetsContents";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { Grid } from "@material-ui/core";
 
@@ -14,8 +14,8 @@ import { Grid } from "@material-ui/core";
 const DialogForm: FunctionComponent = () => {
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const storageRef = firebaseApp.storage.ref();
-	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
-	const { selectedVehicleSummaryState } = stateAssetContext
+	const { stateVehicleAssetContext, dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
+	const { selectedVehicleSummaryState } = stateVehicleAssetContext
 	const [selectedVehicleDetail, setSelectedVehicleDetail] = useState();
 	const [imageFile, setImageFile] = useState()
 	const [image, setImage] = useState();
@@ -42,11 +42,11 @@ const DialogForm: FunctionComponent = () => {
 	}, [selectedVehicleSummaryState])
 
 	const editedVehicleUpload = (vehicleDoc: VehicleDoc) => {
-		dispatchAssetContext({ uploadInProgress: true })
+		dispatchVehicleAssetContext({ uploadInProgress: true })
 		selectedVehicleSummaryState.ref.update(vehicleDoc)
 			.then(() => {
 				console.log("upload success")
-				dispatchAssetContext({
+				dispatchVehicleAssetContext({
 					uploadInProgress: false,
 					editDialog: false
 				})
@@ -65,7 +65,7 @@ const DialogForm: FunctionComponent = () => {
 	}
 
 	const dialogOnCancel = () => {
-		dispatchAssetContext({ editDialog: false })
+		dispatchVehicleAssetContext({ editDialog: false })
 	}
 
 	const changeInputFile = (files: FileList) => {

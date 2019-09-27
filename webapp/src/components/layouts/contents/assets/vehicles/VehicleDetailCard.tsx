@@ -11,7 +11,7 @@ import { red } from '@material-ui/core/colors';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { AssetContext } from '../AssetsContents';
+import { VehicleAssetContext } from '../AssetsContents';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -51,19 +51,19 @@ const useStyles = makeStyles((theme: Theme) =>
 const DetailCard: FunctionComponent = memo(() => {
 	const classes = useStyles();
 
-	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
-	const { selectedVehicleSummaryState } = stateAssetContext
-	const closeVehicleDetailOnClick = () => dispatchAssetContext({ 
+	const { stateVehicleAssetContext, dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
+	const { selectedVehicleSummaryState } = stateVehicleAssetContext
+	const closeVehicleDetailOnClick = () => dispatchVehicleAssetContext({ 
 		viewDetail: false ,
 		removedVehicleId:"",
 		selectedVehicleSummary:{}
 	})
 
-	const editVehicleOnClick = () => dispatchAssetContext({ editDialog: true, viewDetail: false })
+	const editVehicleOnClick = () => dispatchVehicleAssetContext({ editDialog: true, viewDetail: false })
 
 	const removeVehicleOnClick = () => {
 		const [, vehicleId] = selectedVehicleSummaryState.ref.path.split("/")
-		dispatchAssetContext({ 
+		dispatchVehicleAssetContext({ 
 			removedVehicleId: vehicleId,
 			viewDetail: false 
 		 })
