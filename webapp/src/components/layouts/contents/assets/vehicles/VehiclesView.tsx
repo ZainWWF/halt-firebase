@@ -11,7 +11,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { LinearProgress, Theme } from '@material-ui/core';
 import VehicleList from "./VehicleList";
 import { makeStyles } from "@material-ui/core/styles";
-import { AssetContext } from '../AssetsContents';
+import { VehicleAssetContext } from '../AssetsContents';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	paper: {
@@ -55,9 +55,9 @@ const View: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
 
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
-	const { dispatchAssetContext } = useContext(AssetContext)
+	const { dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
 	const addVehicleOnClick = () => {
-		dispatchAssetContext({ newDialog: true })
+		dispatchVehicleAssetContext({ newDialog: true })
 	}
 
 	return (

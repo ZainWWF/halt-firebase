@@ -4,21 +4,21 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import VehiclesEditForm from './VehiclesEditForm';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
-import { AssetContext } from '../AssetsContents';
+import { VehicleAssetContext } from '../AssetsContents';
 
 
 const FormDialog: FunctionComponent = () => {
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
-	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
+	const { stateVehicleAssetContext, dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
 	const dialogOnClose = () => {
-		dispatchAssetContext({ editDialog: false })
+		dispatchVehicleAssetContext({ editDialog: false })
 	}
 
 	return (
 		<div>
-			<Dialog  fullScreen={fullScreen} open={stateAssetContext.editDialogState} onClose={dialogOnClose} aria-labelledby="form-dialog-edit">
+			<Dialog  fullScreen={fullScreen} open={stateVehicleAssetContext.editDialogState} onClose={dialogOnClose} aria-labelledby="form-dialog-edit">
 				<DialogTitle id="form-dialog-title">Edit Vehicle</DialogTitle>
 				<VehiclesEditForm/>
 			</Dialog>

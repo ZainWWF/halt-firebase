@@ -4,20 +4,20 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import VehiclesNewForm from './VehiclesNewForm';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
-import { AssetContext } from '../AssetsContents';
+import { VehicleAssetContext } from '../AssetsContents';
 
 const FormDialog: FunctionComponent = () => {
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
-	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
+	const { stateVehicleAssetContext, dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
 	const dialogOnClose = () => {
-		dispatchAssetContext({ newDialog: false })
+		dispatchVehicleAssetContext({ newDialog: false })
 	}
 
 	return (
 		<div>
-			<Dialog disableBackdropClick={true} fullScreen={fullScreen} onClose={dialogOnClose} open={stateAssetContext.newDialogState} aria-labelledby="form-dialog-title">
+			<Dialog disableBackdropClick={true} fullScreen={fullScreen} onClose={dialogOnClose} open={stateVehicleAssetContext.newDialogState} aria-labelledby="form-dialog-title">
 				<DialogTitle id="form-dialog-title">Add Vehicle</DialogTitle>
 				<VehiclesNewForm />
 			</Dialog>

@@ -7,7 +7,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import { VehicleSummary } from '../../../../types/Vehicle';
-import { AssetContext } from '../AssetsContents';
+import { VehicleAssetContext } from '../AssetsContents';
 import { AuthContext } from "../../../../containers/Main";
 import Typography from '@material-ui/core/Typography';
 
@@ -39,13 +39,13 @@ const ListView: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
 
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const user = useContext(AuthContext) as firebase.User;
-	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
-	const { removedVehicleIdState, uploadInProgressState } = stateAssetContext
+	const { stateVehicleAssetContext, dispatchVehicleAssetContext } = useContext(VehicleAssetContext)
+	const { removedVehicleIdState, uploadInProgressState } = stateVehicleAssetContext
 
 	const viewVehicleDetailOnClick = (e: MouseEvent<HTMLDivElement>) => {
 		const vehicleId = e.currentTarget.getAttribute("id")
 		if (vehicleId) {
-			dispatchAssetContext({
+			dispatchVehicleAssetContext({
 				viewDetail: true,
 				selectedVehicleSummary: vehicleCollection[vehicleId]
 			})
@@ -56,7 +56,7 @@ const ListView: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
 	// remove vehicle 
 	useEffect(() => {
 		if (removedVehicleIdState.length > 0 && !uploadInProgressState) {
-			dispatchAssetContext({
+			dispatchVehicleAssetContext({
 				uploadInProgress: true,
 			})
 			const updateVehicleCollection = Object.keys(vehicleCollection).reduce((collection, vehicleId: string) => {
@@ -71,7 +71,7 @@ const ListView: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
 				vehicles: updateVehicleCollection
 			}).then(() => {
 				console.log("upload success")
-				dispatchAssetContext({
+				dispatchVehicleAssetContext({
 					uploadInProgress: false,
 					removedVehicleId: ""
 				})
@@ -79,7 +79,7 @@ const ListView: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
 
 			})
 		}
-	}, [removedVehicleIdState, firebaseApp, dispatchAssetContext, user, vehicleCollection, uploadInProgressState])
+	}, [removedVehicleIdState, firebaseApp, dispatchVehicleAssetContext, user, vehicleCollection, uploadInProgressState])
 
 	return (
 		<List className={classes.root}>
