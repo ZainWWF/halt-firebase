@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback, FunctionComponent, SetStateAction, Dispatch } from "react";
+import React, { useState, useEffect, useContext, useCallback, FunctionComponent } from "react";
 import { Formik } from "formik";
 import { FirebaseContext, Firebase } from "../../../../providers/Firebase/FirebaseProvider";
 import * as firebase from 'firebase/app';
@@ -8,41 +8,14 @@ import vehicleValidationSchema from "./vehicleValidationSchema";
 import { VehicleDoc } from "../../../../types/Vehicle";
 import { AssetContext } from "../AssetsContents";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { Grid } from "@material-ui/core";
 
-// const useStyles = makeStyles((theme: Theme) =>
-// 	createStyles({
-// 		progress: {
-// 			margin: theme.spacing(2),
-// 			display: "block",
-// 			marginLeft: "auto",
-// 			marginRight: "auto",
-// 		},
-// 		progressContainer : {
-// 			width : 120,
-// 			height: 120
-// 		}
-// 	}),
-// );
-
-
-
-interface IProps {
-	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
-	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	setVehicleEditData: (vehicle: VehicleDoc) => void
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-	setUploadInProgress: Dispatch<SetStateAction<boolean>>
-	selectedVehicleDetail: VehicleDoc
-}
 
 const DialogForm: FunctionComponent = () => {
-	// const classes = useStyles();
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const storageRef = firebaseApp.storage.ref();
 	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
-	const { selectedVehicleSummaryState, selectedVehicleDetailState } = stateAssetContext
+	const { selectedVehicleSummaryState } = stateAssetContext
 	const [selectedVehicleDetail, setSelectedVehicleDetail] = useState();
 	const [imageFile, setImageFile] = useState()
 	const [image, setImage] = useState();
