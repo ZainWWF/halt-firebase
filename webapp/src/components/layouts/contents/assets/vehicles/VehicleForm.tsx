@@ -40,7 +40,7 @@ interface IProps {
 	isValid: boolean
 	errors: { [key: string]: any },
 	touched: { [key: string]: any }
-	enteredValues : any
+	enteredValues: any
 	image: string
 }
 
@@ -58,17 +58,17 @@ const VehicleForm: FunctionComponent<IProps> = memo(({ image, isImage, enteredVa
 					label="license" />
 				<Field name="make.type"
 					as={SelectField}
-					error={ errors.make && errors.make.type }
+					error={errors.make && errors.make.type}
 					touched={errors.make && touched.make.type}
 					type="text"
 					label="make"
 					choices={MakeType} />
-				{enteredValues.make.type === "Lainnya" &&
+				{enteredValues && enteredValues.make.type === "Lainnya" &&
 					<Field name="make.detail"
 						as={SingleField}
-						error={ errors.make && errors.make.detail }
+						error={errors.make && errors.make.detail}
 						touched={errors.make && touched.make.detail}
-						type="text" 
+						type="text"
 						label="detail" />
 				}
 				<Field name="model"

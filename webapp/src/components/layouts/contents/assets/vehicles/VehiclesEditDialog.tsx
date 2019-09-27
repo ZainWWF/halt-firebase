@@ -1,37 +1,26 @@
-import React, { FunctionComponent, Dispatch, SetStateAction } from 'react';
+import React, { FunctionComponent, useContext } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import VehiclesEditForm from './VehiclesEditForm';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
-import {  VehicleDoc } from '../../../../types/Vehicle';
+import { AssetContext } from '../AssetsContents';
 
-interface IProps {
-	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
-	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	vehicleMoreDetail: VehicleDoc
-	setVehicleEditData: Dispatch<SetStateAction<VehicleDoc>>
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-	editDialogOpen: boolean
-	setUploadInProgress: Dispatch<SetStateAction<boolean>>
-}
 
-const FormDialog: FunctionComponent<IProps> = ({ editDialogOpen, setEditDialogOpen, setViewModalOpen, vehicleMoreDetail, setVehicleEditData, setHasError, setUploadInProgress }) => {
+const FormDialog: FunctionComponent = () => {
 	const theme = useTheme();
-	const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
+	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
+
+	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
+	const dialogOnClose = () => {
+		dispatchAssetContext({ editDialog: false })
+	}
 
 	return (
 		<div>
-			<Dialog  fullScreen={fullScreen} open={editDialogOpen} onClose={() => setEditDialogOpen(false)} aria-labelledby="form-dialog-edit">
+			<Dialog  fullScreen={fullScreen} open={stateAssetContext.editDialogState} onClose={dialogOnClose} aria-labelledby="form-dialog-edit">
 				<DialogTitle id="form-dialog-title">Edit Vehicle</DialogTitle>
-				<VehiclesEditForm
-					setEditDialogOpen={setEditDialogOpen}
-					setViewModalOpen={setViewModalOpen}
-					setVehicleEditData={setVehicleEditData}
-					vehicleMoreDetail={vehicleMoreDetail}
-					setHasError={setHasError}
-					setUploadInProgress={setUploadInProgress}
-				/>
+				<VehiclesEditForm/>
 			</Dialog>
 		</div>
 	);

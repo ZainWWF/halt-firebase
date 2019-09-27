@@ -1,12 +1,15 @@
-import React, { FunctionComponent, MouseEvent } from 'react';
+import React, { FunctionComponent, MouseEvent, useContext, memo, useEffect } from 'react';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { FirebaseContext, Firebase } from "../../../../providers/Firebase/FirebaseProvider";
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import { VehicleSummary } from '../../../../types/Vehicle';
-
+import { AssetContext } from '../AssetsContents';
+import { AuthContext } from "../../../../containers/Main";
+import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -19,35 +22,89 @@ const useStyles = makeStyles((theme: Theme) =>
 			width: 60,
 			height: 60,
 		},
+		contentWrapper: {
+			margin: '40px 16px',
+		},
 	}),
 );
 
-interface IProps {
-	vehicleMap: Record<string, any>
-	viewVehicleModalCallback: (e: MouseEvent<HTMLDivElement | MouseEvent>) => void
+type IProps = {
+	vehicleCollection: { [key: string]: any }
+
 }
 
-const ListView: FunctionComponent<IProps> = ({ vehicleMap, viewVehicleModalCallback }) => {
+const ListView: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
+
 	const classes = useStyles();
+
+	const firebaseApp = useContext(FirebaseContext) as Firebase;
+	const user = useContext(AuthContext) as firebase.User;
+	const { stateAssetContext, dispatchAssetContext } = useContext(AssetContext)
+	const { removedVehicleIdState, uploadInProgressState } = stateAssetContext
+
+	const viewVehicleDetailOnClick = (e: MouseEvent<HTMLDivElement>) => {
+		const vehicleId = e.currentTarget.getAttribute("id")
+		if (vehicleId) {
+			dispatchAssetContext({
+				viewDetail: true,
+				selectedVehicleSummary: vehicleCollection[vehicleId]
+			})
+		}
+	}
+
+
+	// remove vehicle 
+	useEffect(() => {
+		if (removedVehicleIdState.length > 0 && !uploadInProgressState) {
+			dispatchAssetContext({
+				uploadInProgress: true,
+			})
+			const updateVehicleCollection = Object.keys(vehicleCollection).reduce((collection, vehicleId: string) => {
+				if (vehicleId !== removedVehicleIdState) {
+					const vehicle = { [vehicleId]: vehicleCollection[vehicleId] }
+					return Object.assign({}, collection, vehicle)
+				}
+				return collection
+			}, {})
+
+			firebaseApp.db.doc('users/' + user.uid).update({
+				vehicles: updateVehicleCollection
+			}).then(() => {
+				console.log("upload success")
+				dispatchAssetContext({
+					uploadInProgress: false,
+					removedVehicleId: ""
+				})
+			}).catch((error: Error) => {
+
+			})
+		}
+	}, [removedVehicleIdState, firebaseApp, dispatchAssetContext, user, vehicleCollection, uploadInProgressState])
 
 	return (
 		<List className={classes.root}>
-			{
-				[...vehicleMap.keys()].map((vehicleId: string) => {
-					const vehicle: VehicleSummary = vehicleMap.get(vehicleId);
+			{vehicleCollection ?
+				Object.keys(vehicleCollection).map((vehicleId: string) => {
+					const vehicle: VehicleSummary = vehicleCollection[vehicleId];
 					return (
-						<ListItem button key={vehicleId} onClick={viewVehicleModalCallback} id={vehicleId} >
+						<ListItem button key={vehicleId} onClick={viewVehicleDetailOnClick} id={vehicleId} >
 							<ListItemAvatar>
 								<Avatar alt={`${vehicle.make.type} ${vehicle.model}/${vehicle.license}`} src={vehicle.url} className={classes.bigAvatar} />
 							</ListItemAvatar>
-							<ListItemText primary={vehicle.make.type !=="Lainnya" ? vehicle.make.type : vehicle.make.detail} secondary={vehicle.license} />
+							<ListItemText primary={vehicle.make.type !== "Lainnya" ? vehicle.make.type : vehicle.make.detail} secondary={vehicle.license} />
 						</ListItem>
 					)
-				})
+				}) :
+				<div className={classes.contentWrapper}>
+					<Typography color="textSecondary" align="center">
+						No vehicles registered yet
+				</Typography>
+				</div>
 			}
 		</List>
 	);
-}
+
+})
 
 
 export default ListView;
