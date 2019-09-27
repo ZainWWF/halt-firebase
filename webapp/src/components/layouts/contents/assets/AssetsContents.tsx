@@ -11,6 +11,7 @@ type AssetContextState = {
 	editDialogState: boolean
 	viewDetailState: boolean
 	selectedVehicleSummaryState: Partial<VehicleSummary>
+	selectedVehicleDetailState: Partial<VehicleDoc>
 	newVehicleDocState: Partial<VehicleDoc>
 	uploadInProgressState: boolean
 	removedVehicleIdState: string
@@ -22,6 +23,7 @@ type AssetContextAction = {
 	viewDetail: true | false
 	uploadInProgress: true | false
 	selectedVehicleSummary: {}
+	selectedVehicleDetail : {}
 	newVehicleDoc: {}
 	removedVehicleId: string
 }
@@ -51,6 +53,9 @@ const newDialogReducer = (state: AssetContextState, action: AssetContextAction) 
 		if (type === "removedVehicleId") {
 			return { ...state, removedVehicleIdState: action.removedVehicleId }
 		}
+		if (type === "selectedVehicleDetail") {
+			return { ...state, selectedVehicleDetailState: action.selectedVehicleDetail }
+		}
 		return state
 
 	}, state)
@@ -62,6 +67,7 @@ const initialState: AssetContextState = {
 	viewDetailState: false,
 	selectedVehicleSummaryState: {},
 	newVehicleDocState: {},
+	selectedVehicleDetailState: {},
 	uploadInProgressState: false,
 	removedVehicleIdState:  ""
 }
