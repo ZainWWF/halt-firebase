@@ -1,4 +1,4 @@
-import React, { useState, Dispatch, SetStateAction, FunctionComponent, useEffect } from 'react';
+import React, { useState, FunctionComponent, useContext, memo } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -8,9 +8,9 @@ import IconButton from '@material-ui/core/IconButton';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import Button from '@material-ui/core/Button';
 import PlantationMap from './PlantationMap';
-import { PlantationSummary, PlantationDetails } from '../../../../types/Plantation';
 import * as turfHelpers from "@turf/helpers";
 import Typography from '@material-ui/core/Typography';
+import { PlantationAssetContext } from '../AssetsContents';
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -31,62 +31,67 @@ const useStyles = makeStyles((theme: Theme) =>
 	}),
 );
 
-
-interface IProps {
-	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	setMapModalOpen: Dispatch<SetStateAction<boolean>>
-	mapModalOpen: boolean
-	plantationSummary: PlantationSummary | undefined
-	plantationDetails: PlantationDetails | undefined
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-	setRefreshGeometry: Dispatch<SetStateAction<boolean>>
+type IProps = {
+	plantationGeometry: string | undefined
+	plantationDocRef: firebase.firestore.DocumentReference | undefined
+	plantationName: string | undefined
+	PlantationManagementType: string | undefined
 }
 
-const DetailCard: FunctionComponent<IProps> = ({ setRefreshGeometry, plantationSummary, plantationDetails, setViewModalOpen, setMapModalOpen, setHasError  }) => {
+const DetailCard: FunctionComponent<IProps> = memo(({ plantationGeometry, plantationDocRef, plantationName, PlantationManagementType }) => {
+
+
 	const classes = useStyles();
 
+	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+
 	const [canUpload, setCanUpload] = useState(false)
-	const [newGeometry, setNewGeometry] = useState<turfHelpers.Geometry>()
+	const [newGeometry, setNewGeometry] = useState<turfHelpers.Geometry | null>(null)
+
+
+	const closePlantationMapOnClick = () => dispatchPlantationAssetContext!({
+		setPlantationMapModalOpen: {
+			payload: false
+		},
+		setPlantationDetailsModalOpen: {
+			payload: true
+		},
+		setPlantationDetailRefresh: {
+			payload: true
+		},		
+		selectPlantationDetail: {
+			payload: null
+		},
+	})
+
 
 
 	const submitPlantationGeometry = () => {
-
-		console.log(newGeometry)
-		plantationSummary!.ref.update({
+		plantationDocRef!.update({
 			"unAudited.geometry": JSON.stringify(newGeometry)
 		})
 			.then(() => {
 				console.log("upload success")
-				setRefreshGeometry(true)
 				setCanUpload(false)
-			}).catch((error) => {
-				setHasError(error)
+
+			}).catch((error: Error) => {
+				// setHasError(error)
 			})
 	}
-
-	useEffect(() => {
-		if (newGeometry) {
-			setCanUpload(true)
-		}
-	}, [newGeometry, setCanUpload])
-
-
-
-
 
 	return (
 		<Card className={classes.card}>
 			<CardHeader
 				action={
-					<IconButton aria-label="settings" onClick={() => { setViewModalOpen(true); setMapModalOpen(false) }}>
+					<IconButton aria-label="settings" onClick={closePlantationMapOnClick}>
 						<AssignmentIcon />
 					</IconButton>
 				}
-				title={plantationSummary!.name}
-				subheader={plantationSummary!.management.type === "PRIVATE" ? "owned by Me" : `owned by ${plantationSummary!.management.name}`}
+				title={plantationName}
+				subheader={PlantationManagementType === "PRIVATE" ? "owned by Me" : `owned by ${plantationName}`}
 			/>
 			<CardActions >
-				<Button variant="contained" color="primary" className={classes.button} onClick={() => submitPlantationGeometry()} disabled={!canUpload}>
+				<Button variant="contained" color="primary" className={classes.button} onClick={submitPlantationGeometry} disabled={!canUpload}>
 					Upload Geometry
       </Button>
 
@@ -95,10 +100,10 @@ const DetailCard: FunctionComponent<IProps> = ({ setRefreshGeometry, plantationS
 				<Typography display={"block"} variant={"caption"}>
 					drag and drop the Geojson geometry of the plantation into the map.
 				</Typography>
-				<PlantationMap setHasError={setHasError} setNewGeometry={setNewGeometry} updatedGeometryData={plantationDetails!.geometry}/>
+				<PlantationMap setNewGeometry={setNewGeometry} setCanUpload={setCanUpload} selectedGeometry={plantationGeometry!} />
 			</CardContent>
 		</Card>
 	);
-}
+})
 
 export default DetailCard;

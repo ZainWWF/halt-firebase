@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useState, FunctionComponent, Dispatch, SetStateAction, } from "react"
+import React, { memo, useRef, useEffect, useCallback, useState, FunctionComponent, Dispatch, SetStateAction, } from "react"
 import { makeStyles, Theme, createStyles } from "@material-ui/core";
 import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
 import * as turfHelpers from "@turf/helpers";
@@ -39,11 +39,12 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface IProps {
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-	setNewGeometry: Dispatch<SetStateAction<turfHelpers.Geometry | undefined>>
-	updatedGeometryData: string  | undefined
+	setCanUpload: Dispatch<SetStateAction<boolean>>
+	setNewGeometry: Dispatch<SetStateAction<turfHelpers.Geometry | null>>
+	selectedGeometry: string
 }
-const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedGeometryData }) => {
+const View: FunctionComponent<IProps> = memo(({ setNewGeometry, setCanUpload, selectedGeometry }) => {
+
 	const classes = useStyles();
 
 	const [map, setMap] = useState<google.maps.Map>();
@@ -135,7 +136,6 @@ const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedG
 		}
 	}, [map]);
 
-
 	//load the geojson into the map and render if it passes the checks
 	const loadGeoJsonStringCallback = useCallback((geoString) => {
 		try {
@@ -150,32 +150,35 @@ const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedG
 
 				if (mapPolygonBounds) {
 					const isInBound = turfContains.default(mapPolygonBounds, userPolygon)
-					if (isInBound) {
-						setNewGeometry(geometry)
-					} else {
+					if (!isInBound) {
+						setCanUpload(false)
 						throw new Error("geometry is out of bounds!")
+					}else {
+						setNewGeometry(geometry)
 					}
 				}
 				zoomCallback();
 			}
 		} catch (e) {
-			setHasError(e)
+			console.log(e)
+			// setHasError(e)
 		}
-	}, [setHasError, checkFeatureHasSinglePolygon, clearMap, zoomCallback, map, mapPolygonBounds, setNewGeometry])
+	}, [checkFeatureHasSinglePolygon, clearMap, zoomCallback, map, setNewGeometry, mapPolygonBounds, setCanUpload])
 
 	useEffect(() => {
-		if (updatedGeometryData && map) {
-			clearMap()
-			map.data.addGeoJson({
-				"type": "FeatureCollection",
-				"features": [{
-					"type": "Feature",
-					"geometry": JSON.parse(updatedGeometryData)
-				}]
-			})
-			zoomCallback();
+		if(selectedGeometry){
+			loadGeoJsonStringCallback(JSON.stringify(
+				{
+					"type": "FeatureCollection",
+					"features": [{
+						"type": "Feature",
+						"geometry": JSON.parse(selectedGeometry)
+					}]
+				}
+			))
 		}
-	}, [updatedGeometryData, zoomCallback, clearMap, map])
+	}, [loadGeoJsonStringCallback,selectedGeometry])
+
 
 	const showPanelCallback = useCallback((e) => {
 		e.stopPropagation();
@@ -195,7 +198,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedG
 		e.preventDefault();
 		e.stopPropagation();
 		hidePanel();
-
+		setCanUpload(true)
 		const files = e.dataTransfer.files;
 		if (files.length) {
 			// process file(s) being dropped
@@ -222,7 +225,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedG
 
 		// prevent drag event from bubbling further
 		return false;
-	}, [loadGeoJsonStringCallback])
+	}, [loadGeoJsonStringCallback, setCanUpload])
 
 
 	const loadMapsApiCallback = useCallback(() => {
@@ -236,15 +239,6 @@ const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedG
 		}
 	}, [initMapCallback])
 
-
-	const getBoundsCallback = useCallback(() => {
-		if (map) {
-			const bounds = map.getBounds();
-
-			console.log(bounds)
-		};
-
-	}, [map])
 
 	useEffect(() => {
 		const mapEl: any = mapRef.current;
@@ -262,7 +256,7 @@ const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedG
 			dropContainerEl.removeEventListener('drop', handleDropCallback, false);
 			dropContainerEl.removeEventListener('dragleave', hidePanel, false);
 		}
-	}, [showPanelCallback, handleDropCallback, getBoundsCallback])
+	}, [showPanelCallback, handleDropCallback])
 
 
 	useEffect(() => {
@@ -277,6 +271,6 @@ const View: FunctionComponent<IProps> = ({ setHasError, setNewGeometry, updatedG
 		</>
 	)
 
-}
+})
 
 export default View;

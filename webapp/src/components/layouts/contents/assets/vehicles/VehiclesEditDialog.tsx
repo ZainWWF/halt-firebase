@@ -18,7 +18,7 @@ const FormDialog: FunctionComponent = () => {
 
 	return (
 		<div>
-			<Dialog  fullScreen={fullScreen} open={stateVehicleAssetContext.editDialogState} onClose={dialogOnClose} aria-labelledby="form-dialog-edit">
+			<Dialog disableBackdropClick={true}  fullScreen={fullScreen} open={stateVehicleAssetContext.editDialogState} onClose={dialogOnClose} aria-labelledby="form-dialog-edit">
 				<DialogTitle id="form-dialog-title">Edit Vehicle</DialogTitle>
 				<VehiclesEditForm/>
 			</Dialog>

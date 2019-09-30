@@ -1,4 +1,4 @@
-import React, { useState, FunctionComponent, Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import React, { useState, FunctionComponent, useCallback, useEffect, useContext } from "react";
 import { Formik } from "formik";
 import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
 import plantationValidationSchema from "./plantationValidationSchema";
@@ -6,6 +6,11 @@ import * as turfHelpers from "@turf/helpers";
 import * as turfPointInPolygon from "@turf/boolean-point-in-polygon";
 import * as firebase from 'firebase/app';
 import PlantationForm from "./PlantationForm";
+import { FirebaseContext, Firebase } from "../../../../providers/Firebase/FirebaseProvider";
+import { AuthContext } from "../../../../containers/Main";
+import { PlantationAssetContext } from "../AssetsContents";
+
+
 
 
 const initialValues = {
@@ -42,21 +47,37 @@ const initialValues = {
 	aveMonthlyYield: 0,
 }
 
-interface IProps {
-	setNewDialogOpen: Dispatch<SetStateAction<boolean>>
-	setPlantationFormData: Dispatch<SetStateAction<any>>
-	setUploadInProgress: Dispatch<SetStateAction<boolean>>
-}
-
-const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setPlantationFormData, setUploadInProgress }) => {
+const DialogForm: FunctionComponent = () => {
 
 	const [mapPolygonBounds, setMapPolygonBounds] = useState<turfHelpers.Feature<turfHelpers.Polygon>>()
 	const [enteredValues, setEnteredValues] = useState(initialValues);
-	
+	const firebaseApp = useContext(FirebaseContext) as Firebase;
+	const user = useContext(AuthContext) as firebase.User;
+	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 
-	const dialogOnCancel = () => {
-		setNewDialogOpen(false)
+	const dialogOnCancel = () => dispatchPlantationAssetContext!({
+		setPlantationNewModalOpen: {
+			payload: false
+		},
+	})
+
+	const newPlantationUpload = (plantationDoc:any) => {
+
+		firebaseApp.db.collection('plantations')
+			.add({ ...plantationDoc, userId: user.uid })
+			.then(() => {
+				console.log("upload success")
+				dispatchPlantationAssetContext!({
+					setPlantationNewModalOpen: {
+						payload: false
+					},
+				})
+			}).catch((error) => {
+				console.log(error)
+				// setHasError(error)
+			})
 	}
+
 
 	// initalise the drawable bounds for the polygon
 	const initMapPolygonBound = () => {
@@ -122,35 +143,21 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setPlantation
 			}}
 			validationSchema={plantationValidationSchema}
 			onSubmit={(values) => {
-				setUploadInProgress(true)
-				setPlantationFormData({
+				newPlantationUpload({
 					name: values.plantationName,
 					unAudited: {
 						geoLocation: new firebase.firestore.GeoPoint(
 							values.geoLocation.latitude,
 							values.geoLocation.longitude
 						),
-						management: {
-							type: values.management.type,
-							name: values.management.name.length > 0 ? values.management.name : 'N/A',
-							rep: values.management.rep.length > 0 ? values.management.rep : 'N/A',
-							contact: values.management.contact.length > 0 ? values.management.contact : 'N/A',
-							detail: values.management.detail.length > 0 ? values.management.detail : 'N/A'
-						},
-						certification: {
-							type: values.certification.type,
-							detail: values.certification.detail.length > 0 ? values.certification.detail : 'N/A',
-							serial: values.certification.serial.length > 0 ? values.certification.serial : 'N/A'
-						},
+						management: values.management,
+						certification: values.certification,
 						license: {
 							area: Number(values.license.area),
-							type: values.license.type.length > 0 ? values.license.type : 'N/A',
-							detail: values.license.detail.length > 0 ? values.license.detail : 'N/A'
+							type:  values.license.type,
+							detail: values.license.detail 
 						},
-						previousLandCover: {
-							type: values.previousLandCover.type,
-							detail: values.previousLandCover.detail.length > 0 ? values.previousLandCover.detail : 'N/A'
-						},
+						previousLandCover: values.previousLandCover,
 						landClearingMethod: values.landClearingMethod,
 						age: Number(values.age),
 						treesPlanted: Number(values.treesPlanted),
@@ -158,8 +165,6 @@ const DialogForm: FunctionComponent<IProps> = ({ setNewDialogOpen, setPlantation
 						aveMonthlyYield: Number(values.aveMonthlyYield)
 					}
 				})
-				setNewDialogOpen(false)
-
 			}}
 		>
 			{({ isValid, errors, touched }) => {

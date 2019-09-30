@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, FunctionComponent, useContext, useState } from "react";
+import React, { FunctionComponent, useContext, useState } from "react";
 import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -8,13 +8,12 @@ import DialogContent from "@material-ui/core/DialogContent";
 import AddIcon from '@material-ui/icons/Add';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { makeStyles } from "@material-ui/core/styles";
-import PlantationRepSearchField from "./PlantationRepSearchField";
 import debounce from 'just-debounce-it';
-import { ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, IconButton } from "@material-ui/core";
+import { ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, IconButton, Typography, InputAdornment } from "@material-ui/core";
 import { grey } from '@material-ui/core/colors';
 import { PlantationSummary } from "../../../../types/Plantation";
-
-
+import SearchField from "../../../fields/SearchField"
+import SearchIcon from '@material-ui/icons/Search';
 
 const useStyles = makeStyles({
 	root: {
@@ -35,6 +34,10 @@ const useStyles = makeStyles({
 		width: 60,
 		height: 60,
 		backgroundColor: grey[500],
+	},
+	contentWrapper: {
+		padding: '40px 16px',
+		backgroundColor: "#f5f5f5",
 	},
 
 });
@@ -79,35 +82,36 @@ const ValidatePlantationRepSchema = Yup.object().shape({
 });
 
 interface IProps {
-	setRepsAddModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationSummary: PlantationSummary | undefined
-	setPlantationReps: Dispatch<SetStateAction<string[]| undefined>>
+	closeRepsCardAddModalOnClick: () => void
+	selectedPlantationSummaryState: PlantationSummary | undefined
+	// setPlantationReps: Dispatch<SetStateAction<string[]| undefined>>
 }
 
 
-const DialogForm: FunctionComponent<IProps> = ({ setRepsAddModalOpen, plantationSummary, setPlantationReps }) => {
+const DialogForm: FunctionComponent<IProps> = ({ closeRepsCardAddModalOnClick, selectedPlantationSummaryState }) => {
 	const classes = useStyles();
 	const [plantationNewRep, setPlantationNewRep] = useState();
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 
-	const addRep =  (userId: string) => {
-		plantationSummary!.ref.update({
-			"repIds": firebase.firestore.FieldValue.arrayUnion(userId) 
-		}).then(()=>{
-			setRepsAddModalOpen(false)
-		    	plantationSummary!.ref.get().then(doc=>{
-						if(doc){
-							console.log(doc.data())
-							setPlantationReps(doc.data()!.repIds)
-						}
+	const addRep = (userId: string) => {
+		selectedPlantationSummaryState!.ref.update({
+			"repIds": firebase.firestore.FieldValue.arrayUnion(userId)
+		}).then(() => {
+			closeRepsCardAddModalOnClick()
+			// selectedPlantationSummaryState!.ref.get().then(doc => {
+			// 	if (doc) {
+			// 		console.log(doc.data())
+			// 		// setPlantationReps(doc.data()!.repIds)
+			// 	}
 
-					}).catch(error=>console.log(error))
-		}).catch(error=>console.log(error))
+			// }).catch(error => console.log(error))
+		}).catch(error => console.log(error))
 
 
 	}
 
 	return (
+
 		<Formik
 			initialValues={{
 				plantationRepPhoneNumber: "",
@@ -123,7 +127,7 @@ const DialogForm: FunctionComponent<IProps> = ({ setRepsAddModalOpen, plantation
 								.where("profile.phoneNumber", "==", values.plantationRepPhoneNumber)
 								.get()
 								.then((data) => {
-									if (data) {
+									if (data && data.docs.length > 0) {
 										console.log(data.docs[0])
 										setPlantationNewRep({ ...data.docs[0].data().profile, userId: data.docs[0].id })
 									} else {
@@ -150,26 +154,49 @@ const DialogForm: FunctionComponent<IProps> = ({ setRepsAddModalOpen, plantation
 				return (<>
 					<AutoSave debounceMs={300} />
 					<form onSubmit={props.handleSubmit}>
-						<DialogContent>
-							<Field as
-								name="plantationRepPhoneNumber" value={props.values.plantationRepPhoneNumber} onChange={props.handleChange} component={PlantationRepSearchField}
-							/>
-						</DialogContent>
+			
+							<Field name="plantationRepPhoneNumber"
+								as={SearchField}
+								error={props.errors.plantationRepPhoneNumber}
+								touched={props.touched.plantationRepPhoneNumber}
+								type="search"
+								label="Add Producer Rep" 
+								autoFocus
+								fullWidth
+								startAdornment={
+									<InputAdornment position="start">
+										<SearchIcon />
+									</InputAdornment>
+								}
+								
+								/>
+		
 					</form>
-					{plantationNewRep && <>
-						<ListItem key={plantationNewRep.userId} id={plantationNewRep.userId} className={classes.repList}>
-							<ListItemAvatar>
-								<Avatar alt={""} src={plantationNewRep.photoUrl} className={classes.bigAvatar}>
-								</Avatar>
-							</ListItemAvatar>
-							<ListItemText primary={plantationNewRep.phoneNumber} secondary={plantationNewRep.name} />
-							<ListItemSecondaryAction className={classes.addIcon}>
-								<IconButton aria-label="add" onClick={() => addRep(plantationNewRep.userId)}>
-									<AddIcon />
-								</IconButton>
-							</ListItemSecondaryAction>
-						</ListItem>
-					</>
+					{plantationNewRep ?
+						<>
+							<ListItem key={plantationNewRep.userId} id={plantationNewRep.userId} className={classes.repList}>
+								<ListItemAvatar>
+									<Avatar alt={""} src={plantationNewRep.photoUrl} className={classes.bigAvatar}>
+									</Avatar>
+								</ListItemAvatar>
+								<ListItemText primary={plantationNewRep.phoneNumber} secondary={plantationNewRep.name} />
+								<ListItemSecondaryAction className={classes.addIcon}>
+									<IconButton aria-label="add" onClick={() => addRep(plantationNewRep.userId)}>
+										<AddIcon />
+									</IconButton>
+								</ListItemSecondaryAction>
+							</ListItem>
+						</>
+						:
+						<>
+							{props.isValid && props.values.plantationRepPhoneNumber.length > 0 &&
+								<div className={classes.contentWrapper}>
+									<Typography color="textSecondary" align="center">
+										No user found
+									</Typography>
+								</div>
+							}
+						</>
 					}
 				</>
 				)

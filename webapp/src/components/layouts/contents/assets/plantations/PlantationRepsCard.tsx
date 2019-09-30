@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, FunctionComponent, useState } from 'react';
+import React, {  FunctionComponent, useContext, useState, useEffect } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -6,12 +6,13 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import { red, grey } from '@material-ui/core/colors';
+import { grey } from '@material-ui/core/colors';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import PlantationRepsCardList from "./PlantationRepsCardList";
 import PlantationRepsCardAddModal from "./PlantationRepsCardAddModal";
-import {  PlantationSummary, PlantationDetails } from '../../../../types/Plantation';
+import { PlantationAssetContext } from '../AssetsContents';
+import { PlantationDoc } from '../../../../types/Plantation';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -24,31 +25,8 @@ const useStyles = makeStyles((theme: Theme) =>
 				width: "100vw"
 			},
 		},
-		media: {
-			height: 0,
-			paddingTop: '56.25%', // 16:9
-		},
-		expand: {
-			transform: 'rotate(0deg)',
-			marginLeft: 'auto',
-			transition: theme.transitions.create('transform', {
-				duration: theme.transitions.duration.shortest,
-			}),
-		},
-		expandOpen: {
-			transform: 'rotate(180deg)',
-		},
-		avatar: {
-			backgroundColor: red[500],
-		},
 		add: {
 			marginLeft: 'auto',
-		},
-		delete: {
-			marginLeft: theme.spacing(1),
-		},
-		button: {
-			// marginLeft: 'auto',
 		},
 		content: {
 			backgroundColor: grey[100],
@@ -59,20 +37,46 @@ const useStyles = makeStyles((theme: Theme) =>
 	}),
 );
 
-interface IProps {
-	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	setRepsModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationSummary: PlantationSummary | undefined
-	plantationDetails: PlantationDetails | undefined
-	plantationReps: string[] | undefined
-	setPlantationReps: Dispatch<SetStateAction<string[]| undefined>>
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-
-}
-
-const DetailCard: FunctionComponent<IProps> = ({ setViewModalOpen, setRepsModalOpen, plantationSummary, plantationReps,setPlantationReps, plantationDetails, setHasError }) => {
+const DetailCard: FunctionComponent = () => {
 	const classes = useStyles();
-	const [repsAddModalOpen, setRepsAddModalOpen] = useState(false)
+
+	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { selectedPlantationSummaryState } = statePlantationAssetContext
+
+
+	const [selectedPlantationDetail, setSelectedPlantationDetail] = useState();
+
+	useEffect(() => {
+		selectedPlantationSummaryState.ref.get().then((doc: firebase.firestore.DocumentData) => {
+			const result = doc.data() as PlantationDoc
+			console.log(result )
+			if (result && !doc.metadata.hasPendingWrites)  {
+		
+				if (result.auditAcceptedAt) {
+					setSelectedPlantationDetail({...result.audited, repIds: result.repIds ? result.repIds : []})
+				} else {
+					setSelectedPlantationDetail({...result.unAudited, repIds: result.repIds ? result.repIds : []})
+				}
+			}
+		}).catch((error: Error) => {
+			// setHasError(error)
+		})
+	}, [selectedPlantationSummaryState])
+
+	
+	const closeRepsCardOnClick = () => {
+		dispatchPlantationAssetContext({
+			viewRep: false,
+			viewDetail: true
+		})
+	}
+
+	const openRepsCardAddModaOnClick = () => {
+		dispatchPlantationAssetContext({
+			addRep: true
+		})
+
+	}
 
 
 	return (
@@ -80,20 +84,19 @@ const DetailCard: FunctionComponent<IProps> = ({ setViewModalOpen, setRepsModalO
 			<Card className={classes.card}>
 				<CardHeader
 					action={
-						<IconButton aria-label="settings" onClick={() => { setViewModalOpen(true); setRepsModalOpen(false) }}>
+						<IconButton aria-label="settings" onClick={closeRepsCardOnClick}>
 							<AssignmentIcon />
 						</IconButton>
 					}
-					title={plantationSummary!.name}
+					title={selectedPlantationSummaryState.name}
 					subheader={"Producer Reps"}
 				/>
 				{
 					<CardContent className={classes.content}>
-						{ plantationReps && plantationReps.length > 0 ?
+						{selectedPlantationDetail && selectedPlantationDetail.repIds.length > 0 ?
 							<PlantationRepsCardList
-								plantationReps={plantationReps}
-								setPlantationReps={setPlantationReps}
-								plantationSummary={plantationSummary}
+							plantationReps={selectedPlantationDetail.repIds}
+								plantationSummary={selectedPlantationSummaryState}
 							/>
 							:
 							<div className={classes.contentWrapper}>
@@ -106,17 +109,12 @@ const DetailCard: FunctionComponent<IProps> = ({ setViewModalOpen, setRepsModalO
 					</CardContent>
 				}
 				<CardActions >
-					<IconButton aria-label="add" onClick={() => setRepsAddModalOpen(true)} className={classes.add}>
+					<IconButton aria-label="add" onClick={openRepsCardAddModaOnClick} className={classes.add}>
 						<PersonAddIcon />
 					</IconButton>
 				</CardActions>
 			</Card>
-			<PlantationRepsCardAddModal
-				repsAddModalOpen={repsAddModalOpen}
-				setRepsAddModalOpen={setRepsAddModalOpen}
-				plantationSummary={plantationSummary}
-				setPlantationReps={setPlantationReps}
-			/>
+			<PlantationRepsCardAddModal/>
 		</>
 	);
 }

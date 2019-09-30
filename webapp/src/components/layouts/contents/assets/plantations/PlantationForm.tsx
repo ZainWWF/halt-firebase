@@ -27,7 +27,7 @@ const useStyles = makeStyles({
 });
 
 interface IProps {
-	enteredValues: Omit<PlantationDetails, "geoLocation">
+	enteredValues: Omit<PlantationDetails, "name" | "ref" | "geoLocation" >
 	dialogOnCancel: () => void
 	isValid: boolean
 	errors: { [key: string]: any },
@@ -135,7 +135,7 @@ const PlantationForm: FunctionComponent<IProps> = memo(({ isValid, errors, touch
 						label="serial" />
 				</FormGroup>
 				<br />
-				{/* <FormLabel component="legend">License</FormLabel>
+				<FormLabel component="legend">License</FormLabel>
 				<FormGroup>
 					<Field name="license.area"
 						as={SingleField}
@@ -161,7 +161,7 @@ const PlantationForm: FunctionComponent<IProps> = memo(({ isValid, errors, touch
 							}
 						</>
 					}
-				</FormGroup> */}
+				</FormGroup>
 				<br />
 				<FormLabel component="legend">Previous Land Cover</FormLabel>
 				<FormGroup>
@@ -183,6 +183,7 @@ const PlantationForm: FunctionComponent<IProps> = memo(({ isValid, errors, touch
 				</FormGroup>
 				<br />
 				<FormGroup>
+					<FormLabel component="legend">Land Clearing Method</FormLabel>
 					<Field name="landClearingMethod"
 						as={SelectField}
 						error={errors.landClearingMethod}
@@ -190,6 +191,10 @@ const PlantationForm: FunctionComponent<IProps> = memo(({ isValid, errors, touch
 						type="text"
 						label="type"
 						choices={LandClearingMethodType} />
+				</FormGroup>
+				<br />
+				<FormLabel component="legend">Yield</FormLabel>
+				<FormGroup>
 					<Field name="age"
 						as={SingleField}
 						error={errors.age}

@@ -1,44 +1,53 @@
-import React, { Dispatch, SetStateAction, FunctionComponent } from "react";
+import React, { memo, FunctionComponent, useContext } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import PlantationDetailCard from "./PlantationDetailCard";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import { PlantationDoc, PlantationSummary,PlantationDetails } from '../../../../types/Plantation';
+import { PlantationAssetContext } from "../AssetsContents";
+import { TransitionProps } from '@material-ui/core/transitions';
+import {  Fade } from "@material-ui/core";
 
+const Transition = React.forwardRef<unknown, TransitionProps>(function Transition(props, ref) {
+	return <Fade
+		in={true}
+		ref={ref} {...props}
+		{...(true ? { timeout: 1000 } : {})}/>
+});
 
-interface IProps {
-	viewModalOpen: boolean
-	setMapModalOpen: Dispatch<SetStateAction<boolean>>
-	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	setRepsModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationDetails: PlantationDetails | undefined
-	setPlantationDoc: Dispatch<SetStateAction<PlantationDoc | undefined>>
-	plantationSummary: PlantationSummary | undefined
-	removePlantationCallback: (path: string) => void
-	editPlantationCallback: (path: string) => void
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-}
-
-const ModalView: FunctionComponent<IProps> = ({ viewModalOpen, setViewModalOpen, setMapModalOpen, setRepsModalOpen, plantationDetails, setPlantationDoc, plantationSummary, editPlantationCallback, removePlantationCallback, setHasError }) => {
+const ModalView: FunctionComponent = memo(() => {
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
+	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { plantationDetailsModalOpenState, selectedPlantationDetailState } = statePlantationAssetContext!
 
-	return (
-		<div>
-			<Dialog fullScreen={fullScreen} open={viewModalOpen} onClose={() => setViewModalOpen(false)} aria-labelledby="view-modal-detail">
-				<PlantationDetailCard
-					setViewModalOpen={setViewModalOpen}
-					setMapModalOpen={setMapModalOpen}
-					setRepsModalOpen={setRepsModalOpen}
-					setPlantationDoc={setPlantationDoc}
-					plantationSummary={plantationSummary}
-					editPlantationCallback={editPlantationCallback}
-					plantationDetails={plantationDetails}
-					removePlantationCallback={removePlantationCallback}
-				/>
+	const onClose = () => dispatchPlantationAssetContext!({
+		setPlantationDetailsModalOpen: {
+			payload: false
+		},
+		selectPlantationId: {
+			payload: null
+		},
+		selectPlantationDetail: {
+			payload: null
+		},
+		selectRepProfiles: {
+			payload: null
+		}
+	})
+
+	return (selectedPlantationDetailState && Object.keys(selectedPlantationDetailState).length > 0 ?
+		<>
+			<Dialog fullScreen={fullScreen}
+				open={plantationDetailsModalOpenState!}
+				onClose={onClose}
+				TransitionComponent={Transition}
+			>
+				<PlantationDetailCard selectedPlantationDetailState={selectedPlantationDetailState} />
 			</Dialog>
-		</div>
-	);
-}
+		</>
+		:
+		null
+	)
+})
 
 export default ModalView

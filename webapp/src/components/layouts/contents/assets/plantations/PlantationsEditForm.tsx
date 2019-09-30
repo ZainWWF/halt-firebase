@@ -1,35 +1,61 @@
-import React, { useState, Dispatch, SetStateAction, FunctionComponent, useEffect, useCallback } from "react";
+import React, { useState, FunctionComponent, useEffect, useCallback, useContext } from "react";
 import { Formik } from "formik";
-import { PlantationDoc, PlantationDetails } from '../../../../types/Plantation';
 import plantationValidationSchema from "./plantationValidationSchema";
 import * as turfHelpers from "@turf/helpers";
 import * as turfPointInPolygon from "@turf/boolean-point-in-polygon";
 import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
 import * as firebase from 'firebase/app';
 import PlantationForm from "./PlantationForm";
+import { PlantationAssetContext } from "../AssetsContents";
+import { Grid, CircularProgress } from "@material-ui/core";
 
-interface IProps {
-	setEditDialogOpen: Dispatch<SetStateAction<boolean>>
-	setViewModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationDoc: PlantationDoc | undefined
-	setPlantationEditData: Dispatch<SetStateAction<{ unAudited: PlantationDetails, name: string }>>
-	setHasError: Dispatch<SetStateAction<Error | undefined>>
-	setUploadInProgress: Dispatch<SetStateAction<boolean>>
+
+type IProps = {
+	selectedPlantationDetailState: any
 }
 
-const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModalOpen, plantationDoc, setPlantationEditData }) => {
 
+const EditForm: FunctionComponent<IProps> = ({ selectedPlantationDetailState }) => {
+
+	console.log("render")
+	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const [ selectedPlantationDetail, setSelectedPlantationDetail] = useState(selectedPlantationDetailState);
 	const [mapPolygonBounds, setMapPolygonBounds] = useState<turfHelpers.Feature<turfHelpers.Polygon>>()
-	const [enteredValues, setEnteredValues] = useState({
-		...plantationDoc!.unAudited, geoLocation: {
-			latitude: plantationDoc!.unAudited.geoLocation!.latitude,
-			longitude: plantationDoc!.unAudited.geoLocation!.longitude
-		}
-	});
+
+	const editedPlantationUpload = (plantationDoc: any) => {
+
+		selectedPlantationDetailState.ref.update(plantationDoc)
+			.then(() => {
+				console.log("upload success")
+				dispatchPlantationAssetContext!({
+					setPlantationEditModalOpen: {
+						payload: false
+					},
+					setPlantationDetailsModalOpen: {
+						payload: false
+					},
+					selectPlantationId: {
+						payload: null
+					},
+					selectPlantationDetail: {
+						payload: null
+					}
+				})
+			}).catch((error: Error) => {
+				console.log(error)
+				// setHasError(error)
+			})
+	}
 
 	const dialogOnCancel = () => {
-		setEditDialogOpen(false);
-		setViewModalOpen(true);
+		dispatchPlantationAssetContext!({
+			setPlantationEditModalOpen: {
+				payload: false
+			},
+			setPlantationDetailsModalOpen: {
+				payload: true
+			}
+		})
 	}
 
 	// initalise the drawable bounds for the polygon
@@ -50,76 +76,76 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 
 
 	useEffect(() => {
-		if (plantationDoc) {
-			if (plantationDoc.unAudited.management.type === "Pribadi") {
-				plantationDoc.unAudited.management.name = ""
-				plantationDoc.unAudited.management.rep = ""
-				plantationDoc.unAudited.management.contact = ""
-				plantationDoc.unAudited.management.detail = ""
+		if (selectedPlantationDetailState) {
+			if (selectedPlantationDetailState.management.type === "Pribadi") {
+				selectedPlantationDetailState.management.name = ""
+				selectedPlantationDetailState.management.rep = ""
+				selectedPlantationDetailState.management.contact = ""
+				selectedPlantationDetailState.management.detail = ""
 			}
 
-			if (plantationDoc.unAudited.management.type !== "Lainnya") {
-				plantationDoc.unAudited.management.detail = ""
+			if (selectedPlantationDetailState.management.type !== "Lainnya") {
+				selectedPlantationDetailState.management.detail = ""
 			}
 
-			if (plantationDoc.unAudited.certification.type !== "Lainnya") {
-				plantationDoc.unAudited.certification.detail = ""
+			if (selectedPlantationDetailState.certification.type !== "Lainnya") {
+				selectedPlantationDetailState.certification.detail = ""
 			}
 
-			// if (plantationDoc.unAudited.license.area <= 25) {
-			// 	plantationDoc.unAudited.license.type = ""
-			// 	plantationDoc.unAudited.license.detail = ""
-			// }
-
-			// if (plantationDoc.unAudited.license.type !== "Lainnya") {
-			// 	plantationDoc.unAudited.license.detail = ""
-			// }
-
-			if (plantationDoc.unAudited.previousLandCover.type !== "Lainnya") {
-				plantationDoc.unAudited.previousLandCover.detail = ""
+			if (selectedPlantationDetailState.license.area <= 25) {
+				selectedPlantationDetailState.license.type = ""
+				selectedPlantationDetailState.license.detail = ""
 			}
 
+			if (selectedPlantationDetailState.license.type !== "Lainnya") {
+				selectedPlantationDetailState.license.detail = ""
+			}
+
+			if (selectedPlantationDetailState.previousLandCover.type !== "Lainnya") {
+				selectedPlantationDetailState.previousLandCover.detail = ""
+			}
 		}
 
-	}, [plantationDoc])
+	}, [selectedPlantationDetailState])
 
-	return (
+	return (selectedPlantationDetailState ?
+
 		<Formik
 			initialValues={{
 				geoLocation: {
-					latitude: plantationDoc!.unAudited.geoLocation!.latitude,
-					longitude: plantationDoc!.unAudited.geoLocation!.longitude,
+					latitude: selectedPlantationDetailState.geoLocation.latitude,
+					longitude: selectedPlantationDetailState.geoLocation.longitude,
 				},
 				management: {
-					type: plantationDoc!.unAudited.management.type,
-					name: plantationDoc!.unAudited.management.name,
-					rep: plantationDoc!.unAudited.management.rep,
-					contact: plantationDoc!.unAudited.management.contact,
-					detail: plantationDoc!.unAudited.management.detail,
+					type: selectedPlantationDetailState.management.type,
+					name: selectedPlantationDetailState.management.name,
+					rep: selectedPlantationDetailState.management.rep,
+					contact: selectedPlantationDetailState.management.contact,
+					detail: selectedPlantationDetailState.management.detail,
 				},
 				certification: {
-					type: plantationDoc!.unAudited.certification.type,
-					detail: plantationDoc!.unAudited.certification.detail,
-					serial: plantationDoc!.unAudited.certification.serial
+					type: selectedPlantationDetailState.certification.type,
+					detail: selectedPlantationDetailState.certification.detail,
+					serial: selectedPlantationDetailState.certification.serial
 				},
-				// license: {
-				// 	area: plantationDoc!.unAudited.license.area,
-				// 	type: plantationDoc!.unAudited.license.type,
-				// 	detail: plantationDoc!.unAudited.license.detail
-				// },
+				license: {
+					area: selectedPlantationDetailState.license.area,
+					type: selectedPlantationDetailState.license.type,
+					detail: selectedPlantationDetailState.license.detail
+				},
 				previousLandCover: {
-					type: plantationDoc!.unAudited.previousLandCover.type,
-					detail: plantationDoc!.unAudited.previousLandCover.detail
+					type: selectedPlantationDetailState.previousLandCover.type,
+					detail: selectedPlantationDetailState.previousLandCover.detail
 				},
-				age: plantationDoc!.unAudited.age,
-				treesPlanted: plantationDoc!.unAudited.treesPlanted,
-				treesProductive: plantationDoc!.unAudited.treesProductive,
-				aveMonthlyYield: plantationDoc!.unAudited.aveMonthlyYield,
-				landClearingMethod: plantationDoc!.unAudited.landClearingMethod,
-				plantationName: plantationDoc!.name
+				age: selectedPlantationDetailState.age,
+				treesPlanted: selectedPlantationDetailState.treesPlanted,
+				treesProductive: selectedPlantationDetailState.treesProductive,
+				aveMonthlyYield: selectedPlantationDetailState.aveMonthlyYield,
+				landClearingMethod: selectedPlantationDetailState.landClearingMethod,
+				plantationName: selectedPlantationDetailState.name
 			}}
 			validate={values => {
-				setEnteredValues({ ...values })
+				setSelectedPlantationDetail({ ...values })
 				if (values.management.type === "Pribadi") {
 					values.management.name = ""
 					values.management.rep = ""
@@ -135,14 +161,14 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 					values.certification.detail = ""
 				}
 
-				// if (values.license.area <= 25) {
-				// 	values.license.type = ""
-				// 	values.license.detail = ""
-				// }
+				if (values.license.area <= 25) {
+					values.license.type = ""
+					values.license.detail = ""
+				}
 
-				// if (values.license.type !== "Lainnya") {
-				// 	values.license.detail = ""
-				// }
+				if (values.license.type !== "Lainnya") {
+					values.license.detail = ""
+				}
 
 				if (values.previousLandCover.type !== "Lainnya") {
 					values.previousLandCover.detail = ""
@@ -163,34 +189,21 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 			}}
 			validationSchema={plantationValidationSchema}
 			onSubmit={(values) => {
-				setPlantationEditData({
+				editedPlantationUpload({
 					name: values.plantationName,
 					unAudited: {
 						geoLocation: new firebase.firestore.GeoPoint(
 							values.geoLocation.latitude,
 							values.geoLocation.longitude
 						),
-						management: {
-							type: values.management.type,
-							name: values.management.name.length > 0 ? values.management.name : 'N/A',
-							rep: values.management.rep.length > 0 ? values.management.rep : 'N/A',
-							contact: values.management.contact.length > 0 ? values.management.contact : 'N/A',
-							detail: values.management.detail.length > 0 ? values.management.detail : 'N/A'
+						management: values.management,
+						certification: values.certification,
+						license: {
+							area: Number(values.license.area),
+							type: values.license.type,
+							detail: values.license.detail
 						},
-						certification: {
-							type: values.certification.type,
-							detail: values.certification.detail.length > 0 ? values.certification.detail : 'N/A',
-							serial: values.certification.serial.length > 0 ? values.certification.serial : 'N/A'
-						},
-						// license: {
-						// 	area: Number(values.license.area),
-						// 	type: values.license.type.length > 0 ? values.license.type : 'N/A',
-						// 	detail: values.license.detail.length > 0 ? values.license.detail : 'N/A'
-						// },
-						previousLandCover: {
-							type: values.previousLandCover.type,
-							detail: values.previousLandCover.detail.length > 0 ? values.previousLandCover.detail : 'N/A'
-						},
+						previousLandCover: values.previousLandCover,
 						landClearingMethod: values.landClearingMethod,
 						age: Number(values.age),
 						treesPlanted: Number(values.treesPlanted),
@@ -198,7 +211,6 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 						aveMonthlyYield: Number(values.aveMonthlyYield)
 					}
 				})
-				setEditDialogOpen(false)
 			}}
 		>
 			{({ isValid, errors, touched }) =>
@@ -206,11 +218,21 @@ const DialogForm: FunctionComponent<IProps> = ({ setEditDialogOpen, setViewModal
 					errors={errors}
 					touched={touched}
 					isValid={isValid}
-					enteredValues={enteredValues}
+					enteredValues={selectedPlantationDetail}
 					dialogOnCancel={dialogOnCancel} />
 			}
 		</Formik>
+		:
+		<Grid
+			container
+			justify="center"
+			alignItems="center"
+			style={{ height: 100, width: 140, margin: "auto", paddingBottom: 20 }}
+		>
+			<CircularProgress />
+		</Grid>
+
 	);
 }
 
-export default DialogForm;
+export default EditForm;

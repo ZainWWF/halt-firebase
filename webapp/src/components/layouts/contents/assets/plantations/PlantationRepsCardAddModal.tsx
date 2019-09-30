@@ -1,34 +1,35 @@
-import React, { Dispatch, SetStateAction, FunctionComponent, memo } from "react";
+import React, { FunctionComponent, memo, useContext } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import PlantationRepSearchForm from "./PlantationRepsSearchForm";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
-import {  PlantationSummary, } from '../../../../types/Plantation';
+import { PlantationAssetContext } from "../AssetsContents";
+import { DialogContent, Fade } from "@material-ui/core";
 
 
-interface IProps {
-	repsAddModalOpen: boolean
-	setRepsAddModalOpen: Dispatch<SetStateAction<boolean>>
-	plantationSummary: PlantationSummary | undefined
-	setPlantationReps: Dispatch<SetStateAction<string[] | undefined>>
-}
-
-
-const ModalView: FunctionComponent<IProps> =memo(({ plantationSummary, repsAddModalOpen, setRepsAddModalOpen,setPlantationReps }) => {
+const ModalView: FunctionComponent = memo(() => {
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
+	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { selectedPlantationSummaryState } = statePlantationAssetContext
 
+	const closeRepsCardAddModalOnClick = () => {
+		dispatchPlantationAssetContext({ addRep: false })
+	}
 
 	return (
-		<div>
-			<Dialog fullScreen={fullScreen} open={repsAddModalOpen} onClose={() => setRepsAddModalOpen(false)} aria-labelledby="view-modal-detail">
-				<PlantationRepSearchForm 
-				setRepsAddModalOpen={setRepsAddModalOpen} 
-				plantationSummary={plantationSummary} 
-				setPlantationReps={setPlantationReps}
+
+		<Dialog fullScreen={false} open={statePlantationAssetContext.addRepState} onClose={closeRepsCardAddModalOnClick} aria-labelledby="view-modal-detail">
+			<DialogContent>
+
+				<PlantationRepSearchForm
+					closeRepsCardAddModalOnClick={closeRepsCardAddModalOnClick}
+					selectedPlantationSummaryState={selectedPlantationSummaryState}
 				/>
-			</Dialog>
-		</div>
+
+			</DialogContent>
+		</Dialog >
+
 	);
 })
 

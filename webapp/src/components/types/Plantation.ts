@@ -16,6 +16,9 @@ export type PlantationDoc = {
 
 
 export type PlantationDetails = {
+	name:string
+	repIds?: string[]
+	ref: firestore.DocumentReference
 	geometry?: string
 	geoLocation?: firestore.GeoPoint
 	management: {
@@ -30,11 +33,11 @@ export type PlantationDetails = {
 		detail: string
 		serial: string
 	},
-	// license: {
-	// 	area: number
-	// 	type: string
-	// 	detail: string
-	// },
+	license: {
+		area: number
+		type: string
+		detail: string
+	},
 	previousLandCover: {
 		type: string,
 		detail: string
@@ -56,6 +59,8 @@ export type PlantationSummary = {
 	auditAcceptedAt: string | null,
 	isActive: boolean
 	ref: firestore.DocumentReference
+	repOfId? : string
+	repOfName?: string
 
 }
 

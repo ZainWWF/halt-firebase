@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useCallback, useContext, useState, memo, Dispatch, SetStateAction } from 'react';
+import React, { FunctionComponent, useEffect, useCallback, useContext, useState, memo} from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -38,13 +38,12 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface IProps {
-	plantationReps: string[] | undefined
 	plantationSummary: PlantationSummary | undefined
-	setPlantationReps: Dispatch<SetStateAction<string[] | undefined>>
+	plantationReps : string[] 
 }
 
 
-const ListView: FunctionComponent<IProps> = memo(({ plantationSummary, plantationReps, setPlantationReps }) => {
+const ListView: FunctionComponent<IProps> = memo(({ plantationSummary, plantationReps }) => {
 	const classes = useStyles();
 	const [repProfiles, setRepProfiles] = useState<any[]>([])
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
@@ -53,22 +52,17 @@ const ListView: FunctionComponent<IProps> = memo(({ plantationSummary, plantatio
 		plantationSummary!.ref.update({
 			"repIds": firebase.firestore.FieldValue.arrayRemove(userId)
 		}).then(() => {
-
-			if (plantationReps) {
-				const updatedPlantationReps = plantationReps.filter(repId => repId !== userId)
-				setPlantationReps(updatedPlantationReps)
-			}
 			console.log("remove success!")
 		}).catch(error => console.log(error))
 	}
 
 	const plantationRepsCallback = useCallback(() =>
-		Promise.all(plantationReps!.map(repId =>
+		Promise.all(plantationReps.map((repId:string) =>
 			firebaseApp.db.doc(`users/${repId}`)
 				.get()))
-
 		, [plantationReps, firebaseApp])
 
+	// get list of plantation reps		
 	useEffect(() => {
 		plantationRepsCallback().then((snaps: firebase.firestore.DocumentSnapshot[]) => {
 			const profiles = snaps.map(snap => { return { ...snap.data()!.profile, userId: snap.id } })
