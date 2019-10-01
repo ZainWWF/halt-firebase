@@ -55,6 +55,7 @@ const ListView: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
 
 	// remove vehicle 
 	useEffect(() => {
+		let isSubscribed = true
 		if (removedVehicleIdState.length > 0 && !uploadInProgressState) {
 			dispatchVehicleAssetContext({
 				uploadInProgress: true,
@@ -71,14 +72,18 @@ const ListView: FunctionComponent<IProps> = memo(({ vehicleCollection }) => {
 				vehicles: updateVehicleCollection
 			}).then(() => {
 				console.log("upload success")
-				dispatchVehicleAssetContext({
-					uploadInProgress: false,
-					removedVehicleId: ""
-				})
+				if (isSubscribed) {
+					dispatchVehicleAssetContext({
+						uploadInProgress: false,
+						removedVehicleId: ""
+					})
+				}
+
 			}).catch((error: Error) => {
 
 			})
 		}
+		return () => { isSubscribed = false }
 	}, [removedVehicleIdState, firebaseApp, dispatchVehicleAssetContext, user, vehicleCollection, uploadInProgressState])
 
 	return (

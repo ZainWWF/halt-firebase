@@ -72,20 +72,26 @@ service cloud.firestore {
 			// allow read, write;
 				allow read:	if isSignedIn() && isAssetOwner()
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
-										// && incomingData().size() == 8
-										// && incomingData().license is string
-										// && incomingData().colour is string
-										// && incomingData().chassis is string
-										// && incomingData().model is string
-										// && incomingData().make is string
-										// && incomingData().url is string
-										// && incomingData().loadingCapacity is number
+										// && incomingData().size() == 7
+										&& incomingData().license is string
+										&& incomingData().colour is string
+										&& incomingData().model is string
+										// && incomingData().make is map
+										&& incomingData().url is string
+										&& incomingData().loadingCapacity is number
+										// && incomingData().make.size() == 2
+										// && incomingData().make.type is string
+										// && incomingData().make.detail is string
+
+
 				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
 										&& incomingData().userId == existingData().userId
 										&& incomingData().isRemoved == existingData().isRemoved
 										&& incomingData().createdAt == existingData().createdAt
 										&& incomingData().updatedAt == existingData().updatedAt
-				
+										&& existingData().isRemoved == false
+		
+
 
 				allow delete: if false
 
@@ -109,7 +115,7 @@ service cloud.firestore {
 											// && incomingData().unAudited.buyerAssociation.agreement is string
 											// && incomingData().unAudited.certification is string
 											// && incomingData().unAudited.area is number
-											// && incomingData().unAudited.age is number
+											// && incomingData().unAudited.age is number // age min max check?
 											// && incomingData().unAudited.treesPlanted is number
 											// && incomingData().unAudited.treesProductive is number
 											// && incomingData().unAudited.aveMonthlyYield is number
@@ -126,13 +132,18 @@ service cloud.firestore {
 											&& incomingData().auditAcceptedAt == existingData().auditAcceptedAt
 											&& incomingData().auditAt == existingData().auditAt
 											&& incomingData().auditBy == existingData().auditBy
+											&& existingData().isRemoved == false
 
+								
 				allow delete: if false
 
 		}
 
 
+		match /plantations/{plantationId}/buyers/{buyerId} {
+			allow read, write;
+		}	
 
-
-  }
+	
+ }
 }
