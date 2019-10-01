@@ -97,6 +97,7 @@ const DialogForm: FunctionComponent = () => {
 
 
 	return (
+
 		<Formik
 			initialValues={initialValues}
 			validate={values => {
@@ -179,6 +180,7 @@ const DialogForm: FunctionComponent = () => {
 				)
 			}}
 		</Formik>
+
 	);
 }
 

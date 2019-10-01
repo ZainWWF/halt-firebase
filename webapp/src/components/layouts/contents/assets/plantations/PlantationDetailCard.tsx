@@ -109,10 +109,18 @@ const DetailCard: FunctionComponent<IProps> = ({ selectedPlantationDetailState }
 			payload: selectedPlantationDetailState.ref.path.split("/")[1]
 		}
 	})
-	console.log(selectedPlantationDetailState)
 
 	const openMapOnClick = () => dispatchPlantationAssetContext!({
 		setPlantationMapModalOpen: {
+			payload: true
+		},
+		setPlantationDetailsModalOpen: {
+			payload: false
+		}
+	})
+
+	const openRepOnClick = () => dispatchPlantationAssetContext!({
+		setPlantationRepsModalOpen: {
 			payload: true
 		},
 		setPlantationDetailsModalOpen: {
@@ -130,16 +138,15 @@ const DetailCard: FunctionComponent<IProps> = ({ selectedPlantationDetailState }
 						</IconButton>
 					}
 					title={selectedPlantationDetailState.name}
-					subheader={selectedPlantationDetailState.management!.type === "PRIVATE" ? "owned by Me" : `owned by ${selectedPlantationDetailState!.management.name}`}
+					subheader={selectedPlantationDetailState.management!.type === "Pribadi" ? "owned by Me" : `owned by ${selectedPlantationDetailState!.management.name}`}
 				/>
 				<CardActions >
 					<Button size="small" color="primary" onClick={openMapOnClick}>
 						Map
 				</Button>
-					{/* 
-					<Button size="small" color="primary" onClick={openRepOnClick}>
+				<Button size="small" color="primary" onClick={openRepOnClick}>
 						Reps
-				</Button> */}
+				</Button>
 				</CardActions>
 
 				<CardContent className={classes.content}>

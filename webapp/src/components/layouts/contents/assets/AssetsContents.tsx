@@ -1,4 +1,4 @@
-import React, { useContext, useCallback, useEffect, useState, useRef, createContext, useReducer, Dispatch } from 'react';
+import React, { useContext, useEffect, useState, useRef, createContext, useReducer, Dispatch } from 'react';
 import { FirebaseContext, Firebase } from '../../../providers/Firebase/FirebaseProvider';
 import { Switch, Route } from 'react-router-dom';
 import VehiclesView from './vehicles/VehiclesView';
@@ -29,44 +29,60 @@ const AssetsContents = () => {
 
 	const unsubscribeRef = useRef<any>()
 
-	const listenAssetCallback = useCallback(() => {
-		let unsubscribe = firebaseApp.db
-			.collection("users")
-			.doc(user.uid)
-			.onSnapshot((doc) => {
-				unsubscribeRef.current = unsubscribe
-				const data = doc.data();
-				if (data && data.plantations) {
-					setPlantationCollection(data.plantations)
 
-					dispatchPlantationAssetContext({
-						plantationCollection: {
-							payload: data.plantations
-						}
-					})
-				}
-				if (data && data.vehicles) {
-					setVehicleCollection(data.vehicles)
-				}
-			})
+	// useEffect(() => {
+	// 	let timer = setTimeout(() => {
+	// 		// if (statePlantationAssetContext.plantationDetailRefreshState) {
+	// 			dispatchPlantationAssetContext({
+	// 				setPlantationDetailRefresh: {
+	// 					payload: false
+	// 				}
+	// 			})
+	// 		// }
+	// 	}, 3000)
 
-	}, [firebaseApp, user])
+	// 	return () => clearTimeout(timer)
+	// }, [statePlantationAssetContext.plantationDetailRefreshState])
 
-	useEffect(() => {
-		if(statePlantationAssetContext.plantationDetailRefreshState){
-			listenAssetCallback()
-		}
-		return () => {
-			console.log("unsubscribe")
-			if (unsubscribeRef) unsubscribeRef.current()
-		}
-	}, [listenAssetCallback, statePlantationAssetContext.plantationDetailRefreshState])
 
 
 	useEffect(() => {
-		console.log(statePlantationAssetContext.selectedPlantationIdState)
+		console.log("unsubscribe")
+		return () => unsubscribeRef.current()
+	}, [])
+
+	useEffect(() => {
+		if (statePlantationAssetContext.plantationDetailRefreshState) {
+			console.log("refreshing collection subscription")
+			if (unsubscribeRef.current) unsubscribeRef.current()
+			console.log("subscribe")
+			unsubscribeRef.current = firebaseApp.db
+				.collection("users")
+				.doc(user.uid)
+				.onSnapshot((doc) => {
+					const data = doc.data();
+					if (data && data.plantations) {
+						setPlantationCollection(data.plantations)
+						dispatchPlantationAssetContext({
+							plantationCollection: {
+								payload: data.plantations
+							}
+						})
+					}
+					if (data && data.vehicles) {
+						setVehicleCollection(data.vehicles)
+					}
+				})
+		}
+	}, [statePlantationAssetContext.plantationDetailRefreshState, firebaseApp, user])
+
+
+	// process the selected plantation details to the views
+	useEffect(() => {
 		let isSubscribed = true
-		if (plantationCollection && statePlantationAssetContext.selectedPlantationIdState) {
+		if (plantationCollection && statePlantationAssetContext.selectedPlantationIdState &&
+			plantationCollection[statePlantationAssetContext.selectedPlantationIdState]
+		) {
 			plantationCollection[statePlantationAssetContext.selectedPlantationIdState].ref.get().then((doc: firebase.firestore.DocumentData) => {
 				const result = doc.data() as PlantationDoc
 				if (result && isSubscribed) {
@@ -84,7 +100,7 @@ const AssetsContents = () => {
 							.get()))
 						.then((snaps: firebase.firestore.DocumentSnapshot[]) => {
 							const profiles = snaps.map(snap => { return { ...snap.data()!.profile, userId: snap.id } })
-							
+
 							if (isSubscribed) {
 								console.log("dispatch plantation details and profile update")
 								dispatchPlantationAssetContext({
@@ -105,14 +121,13 @@ const AssetsContents = () => {
 				// setHasError(error)
 			})
 		}
-		return () => {
-			isSubscribed = false
-		}
-		}, [firebaseApp, statePlantationAssetContext.selectedPlantationIdState, plantationCollection])
+		return () => { isSubscribed = false }
+	}, [firebaseApp, statePlantationAssetContext.selectedPlantationIdState, plantationCollection])
 
 	// remove plantation 
 	useEffect(() => {
-		if ( statePlantationAssetContext.removedPlantationIdState  ) {
+		if (statePlantationAssetContext.removedPlantationIdState) {
+			console.log("removing plantation Id: ", statePlantationAssetContext.removedPlantationIdState)
 			const updatePlantationCollection = Object.keys(plantationCollection).reduce((collection, plantationId: string) => {
 				if (plantationId !== statePlantationAssetContext.removedPlantationIdState) {
 					const plantation = { [plantationId]: plantationCollection[plantationId] }
@@ -121,6 +136,8 @@ const AssetsContents = () => {
 				return collection
 			}, {})
 
+			console.log("updating plantation collection  with removed plantation to firestore: ", updatePlantationCollection)
+
 			firebaseApp.db.doc('users/' + user.uid).update({
 				plantations: updatePlantationCollection
 			}).then(() => {
@@ -128,13 +145,16 @@ const AssetsContents = () => {
 				dispatchPlantationAssetContext!({
 					setPlantationDetailRefresh: {
 						payload: true
+					},
+					removePlantationId: {
+						payload: null
 					}
 				})
 			}).catch((error: Error) => {
 
 			})
 		}
-	}, [firebaseApp,statePlantationAssetContext.removedPlantationIdState, plantationCollection, user])
+	}, [firebaseApp, statePlantationAssetContext.removedPlantationIdState, plantationCollection, user])
 
 
 

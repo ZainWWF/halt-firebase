@@ -1,54 +1,44 @@
-import React, { FunctionComponent, useContext, useState, useEffect,memo } from "react";
+import React, { FunctionComponent, useContext } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import PlantationRepsCard from "./PlantationRepsCard";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
 import { PlantationAssetContext } from "../AssetsContents";
-import { PlantationDoc } from "../../../../types/Plantation";
-import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
-import * as firebase from 'firebase/app';
-import 'firebase/firestore';
+import { TransitionProps } from '@material-ui/core/transitions';
+import { Fade } from '@material-ui/core';
+
+const Transition = React.forwardRef<unknown, TransitionProps>(function Transition(props, ref) {
+	return <Fade
+		in={true}
+		ref={ref} {...props}
+		{...(true ? { timeout: 1000 } : {})} />
+});
 
 
-type IProps ={
-	setRepsModelOpen: any
-	repsModalOpen:any
-	setDetailsModelOpen:any
-}
-const ModalView: FunctionComponent<IProps> = memo(({repsModalOpen,setRepsModelOpen,setDetailsModelOpen}) => {
+const ModalView: FunctionComponent = () => {
 	const theme = useTheme();
-	const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
-	// const firebaseApp = useContext(FirebaseContext) as Firebase;
-	// const [repProfiles, setRepProfiles] = useState<any[]>([])
-	// const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
-	
-	console.log("render")
-	// setDetailsModelOpen(false)
-	const dialogOnClose = () => setRepsModelOpen(false)
-	
-	// {
-		// dispatchPlantationAssetContext({ viewRep: false })
-	// }
+	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
+
+	const { statePlantationAssetContext } = useContext(PlantationAssetContext)
+	const { plantationRepsModalOpenState, selectedPlantationDetailState } = statePlantationAssetContext!
 
 	return (
-		<div>
-			<Dialog disableBackdropClick={true}
+		selectedPlantationDetailState && Object.keys(selectedPlantationDetailState).length > 0 ?
+		<>
+			<Dialog
 				fullScreen={fullScreen}
-				onClose={dialogOnClose}
-				open={repsModalOpen}
-				aria-labelledby="form-dialog-title">
-				<PlantationRepsCard
-				setDetailsModelOpen={setDetailsModelOpen}
-					// repProfiles={repProfiles}
-					// selectedPlantationDetail={selectedPlantationDetail}
-					// statePlantationAssetContext={statePlantationAssetContext}
-					// dispatchPlantationAssetContext={dispatchPlantationAssetContext}
-
-				/>
+				disableBackdropClick={true}
+				open={plantationRepsModalOpenState!}
+				TransitionComponent={Transition}
+			>
+				<PlantationRepsCard/>
 			</Dialog>
-		</div>
-	);
-})
+		</>
+		:
+		null
+	)
+
+}
 
 export default ModalView
 

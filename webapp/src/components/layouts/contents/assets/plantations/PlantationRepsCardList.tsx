@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useCallback, useContext, useState, memo} from 'react';
+import React, { FunctionComponent, memo, useContext } from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -6,12 +6,13 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import { grey } from '@material-ui/core/colors';
-import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
+
 import { ListItemSecondaryAction, IconButton } from '@material-ui/core';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import { PlantationSummary } from '../../../../types/Plantation';
+
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import { PlantationAssetContext } from '../AssetsContents';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -38,44 +39,39 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface IProps {
-	plantationSummary: PlantationSummary | undefined
-	plantationReps : string[] 
+	plantationSummary: any
+	repProfiles: string[]
 }
 
 
-const ListView: FunctionComponent<IProps> = memo(({ plantationSummary, plantationReps }) => {
+const ListView: FunctionComponent<IProps> = memo(({ plantationSummary, repProfiles }) => {
+	
 	const classes = useStyles();
-	const [repProfiles, setRepProfiles] = useState<any[]>([])
-	const firebaseApp = useContext(FirebaseContext) as Firebase;
+	const {   dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 
 	const removePlantationRep = (userId: string) => {
 		plantationSummary!.ref.update({
 			"repIds": firebase.firestore.FieldValue.arrayRemove(userId)
 		}).then(() => {
 			console.log("remove success!")
-		}).catch(error => console.log(error))
+			dispatchPlantationAssetContext!({
+				selectRepProfiles: {
+					payload: null
+				},
+				setPlantationDetailRefresh: {
+					payload: true
+				},
+				setPlantationRepsModalOpen: {
+					payload: true
+				},
+			})
+		}).catch((error: Error) => console.log(error))
 	}
-
-	const plantationRepsCallback = useCallback(() =>
-		Promise.all(plantationReps.map((repId:string) =>
-			firebaseApp.db.doc(`users/${repId}`)
-				.get()))
-		, [plantationReps, firebaseApp])
-
-	// get list of plantation reps		
-	useEffect(() => {
-		plantationRepsCallback().then((snaps: firebase.firestore.DocumentSnapshot[]) => {
-			const profiles = snaps.map(snap => { return { ...snap.data()!.profile, userId: snap.id } })
-			console.log(profiles)
-			setRepProfiles(profiles)
-		})
-	}, [plantationRepsCallback])
-
 
 	return (
 		<List className={classes.root}>
 			{
-				repProfiles!.map((rep: any) => {
+				repProfiles! && repProfiles.map((rep: any) => {
 					return (
 						<ListItem key={rep.userId} id={rep.userId} className={classes.repList}>
 							<ListItemAvatar>

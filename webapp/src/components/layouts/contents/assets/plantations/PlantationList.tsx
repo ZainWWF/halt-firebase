@@ -62,16 +62,16 @@ const ListView: FunctionComponent = memo(() => {
 
 	const ownership = (plantation: PlantationSummary) => {
 		if (!plantation.repOfId) {
-			return plantation.management.type === "PRIVATE" ? "owned by Me" : `owned by ${plantation.management.name}`
+			return plantation.management.type === "Pribadi" ? "owned by Me" : `owned by ${plantation.management.name}`
 		} else {
-			return plantation.management.type === "PRIVATE" ? `owned by ${plantation.repOfName ? plantation.repOfName : "Unknown"}` : `owned by ${plantation.management.name}`
+			return plantation.management.type === "Pribadi" ? `owned by ${plantation.repOfName ? plantation.repOfName : "Unknown"}` : `owned by ${plantation.management.name}`
 		}
 	}
 
 
 	return (
 		<List className={classes.root}>
-			{plantationCollectionState ?
+			{plantationCollectionState && Object.keys(plantationCollectionState).length > 0 ?
 				Object.keys(plantationCollectionState).map((plantationId: string) => {
 					const plantation: PlantationSummary = plantationCollectionState[plantationId];
 					return (

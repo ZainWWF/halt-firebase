@@ -20,6 +20,6 @@
     "jsx": "react"
   },
   "include": [
-    "src", "src/components/types/.ts"
+    "src", "src/components/types/.ts", "../__VehiclesView_old copy.tsx"
   ]
 }

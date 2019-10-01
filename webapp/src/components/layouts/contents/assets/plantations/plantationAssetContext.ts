@@ -2,18 +2,14 @@
 import {  PlantationDetails } from "../../../../types/Plantation";
 
 export type PlantationAssetContextState = {
-
-
-	viewRepState: boolean | undefined
-	addRepState: boolean | undefined
 	uploadInProgressState: boolean | undefined
-
-
 	plantationDetailRefreshState: boolean | undefined
 	plantationMapModalOpenState: boolean | undefined
 	plantationNewModalOpenState: boolean | undefined
 	plantationEditModalOpenState: boolean | undefined
 	plantationDetailsModalOpenState: boolean | undefined
+	plantationRepsModalOpenState: boolean | undefined
+	plantationNewRepModalOpenState: boolean | undefined
 	selectedPlantationIdState: string | null
 	removedPlantationIdState: string | null
 	selectedPlantationDetailState: Partial<PlantationDetails> | null
@@ -23,13 +19,9 @@ export type PlantationAssetContextState = {
 
 export type PlantationAssetContextAction = {
 
-
-	
-	viewRep?: true | false
-	addRep?: true | false
-	uploadInProgress?: true | false
-	removedPlantationId?: string
-
+	uploadInProgress?: {
+		payload: true | false
+	}
 
 	setPlantationDetailRefresh?: {
 		payload: true | false
@@ -48,6 +40,14 @@ export type PlantationAssetContextAction = {
 	}
 
 	setPlantationDetailsModalOpen?: {
+		payload: true | false
+	}
+
+	setPlantationRepsModalOpen?: {
+		payload: true | false
+	}
+
+	setPlantationNewRepModalOpen?: {
 		payload: true | false
 	}
 
@@ -72,22 +72,12 @@ export type PlantationAssetContextAction = {
 }
 
 export const plantationAssetContextReducer = (state: PlantationAssetContextState, action: PlantationAssetContextAction) => {
-	console.log(action)
+	
 	return Object.keys(action).reduce((state, type) => {
 
-
-
-		if (type === "viewRep") {
-			return { ...state, viewRepState: action.viewRep }
-		}
-		if (type === "addRep") {
-			return { ...state, addRepState: action.addRep }
-		}
 		if (type === "uploadInProgress") {
-			return { ...state, uploadInProgressState: action.uploadInProgress }
+			return { ...state, uploadInProgressState: action.uploadInProgress!.payload }
 		}
-
-
 		if (type === "selectPlantationDetail") {
 			return { ...state, selectedPlantationDetailState: action.selectPlantationDetail!.payload }
 		}
@@ -106,6 +96,12 @@ export const plantationAssetContextReducer = (state: PlantationAssetContextState
 		if (type === "setPlantationDetailsModalOpen") {
 			return { ...state, plantationDetailsModalOpenState: action.setPlantationDetailsModalOpen!.payload }
 		}
+		if (type === "setPlantationRepsModalOpen") {
+			return { ...state, plantationRepsModalOpenState: action.setPlantationRepsModalOpen!.payload }
+		}
+		if (type === "setPlantationNewRepModalOpen") {
+			return { ...state, plantationNewRepModalOpenState: action.setPlantationNewRepModalOpen!.payload }
+		}	
 		if (type === "setPlantationEditModalOpen") {
 			return { ...state, plantationEditModalOpenState: action.setPlantationEditModalOpen!.payload }
 		}
@@ -124,12 +120,7 @@ export const plantationAssetContextReducer = (state: PlantationAssetContextState
 }
 
 export const initialPlantationState: PlantationAssetContextState = {
-
-	viewRepState: false,
-	addRepState: false,
 	uploadInProgressState: false,
-
-
 	plantationDetailRefreshState: true,
 	selectedPlantationDetailState: {},
 	selectedRepProfilesState: null,
@@ -139,5 +130,7 @@ export const initialPlantationState: PlantationAssetContextState = {
 	plantationDetailsModalOpenState: false,
 	plantationEditModalOpenState: false,
 	plantationNewModalOpenState: false,
-	plantationMapModalOpenState: false
+	plantationMapModalOpenState: false,
+	plantationRepsModalOpenState: false,
+	plantationNewRepModalOpenState: false
 }

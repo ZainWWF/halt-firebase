@@ -1,4 +1,4 @@
-import React, {  FunctionComponent, useContext, useState, useEffect } from 'react';
+import React, { FunctionComponent, useContext } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -10,9 +10,8 @@ import { grey } from '@material-ui/core/colors';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import PlantationRepsCardList from "./PlantationRepsCardList";
-import PlantationRepsCardAddModal from "./PlantationRepsCardAddModal";
 import { PlantationAssetContext } from '../AssetsContents';
-import { PlantationDoc } from '../../../../types/Plantation';
+
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -38,46 +37,28 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const DetailCard: FunctionComponent = () => {
+
 	const classes = useStyles();
+	const {  statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { selectedRepProfilesState, selectedPlantationDetailState } = statePlantationAssetContext!
 
-	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
-	const { selectedPlantationSummaryState } = statePlantationAssetContext
+	const closeRepsCardOnClick = () => dispatchPlantationAssetContext!({
+		setPlantationRepsModalOpen: {
+			payload: false
+		},
+		setPlantationDetailsModalOpen: {
+			payload: true
+		}
+	})
 
-
-	const [selectedPlantationDetail, setSelectedPlantationDetail] = useState();
-
-	useEffect(() => {
-		selectedPlantationSummaryState.ref.get().then((doc: firebase.firestore.DocumentData) => {
-			const result = doc.data() as PlantationDoc
-			console.log(result )
-			if (result && !doc.metadata.hasPendingWrites)  {
-		
-				if (result.auditAcceptedAt) {
-					setSelectedPlantationDetail({...result.audited, repIds: result.repIds ? result.repIds : []})
-				} else {
-					setSelectedPlantationDetail({...result.unAudited, repIds: result.repIds ? result.repIds : []})
-				}
-			}
-		}).catch((error: Error) => {
-			// setHasError(error)
-		})
-	}, [selectedPlantationSummaryState])
-
-	
-	const closeRepsCardOnClick = () => {
-		dispatchPlantationAssetContext({
-			viewRep: false,
-			viewDetail: true
-		})
-	}
-
-	const openRepsCardAddModaOnClick = () => {
-		dispatchPlantationAssetContext({
-			addRep: true
-		})
-
-	}
-
+	const openRepsCardAddModaOnClick = () =>  dispatchPlantationAssetContext!({
+		setPlantationNewRepModalOpen: {
+			payload: true
+		},
+		setPlantationRepsModalOpen: {
+			payload: false
+		}
+	})
 
 	return (
 		<>
@@ -88,15 +69,16 @@ const DetailCard: FunctionComponent = () => {
 							<AssignmentIcon />
 						</IconButton>
 					}
-					title={selectedPlantationSummaryState.name}
+					title={selectedPlantationDetailState!.name!}
 					subheader={"Producer Reps"}
 				/>
 				{
 					<CardContent className={classes.content}>
-						{selectedPlantationDetail && selectedPlantationDetail.repIds.length > 0 ?
+						{selectedPlantationDetailState && selectedPlantationDetailState!.repIds!.length > 0 ?
+							
 							<PlantationRepsCardList
-							plantationReps={selectedPlantationDetail.repIds}
-								plantationSummary={selectedPlantationSummaryState}
+								plantationSummary={selectedPlantationDetailState!}
+								repProfiles={selectedRepProfilesState!}
 							/>
 							:
 							<div className={classes.contentWrapper}>
@@ -114,7 +96,7 @@ const DetailCard: FunctionComponent = () => {
 					</IconButton>
 				</CardActions>
 			</Card>
-			<PlantationRepsCardAddModal/>
+
 		</>
 	);
 }

@@ -1,5 +1,5 @@
 import React, { useState, FunctionComponent, memo, useContext } from 'react';
-import { Paper, Grid, LinearProgress, Theme, Button, Toolbar, AppBar, Snackbar } from '@material-ui/core';
+import { Paper, Grid, Theme, Button, Toolbar, AppBar, Snackbar, LinearProgress } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import PlantationList from "./PlantationList";
 import PlantationsNewModal from "./PlantationsNewModal";
@@ -7,8 +7,9 @@ import PlantationDetailModal from "./PlantationDetailModal";
 import PlantationsEditModal from "./PlantationsEditModal";
 import PlantationMapModal from "./PlantationMapModal";
 import PlantationRepsModal from "./PlantationRepsModal";
+import PlantationRepsCardAddModal from "./PlantationRepsCardAddModal";
+import PlantationInProgressModal from "./PlantationInProgressModal";
 import { PlantationAssetContext } from '../AssetsContents';
-
 
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -46,12 +47,12 @@ const View: FunctionComponent = memo(() => {
 
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
-	
-	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+
+	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 
 	const addPlantationOnClick = () => {
 		dispatchPlantationAssetContext!({
-			setPlantationNewModalOpen : {
+			setPlantationNewModalOpen: {
 				payload: true
 			}
 		})
@@ -60,6 +61,7 @@ const View: FunctionComponent = memo(() => {
 	return (
 		<Paper className={classes.paper}>
 			<AppBar className={classes.topBar} position="static" color="default" elevation={0}>
+				{/* {statePlantationAssetContext!.plantationDetailRefreshState! && <LinearProgress />} */}
 				<Toolbar>
 					<Grid container spacing={2} alignItems="center">
 						<Grid item>
@@ -74,21 +76,19 @@ const View: FunctionComponent = memo(() => {
 					</Grid>
 				</Toolbar>
 			</AppBar>
-			{/* {uploadInProgress ? <LinearProgress /> : null} */}
 			<PlantationList />
-			<PlantationDetailModal />
-			<PlantationsEditModal />
 			<PlantationsNewModal />
-			<PlantationMapModal />
-			{/* 
-
-
-			<PlantationRepsModal
-		 repsModalOpen={repsModalOpen}
-		 setRepsModelOpen={setRepsModelOpen}
-		 setDetailsModelOpen={setDetailsModelOpen}
-		 
-		 />  */}
+			<PlantationsEditModal />
+			{!statePlantationAssetContext!.plantationDetailRefreshState! &&
+				<>
+					<PlantationDetailModal />
+					<PlantationMapModal />
+					<PlantationRepsModal />
+					<PlantationRepsCardAddModal />
+				</>
+				// :
+				// <PlantationInProgressModal />
+			}
 			<Snackbar
 				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 				key={`bottom,center`}

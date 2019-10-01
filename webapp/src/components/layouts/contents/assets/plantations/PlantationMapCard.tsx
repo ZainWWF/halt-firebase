@@ -88,7 +88,7 @@ const DetailCard: FunctionComponent<IProps> = memo(({ plantationGeometry, planta
 					</IconButton>
 				}
 				title={plantationName}
-				subheader={PlantationManagementType === "PRIVATE" ? "owned by Me" : `owned by ${plantationName}`}
+				subheader={PlantationManagementType === "Pribadi" ? "owned by Me" : `owned by ${plantationName}`}
 			/>
 			<CardActions >
 				<Button variant="contained" color="primary" className={classes.button} onClick={submitPlantationGeometry} disabled={!canUpload}>
