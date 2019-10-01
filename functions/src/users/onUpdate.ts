@@ -21,7 +21,7 @@ export default functions.region("asia-east2").firestore
 				const newVehicleMap = new Map(Object.entries(newUserData.vehicles));
 
 				// check if a User.vehicle entry has been removed and update Vehicle if true
-				if (await syncRemovedMapWithDoc(newVehicleMap, previousVehicleMap)) return;
+				if (await syncRemovedMapWithDoc(newVehicleMap, previousVehicleMap, null)) return;
 
 				// check for changes in plantations
 				const previousUserDataPlantations = previousUserData.plantations ? previousUserData.plantations : {}
@@ -29,7 +29,8 @@ export default functions.region("asia-east2").firestore
 				const newPlantationMap = new Map(Object.entries(newUserData.plantations));
 
 				// check if a User.plantation entry has been removed and update Plantation if true
-				if (await syncRemovedMapWithDoc(newPlantationMap, previousPlantationMap)) return;
+				// additional process as Plantation has a repIds field which needs to be sync
+				if (await syncRemovedMapWithDoc(newPlantationMap, previousPlantationMap, context.params.userId)) return;
 
 			}
 
@@ -88,16 +89,34 @@ async function isRemoveDenied(removedRef): Promise<boolean> {
 }
 
 // update the Doc associated with the removed map entry with "isRemoved : true"
-async function syncRemovedMapWithDoc(newMap, previousMap): Promise<boolean> {
+async function syncRemovedMapWithDoc(newMap, previousMap, userId): Promise<boolean> {
 
 	// new size is smaller so its is delete
 	if (newMap.size < previousMap.size) {
-		const removedRef = getRemovedRef(previousMap, newMap);
+
+		// process for Plantation Only
+		// get the ref  of the removed item. if removed map entry is an action from rep, do not remove main document
+		// only remove userId from the Plantation.repIds array
+		const { removedRef, isRep } = getRemovedRef(previousMap, newMap);	
+		if (isRep && removedRef) {
+			console.log("Producer Rep userId: ", userId)
+			console.log("Plantation Ref: ",  removedRef.path)
+			try {
+				await removedRef.update({
+					"repIds": admin.firestore.FieldValue.arrayRemove(userId)
+				})
+				return false;
+			} catch (error) {
+				console.log(error)
+			}
+
+		}
+		if (!removedRef) return false
 
 		// check the control fields of the associated Doc if allows remove action
 		if (await isRemoveDenied(removedRef)) return false;
-		console.log("removing: ", removedRef!.path)
 
+		console.log("removing: ", removedRef!.path)
 		if (removedRef) {
 			// add field to show that  doc has been removed 
 			await removedRef.update({
@@ -110,25 +129,28 @@ async function syncRemovedMapWithDoc(newMap, previousMap): Promise<boolean> {
 }
 
 // get the doc reference to the map entry that has been removed 
-function getRemovedRef(previousMap: Map<string, any>, newMap: Map<string, any>): FirebaseFirestore.DocumentReference | null {
+function getRemovedRef(previousMap: Map<string, any>, newMap: Map<string, any>): { removedRef: FirebaseFirestore.DocumentReference, isRep: boolean } {
 
-	const previousKeys = [...previousMap.keys()]
-	console.log("previousMap", previousMap.get(previousKeys[0]))
+	// just a way to get the Doc Id. It is always a single item removed at a time
+	const previousDocIds = [...previousMap.keys()]
+	console.log("Removed map entry: ", previousMap.get(previousDocIds[0]))
 
-  // the removed item is from a rep not owner so dont delete the referenced doc
-	if(previousMap.get(previousKeys[0]).repOfId) return null;
+	// is rep is true if the removedRef belong to a User.plantation of a rep
+	const isRep = !!(previousMap.get(previousDocIds[0]).repOfId)
+	console.log("Removed map entry of a Producer Rep: ", isRep)
+	console.log("Producer user Id: ", previousMap.get(previousDocIds[0]).repOfId)
 
 	// all items has been deleted 
 	// return the value of the ref field in the removed doc		
-	if (newMap.size === 0) return previousMap.get(previousKeys[0]).ref
+	// if (newMap.size === 0) return previousMap.get(previousDocIds[0]).ref
 
 	/** compare and filter the maps to get the deleted key*/
 	/** only support a single entry delete  */
-	const [removedKey] = previousKeys
-		.filter((previousKey: any) => ![...newMap.keys()]
-			.some((newKey: any) => newKey === previousKey))
+	// const [removedDocId] = previousDocIds
+	// 	.filter((previousDocId: any) => ![...newMap.keys()]
+	// 		.some((newDocId: any) => newDocId === previousDocId))
 
 	// return the value of the ref field in the removed doc		
-	return previousMap.get(removedKey).ref
+	return { removedRef: previousMap.get(previousDocIds[0]).ref, isRep }
 }
 
