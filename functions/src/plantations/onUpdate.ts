@@ -66,11 +66,17 @@ async function removeUserRepPlantation(previousData, newData, plantationRef) {
 
 	if (previousData.repIds.length > newData.repIds.length) {
 
-		const removedRepIds = previousData.repIds.filter(prevRepId => !(newData.repIds.some((newRepId) => newRepId === prevRepId)))
+		const removedRepIds: string[] = previousData.repIds
+		.filter(prevRepId => !(newData.repIds.some((newRepId) => newRepId === prevRepId)))
+		.filter(repId => repId !== previousData.userId) // don't remove if owner is errornously registered as rep for the plantation
 
-		console.log(removedRepIds)
+		console.log("Removed rep Ids: ",removedRepIds)
+		console.log("Owner userId: ", previousData.userId)
+		if ( removedRepIds.includes(previousData.userId) ){
+				console.log(previousData.userId, ' is deleting ' , removedRepIds, " !")
+		}
 
-		console.log("plantationRef", plantationRef.replace("/", "."))
+		console.log("plantationRef: ", plantationRef.replace("/", "."))
 		await Promise.all(
 			removedRepIds.map(async repId => await admin.firestore().doc(`users/${repId}`).update({
 				[plantationRef.replace("/", ".")]: admin.firestore.FieldValue.delete()

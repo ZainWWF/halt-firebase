@@ -3,37 +3,37 @@
 		{
 			"name": "userId",
 			"type": "STRING",
-			"mode": "REQUIRED"
+			"mode": "NULLABLE"
 		},
 		{
 			"name": "auditAcceptedAt",
 			"type": "TIMESTAMP",
-			"mode": "REQUIRED"
+			"mode": "NULLABLE"
 		},
 		{
 			"name": "name",
 			"type": "STRING",
-			"mode": "REQUIRED"
+			"mode": "NULLABLE"
 		},
 		{
 			"name": "isActive",
 			"type": "BOOLEAN",
-			"mode": "REQUIRED"
+			"mode": "NULLABLE"
 		},
 		{
 			"name": "createdAt",
 			"type": "TIMESTAMP",
-			"mode": "REQUIRED"
+			"mode": "NULLABLE"
 		},
 		{
 			"name": "updatedAt",
 			"type": "TIMESTAMP",
-			"mode": "REQUIRED"
+			"mode": "NULLABLE"
 		},
 		{
 			"name": "isRemoved",
 			"type": "BOOLEAN",
-			"mode": "REQUIRED"
+			"mode": "NULLABLE"
 		},
 		{
 			"name": "geoLocation",
@@ -60,7 +60,7 @@
 			"mode": "NULLABLE"
 		},
 		{
-			"name": "harvestMonthly",
+			"name": "aveMonthlyYield",
 			"type": "NUMERIC",
 			"mode": "NULLABLE"
 		},
@@ -73,12 +73,12 @@
 		{
 			"name": "management",
 			"type": "RECORD",
-			"mode": "REQUIRED",
+			"mode": "NULLABLE",
 			"fields": [
 				{
 					"name": "type",
 					"type": "STRING",
-					"mode": "REQUIRED"
+					"mode": "NULLABLE"
 				},
 				{
 					"name": "name",
@@ -105,12 +105,17 @@
 		{
 			"name": "certification",
 			"type": "RECORD",
-			"mode": "REQUIRED",
+			"mode": "NULLABLE",
 			"fields": [
 				{
 					"name": "type",
 					"type": "STRING",
-					"mode": "REQUIRED"
+					"mode": "NULLABLE"
+				},
+				{
+					"name": "detail",
+					"type": "STRING",
+					"mode": "NULLABLE"
 				},
 				{
 					"name": "serial",
@@ -122,17 +127,17 @@
 		{
 			"name": "license",
 			"type": "RECORD",
-			"mode": "REQUIRED",
+			"mode": "NULLABLE",
 			"fields": [
 				{
 					"name": "type",
 					"type": "STRING",
-					"mode": "REQUIRED"
+					"mode": "NULLABLE"
 				},
 				{
 					"name": "area",
 					"type": "STRING",
-					"mode": "REQUIRED"
+					"mode": "NULLABLE"
 				},
 				{
 					"name": "detail",
@@ -144,12 +149,12 @@
 		{
 			"name": "previousLandCover",
 			"type": "RECORD",
-			"mode": "REQUIRED",
+			"mode": "NULLABLE",
 			"fields": [
 				{
 					"name": "type",
 					"type": "STRING",
-					"mode": "REQUIRED"
+					"mode": "NULLABLE"
 				},
 				{
 					"name": "detail",

@@ -40,7 +40,7 @@ export default functions.region("asia-east2").firestore
 				}
 			})
 
-			await bqStreamInsert({
+			bqStreamInsert({
 				userId,
 				name,
 				createdAt,
