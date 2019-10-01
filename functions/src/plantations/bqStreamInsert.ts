@@ -1,7 +1,8 @@
 
 import * as admin from "firebase-admin";
-import { BigQuery, Geography } from "@google-cloud/bigquery"
+import { BigQuery } from "@google-cloud/bigquery"
 import schema from "./plantationSchema.json"
+// import { stringify } from "wellknown"
 const bigquery = new BigQuery();
 const dataset = bigquery.dataset('haltgisfiles');
 const table = dataset.table('PlantationsUnaudited');
@@ -12,12 +13,12 @@ type UnAudited = {
 	age: number,
 	treesPlanted: number,
 	treesProductive: number,
-	harvestMonthly: number,
+	aveMonthlyYield: number,
 	landClearingMethod: number,
 	management: Record<string, {}>,
 	certification: Record<string, {}>,
-	license: Record<string, {}>
-	previousLandCover,
+	license: Record<string, {}>,
+	previousLandCover: string
 
 }
 
@@ -25,7 +26,7 @@ type Plantation = {
 	userId: string
 	name: string
 	repIds?: string[] | null,
-	auditAcceptedAt: admin.firestore.Timestamp | null,
+	auditAcceptedAt?: admin.firestore.Timestamp | null,
 	createdAt: admin.firestore.Timestamp,
 	updatedAt?: admin.firestore.Timestamp | null,
 	auditAt: admin.firestore.Timestamp | null,
@@ -35,83 +36,70 @@ type Plantation = {
 	unAudited: UnAudited
 }
 
-export default async function (plantation: Plantation) {
-	try {
+export default function (plantation: Plantation) {
 
-		const {
-			unAudited,
-			userId, name,
-			auditAcceptedAt,
-			isActive,
-			createdAt,
-			updatedAt,
-			isRemoved } = plantation
+	const {
+		unAudited,
+		userId,
+		name,
+		isActive,
+		createdAt,
+		isRemoved } = plantation
 
-		const {
-			geometry,
-			geoLocation,
-			age,
-			treesPlanted,
-			treesProductive,
-			harvestMonthly,
-			landClearingMethod,
-			management,
-			certification,
-			license,
-			previousLandCover } = unAudited
-
-		console.log("geometry:  ", geometry)
-		let geometryGeogragphy: Geography | null = null
-		if (geometry) {
-			geometryGeogragphy = bigquery.geography(geometry)
-		}
-
-		let locationGeogragphy: Geography | null = null
-		if (geoLocation) {
-			const point = {
-				"type": "Point",
-				"coordinates": [
-					geoLocation.longitude,
-					geoLocation.longitude
-				]
-			}
-			locationGeogragphy = bigquery.geography(JSON.stringify(point))
-		}
+	const {
+		// geometry,
+		geoLocation,
+		age,
+		treesPlanted,
+		treesProductive,
+		aveMonthlyYield,
+		landClearingMethod,
+		management,
+		certification,
+		license,
+		previousLandCover } = unAudited
 
 
-		const row = {
-			userId,
-			name,
-			auditAcceptedAt,
-			isActive,
-			createdAt,
-			updatedAt,
-			isRemoved,
-			geoLocation: locationGeogragphy,
-			geometry: geometryGeogragphy,
-			age,
-			treesPlanted,
-			treesProductive,
-			harvestMonthly,
-			landClearingMethod,
-			management,
-			certification,
-			license,
-			previousLandCover
-		}
 
-		const result = await table.insert(row, { schema });
-		console.log("stream insert result: ", result)
-
-		return
-
-	} catch (error) {
-		
-		console.log("stream error: " + error)
-		console.log("stream error stringify: " + JSON.stringify(error))
-
-		return "Error: " + error
-
+	const initRow = {
+		userId,
+		name,
+		isActive,
+		createdAt: bigquery.timestamp(createdAt.toDate()),
+		isRemoved,
+		age,
+		treesPlanted,
+		treesProductive,
+		aveMonthlyYield,
+		landClearingMethod,
+		management,
+		certification,
+		license,
+		previousLandCover
 	}
 
+	// const r1 = geometry ? { geometry: stringify(JSON.parse(geometry)) } : {}
+	const r1 = {}
+
+	const point = {
+		"type": "Point",
+		"coordinates": [
+			geoLocation.longitude,
+			geoLocation.latitude
+		]
+	}
+	const r2 = geoLocation ? { geoLocation: bigquery.geography(JSON.stringify(point)) } : {}
+
+
+	table.insert({ ...initRow, ...r1, ...r2 }, { schema })
+
+		.then((data) => {
+			console.log("insert result: ", data[0]);
+		})
+		.catch((err) => {
+			console.log("insert error: ", JSON.stringify(err))
+		});
 }
+
+
+
