@@ -24,21 +24,28 @@ const DialogForm: FunctionComponent = () => {
 
 
 	useEffect(() => {
+		let isSubscribed = true
 		selectedVehicleSummaryState.ref.get().then((doc: firebase.firestore.DocumentData) => {
 			const result = doc.data() as VehicleDoc
 			if (result) {
+				if (result && isSubscribed) {
 
-				setSelectedVehicleDetail(result)
-				setImageFile({
-					name: null,
-					downloadURL: result.url
-				});
-				setImage(result.url)
+					setSelectedVehicleDetail(result)
+					setImageFile({
+						name: null,
+						downloadURL: result.url
+					});
+					setImage(result.url)
+
+				}
+
+	
 
 			}
 		}).catch((error: Error) => {
 			// setHasError(error)
 		})
+		return () => { isSubscribed = false }
 	}, [selectedVehicleSummaryState])
 
 	const editedVehicleUpload = (vehicleDoc: VehicleDoc) => {
