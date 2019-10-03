@@ -28,17 +28,14 @@ const EditForm: FunctionComponent<IProps> = ({ selectedPlantationDetailState }) 
 			.then(() => {
 				console.log("upload success")
 				dispatchPlantationAssetContext!({
+					selectPlantationDetail: {
+						payload: null
+					},
 					setPlantationEditModalOpen: {
 						payload: false
 					},
-					setPlantationDetailsModalOpen: {
-						payload: false
-					},
-					selectPlantationId: {
-						payload: null
-					},
-					selectPlantationDetail: {
-						payload: null
+					setPlantationDetailRefresh: {
+						payload: true
 					}
 				})
 			}).catch((error: Error) => {
@@ -51,9 +48,6 @@ const EditForm: FunctionComponent<IProps> = ({ selectedPlantationDetailState }) 
 		dispatchPlantationAssetContext!({
 			setPlantationEditModalOpen: {
 				payload: false
-			},
-			setPlantationDetailsModalOpen: {
-				payload: true
 			}
 		})
 	}

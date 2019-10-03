@@ -1,9 +1,8 @@
-import React, { useState, FunctionComponent, memo, useContext } from 'react';
+import React, { useState, FunctionComponent, useContext } from 'react';
 import { Paper, Grid, Theme, Button, Toolbar, AppBar, Snackbar } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
-import PlantationList from "./PlantationList";
-import PlantationsNewModal from "./PlantationsNewModal";
-import PlantationsEditModal from "./PlantationsEditModal";
+import PlantationRepsCard from "./PlantationRepsCard";
+import PlantationRepsCardAddModal from "./PlantationRepsCardAddModal";
 import { PlantationAssetContext } from '../AssetsContents';
 
 
@@ -35,8 +34,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
+type IProps = {
+	match: any
+}
 
-const View: FunctionComponent = memo(() => {
+
+const View: FunctionComponent<IProps> = ({ match }) => {
 
 
 	const classes = useStyles();
@@ -44,19 +47,17 @@ const View: FunctionComponent = memo(() => {
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
 
-	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const {  dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 
-	const addPlantationOnClick = () => {
-		dispatchPlantationAssetContext!({
-			setPlantationNewModalOpen: {
-				payload: true
-			}
-		})
-	}
-
+	const openRepsCardAddModaOnClick = () => dispatchPlantationAssetContext!({
+		setPlantationNewRepModalOpen: {
+			payload: true
+		},
+	})
 	return (
 		<Paper className={classes.paper}>
 			<AppBar className={classes.topBar} position="static" color="default" elevation={0}>
+				{/* {statePlantationAssetContext!.plantationDetailRefreshState! && <LinearProgress />} */}
 				<Toolbar>
 					<Grid container spacing={2} alignItems="center">
 						<Grid item>
@@ -64,16 +65,17 @@ const View: FunctionComponent = memo(() => {
 						<Grid item xs>
 						</Grid>
 						<Grid item>
-							<Button variant="contained" color="primary" className={classes.addUser} onClick={addPlantationOnClick}>
-								Add Plantation
+							<Button variant="contained" color="primary" className={classes.addUser} onClick={openRepsCardAddModaOnClick}>
+								Add Reps
               </Button>
 						</Grid>
 					</Grid>
 				</Toolbar>
 			</AppBar>
-			<PlantationList />
-			<PlantationsNewModal />
-			<PlantationsEditModal />
+			<PlantationRepsCard match={match}/>
+
+			<PlantationRepsCardAddModal match={match}/>
+
 			<Snackbar
 				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 				key={`bottom,center`}
@@ -87,6 +89,6 @@ const View: FunctionComponent = memo(() => {
 			/>
 		</Paper>
 	);
-})
+}
 
 export default View;

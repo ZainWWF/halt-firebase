@@ -5,7 +5,14 @@ import { PlantationAssetContext } from "../AssetsContents";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { useTheme } from "@material-ui/core/styles";
 
-const ModalView: FunctionComponent = memo(() => {
+
+
+type IProps = {
+	match: any
+}
+
+
+const ModalView: FunctionComponent<IProps> = memo(({ match }) => {
 
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
@@ -23,7 +30,7 @@ const ModalView: FunctionComponent = memo(() => {
 	return (
 
 		<Dialog fullScreen={fullScreen} open={statePlantationAssetContext!.plantationNewRepModalOpenState!} onClose={closeRepsCardAddModalOnClick} aria-labelledby="view-modal-detail">
-			<PlantationRepSearchForm />
+			<PlantationRepSearchForm match={match}/>
 		</Dialog >
 
 	);

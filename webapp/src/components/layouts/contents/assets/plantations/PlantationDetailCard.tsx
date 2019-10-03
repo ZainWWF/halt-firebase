@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useContext} from 'react';
+import React, { FunctionComponent, useContext, useEffect, useState, useCallback } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -6,13 +6,18 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import IconButton from '@material-ui/core/IconButton';
 import { red, grey } from '@material-ui/core/colors';
-import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
-import { Typography } from '@material-ui/core';
+import { Typography, LinearProgress } from '@material-ui/core';
 import { PlantationAssetContext } from '../AssetsContents';
+import PlantationsEditModal from "./PlantationsEditModal";
+import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
 
+
+const Link = React.forwardRef<HTMLAnchorElement, RouterLinkProps>((props, ref) => (
+	<RouterLink innerRef={ref}  {...props} />
+));
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -50,8 +55,6 @@ const useStyles = makeStyles((theme: Theme) =>
 		},
 		content: {
 			backgroundColor: grey[100],
-			overflow: "auto",
-			maxHeight: 300,
 			[theme.breakpoints.down('xs')]: {
 				maxHeight: "100vh",
 			},
@@ -60,42 +63,44 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 type IProps = {
-	selectedPlantationDetailState: any
+	match: any
 }
 
-const DetailCard: FunctionComponent<IProps> = ({ selectedPlantationDetailState }) => {
-
+const DetailCard: FunctionComponent<IProps> = ({ match }) => {
+	
 	const classes = useStyles();
-	const {  dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { selectedPlantationDetailState } = statePlantationAssetContext!
+	
+	const [isLoading, setIsLoading] = useState(false)
 
-	const closePlantationDetailOnClick = () => dispatchPlantationAssetContext!({
-		setPlantationDetailsModalOpen: {
-			payload: false
-		},
-		selectPlantationId: {
-			payload: null
-		},
-		selectPlantationDetail: {
-			payload: null
-		},
-		selectRepProfiles: {
-			payload: null
-		}
-	})
+	useEffect(() => {
+		let timer = setTimeout(() => {
+			setIsLoading(true)
+		}, 500)
+		return () => clearTimeout(timer)
+	}, [])
+
+
+	const dispatchCallback = useCallback(() => {
+		dispatchPlantationAssetContext!({
+			selectPlantationId: {
+				payload: match.params.id
+			},
+		})
+	}, [dispatchPlantationAssetContext, match.params.id])
+
+	useEffect(() => {
+		dispatchCallback()
+	}, [dispatchCallback])
 
 	const editPlantationDetailOnClick = () => dispatchPlantationAssetContext!({
 		setPlantationEditModalOpen: {
 			payload: true
 		},
-		setPlantationDetailsModalOpen: {
-			payload: false
-		}
 	})
 
 	const removePlantationDetailOnClick = () => dispatchPlantationAssetContext!({
-		setPlantationDetailsModalOpen: {
-			payload: false
-		},
 		selectPlantationId: {
 			payload: null
 		},
@@ -105,48 +110,32 @@ const DetailCard: FunctionComponent<IProps> = ({ selectedPlantationDetailState }
 		selectRepProfiles: {
 			payload: null
 		},
-		removePlantationId:{
-			payload: selectedPlantationDetailState.ref.path.split("/")[1]
+		removePlantationId: {
+			payload: selectedPlantationDetailState!.ref!.path.split("/")[1]
 		}
 	})
 
-	const openMapOnClick = () => dispatchPlantationAssetContext!({
-		setPlantationMapModalOpen: {
-			payload: true
-		},
-		setPlantationDetailsModalOpen: {
-			payload: false
-		}
-	})
 
-	const openRepOnClick = () => dispatchPlantationAssetContext!({
-		setPlantationRepsModalOpen: {
-			payload: true
-		},
-		setPlantationDetailsModalOpen: {
-			payload: false
-		}
-	})
-
-	return (selectedPlantationDetailState &&
+	return (isLoading && selectedPlantationDetailState && Object.keys(selectedPlantationDetailState).length > 0 ?
 		<>
 			<Card className={classes.card} >
 				<CardHeader
-					action={
-						<IconButton aria-label="settings" onClick={closePlantationDetailOnClick}>
-							<CloseIcon />
-						</IconButton>
-					}
 					title={selectedPlantationDetailState.name}
-					subheader={selectedPlantationDetailState.management!.type === "Pribadi" ? "owned by Me" : `owned by ${selectedPlantationDetailState!.management.name}`}
+					subheader={selectedPlantationDetailState.management!.type === "Pribadi" ? "owned by Me" : `owned by ${selectedPlantationDetailState.management!.name}`}
 				/>
 				<CardActions >
-					<Button size="small" color="primary" onClick={openMapOnClick}>
+					<Button size="small" color="primary" component={Link} to={`/assets/plantations/map/${match.params.id}`}>
 						Map
 				</Button>
-				<Button size="small" color="primary" onClick={openRepOnClick}>
+					<Button size="small" color="primary" component={Link} to={`/assets/plantations/reps/${match.params.id}`}>
 						Reps
 				</Button>
+				<IconButton aria-label="edit" onClick={editPlantationDetailOnClick} className={classes.edit}>
+								<EditIcon />
+							</IconButton>
+							<IconButton aria-label="delete" onClick={removePlantationDetailOnClick} className={classes.delete}>
+								<DeleteIcon />
+							</IconButton>
 				</CardActions>
 
 				<CardContent className={classes.content}>
@@ -161,34 +150,34 @@ const DetailCard: FunctionComponent<IProps> = ({ selectedPlantationDetailState }
 						Management
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						type: {selectedPlantationDetailState.management.type}<br />
-						detail: {selectedPlantationDetailState.management.detail}<br />
-						name: {selectedPlantationDetailState.management.name}<br />
-						rep: {selectedPlantationDetailState.management.rep}<br />
-						contact: {selectedPlantationDetailState.management.contact}<br />
+						type: {selectedPlantationDetailState.management!.type}<br />
+						detail: {selectedPlantationDetailState.management!.detail}<br />
+						name: {selectedPlantationDetailState.management!.name}<br />
+						rep: {selectedPlantationDetailState.management!.rep}<br />
+						contact: {selectedPlantationDetailState.management!.contact}<br />
 					</Typography>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Certification
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						type: {selectedPlantationDetailState.certification.type}<br />
-						detail: {selectedPlantationDetailState.certification.detail}<br />
-						serial: {selectedPlantationDetailState.certification.serial}<br />
+						type: {selectedPlantationDetailState.certification!.type}<br />
+						detail: {selectedPlantationDetailState.certification!.detail}<br />
+						serial: {selectedPlantationDetailState.certification!.serial}<br />
 					</Typography>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Previous Land Cover
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						type: {selectedPlantationDetailState.previousLandCover.type}<br />
-						detail: {selectedPlantationDetailState.previousLandCover.detail}<br />
+						type: {selectedPlantationDetailState.previousLandCover!.type}<br />
+						detail: {selectedPlantationDetailState.previousLandCover!.detail}<br />
 					</Typography>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Licensed Area
 					</Typography>
 					<Typography variant="body2" color="textSecondary" component="p">
-						size: {`${selectedPlantationDetailState.license.area} ha`}<br />
-						type: {selectedPlantationDetailState.license.type}<br />
-						detail: {selectedPlantationDetailState.license.detail}<br />
+						size: {`${selectedPlantationDetailState.license!.area} ha`}<br />
+						type: {selectedPlantationDetailState.license!.type}<br />
+						detail: {selectedPlantationDetailState.license!.detail}<br />
 					</Typography>
 					<Typography variant="body2" color="textPrimary" component="p">
 						Land Clearing Method
@@ -206,18 +195,11 @@ const DetailCard: FunctionComponent<IProps> = ({ selectedPlantationDetailState }
 						ave. monthly yield: {selectedPlantationDetailState.aveMonthlyYield}<br />
 					</Typography>
 				</CardContent>
-
-				<CardActions >
-					<IconButton aria-label="edit" onClick={editPlantationDetailOnClick} className={classes.edit}>
-						<EditIcon />
-					</IconButton>
-					<IconButton aria-label="delete" onClick={removePlantationDetailOnClick} className={classes.delete}>
-						<DeleteIcon />
-					</IconButton>
-				</CardActions>
+				<PlantationsEditModal />
 			</Card>
-
 		</>
+		:
+		<LinearProgress />
 	);
 
 }

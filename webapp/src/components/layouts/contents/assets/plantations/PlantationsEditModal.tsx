@@ -35,6 +35,8 @@ const ModalView: FunctionComponent = () => {
 	return (selectedPlantationDetailState && Object.keys(selectedPlantationDetailState).length > 0 ?
 		<>
 			<Dialog 
+				fullWidth={true}
+				maxWidth={"xs"}
 				fullScreen={fullScreen}
 				disableBackdropClick={true} 
 				open={plantationEditModalOpenState!}

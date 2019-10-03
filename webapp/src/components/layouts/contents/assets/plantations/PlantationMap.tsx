@@ -11,7 +11,8 @@ const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		map: {
 			width: 480,
-			height: 480
+			height: 480,
+			margin: "auto"
 		},
 
 		dropContainer: {

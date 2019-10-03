@@ -32,6 +32,8 @@ const ModalView: FunctionComponent = () => {
 	return (
 		<>
 			<Dialog
+				fullWidth={true}
+				maxWidth={"xs"}
 				fullScreen={fullScreen}
 				disableBackdropClick={true}
 				open={plantationNewModalOpenState!}

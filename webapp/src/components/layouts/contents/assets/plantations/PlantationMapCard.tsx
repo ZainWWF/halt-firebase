@@ -1,4 +1,4 @@
-import React, { useState, FunctionComponent, useContext, memo } from 'react';
+import React, { useState, FunctionComponent, useContext } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -11,11 +11,13 @@ import PlantationMap from './PlantationMap';
 import * as turfHelpers from "@turf/helpers";
 import Typography from '@material-ui/core/Typography';
 import { PlantationAssetContext } from '../AssetsContents';
+import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
 
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		card: {
+			height: "100%",
 			minWidth: 480,
 			[theme.breakpoints.down('xs')]: {
 				borderRadius: 0,
@@ -25,45 +27,34 @@ const useStyles = makeStyles((theme: Theme) =>
 			},
 		},
 		button: {
-			margin: theme.spacing(1),
+			margin: "auto",
 		},
 
 	}),
 );
 
+const Link = React.forwardRef<HTMLAnchorElement, RouterLinkProps>((props, ref) => (
+	<RouterLink innerRef={ref}  {...props} />
+));
+
 type IProps = {
-	plantationGeometry: string | undefined
-	plantationDocRef: firebase.firestore.DocumentReference | undefined
-	plantationName: string | undefined
-	PlantationManagementType: string | undefined
+	match : any
 }
 
-const DetailCard: FunctionComponent<IProps> = memo(({ plantationGeometry, plantationDocRef, plantationName, PlantationManagementType }) => {
-
+const DetailCard: FunctionComponent<IProps> = ({match}) => {
 
 	const classes = useStyles();
 
-	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { statePlantationAssetContext } = useContext(PlantationAssetContext)
+	const { selectedPlantationDetailState } = statePlantationAssetContext!
+
+	const plantationGeometry= selectedPlantationDetailState!.geometry;
+	const plantationDocRef= selectedPlantationDetailState!.ref;
+	const plantationName= selectedPlantationDetailState!.name;
+	const PlantationManagementType = selectedPlantationDetailState!.management ? selectedPlantationDetailState!.management!.type : null
 
 	const [canUpload, setCanUpload] = useState(false)
 	const [newGeometry, setNewGeometry] = useState<turfHelpers.Geometry | null>(null)
-
-
-	const closePlantationMapOnClick = () => dispatchPlantationAssetContext!({
-		setPlantationMapModalOpen: {
-			payload: false
-		},
-		setPlantationDetailsModalOpen: {
-			payload: true
-		},
-		setPlantationDetailRefresh: {
-			payload: true
-		},		
-		selectPlantationDetail: {
-			payload: null
-		},
-	})
-
 
 
 	const submitPlantationGeometry = () => {
@@ -83,7 +74,7 @@ const DetailCard: FunctionComponent<IProps> = memo(({ plantationGeometry, planta
 		<Card className={classes.card}>
 			<CardHeader
 				action={
-					<IconButton aria-label="settings" onClick={closePlantationMapOnClick}>
+					<IconButton aria-label="settings" component={Link} to={`/assets/plantations/detail/${match.params.id}`}>
 						<AssignmentIcon />
 					</IconButton>
 				}
@@ -97,13 +88,13 @@ const DetailCard: FunctionComponent<IProps> = memo(({ plantationGeometry, planta
 
 			</CardActions>
 			<CardContent>
-				<Typography display={"block"} variant={"caption"}>
+				<Typography display={"block"} variant={"caption"} align={"center"}>
 					drag and drop the Geojson geometry of the plantation into the map.
 				</Typography>
 				<PlantationMap setNewGeometry={setNewGeometry} setCanUpload={setCanUpload} selectedGeometry={plantationGeometry!} />
 			</CardContent>
 		</Card>
 	);
-})
+}
 
 export default DetailCard;

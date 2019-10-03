@@ -1,5 +1,5 @@
 
-import React, { FunctionComponent, MouseEvent, memo, useContext } from 'react';
+import React, { FunctionComponent, memo, useContext } from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -13,6 +13,8 @@ import classNames from "classnames";
 import { PlantationAssetContext } from '../AssetsContents';
 import { Typography } from '@material-ui/core';
 import { PlantationSummary } from '../../../../types/Plantation';
+import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
+
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -39,26 +41,18 @@ const useStyles = makeStyles((theme: Theme) =>
 	}),
 );
 
+
+const LinkDetails = React.forwardRef<HTMLAnchorElement, RouterLinkProps>((props, ref) => (
+	<RouterLink innerRef={ref}  {...props} />
+));
+
+
 const ListView: FunctionComponent = memo(() => {
 
 	const classes = useStyles();
 
-	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+	const { statePlantationAssetContext} = useContext(PlantationAssetContext)
 	const { plantationCollectionState } = statePlantationAssetContext!
-
-	const viewPlantationDetailOnClick = (e: MouseEvent<HTMLDivElement>) => {
-		const plantationId = e.currentTarget.getAttribute("id")
-		if (plantationId) {
-			dispatchPlantationAssetContext!({
-				setPlantationDetailsModalOpen: {
-					payload: true
-				},
-				selectPlantationId: {
-					payload: plantationId
-				}
-			})
-		}
-	}
 
 	const ownership = (plantation: PlantationSummary) => {
 		if (!plantation.repOfId) {
@@ -68,14 +62,13 @@ const ListView: FunctionComponent = memo(() => {
 		}
 	}
 
-
 	return (
 		<List className={classes.root}>
 			{plantationCollectionState && Object.keys(plantationCollectionState).length > 0 ?
 				Object.keys(plantationCollectionState).map((plantationId: string) => {
 					const plantation: PlantationSummary = plantationCollectionState[plantationId];
 					return (
-						<ListItem button key={plantationId} onClick={viewPlantationDetailOnClick} id={plantationId} >
+						<ListItem button component={LinkDetails} to={`/assets/plantations/detail/${plantationId}`} key={plantationId} id={plantationId} >
 							<ListItemAvatar>
 								<Avatar alt={plantation.name} className={plantation.auditAcceptedAt ? classNames(classes.bigAvatar, classes.auditedAvatar) : classNames(classes.bigAvatar, classes.nonAuditedAvatar)} >
 									{plantation.auditAcceptedAt ? <AssignmentTurnedInIcon /> : <AssignmentLateIcon />}

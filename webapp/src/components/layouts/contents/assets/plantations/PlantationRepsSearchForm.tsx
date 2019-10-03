@@ -84,21 +84,31 @@ const AutoSave: FunctionComponent<{ debounceMs: number }> = ({ debounceMs }) => 
 	);
 };
 
+const ValidatePlantationRepSchema = Yup.lazy((value: any)=>{
+	if(value.plantationRepPhoneNumber && value.plantationRepPhoneNumber.length === 3){
+		return Yup.mixed()
+	}else{
+		return Yup.object().shape({
+				plantationRepPhoneNumber: Yup.string()
+					.matches(/^\+/, "require country code eg. +61")
+					.matches(/^\+[0-9]{10,16}/, "number must be between 10 to 16 digits")
+			});
+		}
+})
 
-const ValidatePlantationRepSchema = Yup.object().shape({
-	plantationRepPhoneNumber: Yup.string()
-		.matches(/^\+/, "require country code eg. +61")
-		.matches(/^\+[0-9]{10,16}/, "number must be between 10 to 16 digits")
-});
+type IProps = {
+	match: any
+}
 
 
-const DialogForm: FunctionComponent = () => {
+const DialogForm: FunctionComponent<IProps> = ({ match }) => {
 
 	const classes = useStyles();
 
 	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 	const { selectedPlantationDetailState } = statePlantationAssetContext!
 
+	console.log(selectedPlantationDetailState)
 	const [plantationNewRep, setPlantationNewRep] = useState();
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 
@@ -140,19 +150,19 @@ const DialogForm: FunctionComponent = () => {
 						<CloseIcon />
 					</IconButton>
 				}
-				title={selectedPlantationDetailState!.name}
-				subheader={"Producer Reps"}
+				title={"Search Directory"}
+				subheader={"Add New Rep"}
 			/>
 			<CardContent className={classes.content}>
 				<Formik
 					initialValues={{
-						plantationRepPhoneNumber: "",
+						plantationRepPhoneNumber: "+61",
 					}}
 					validationSchema={ValidatePlantationRepSchema}
 					validateOnChange={true}
 					onSubmit={(values, { setSubmitting }) => {
 				
-						if (values.plantationRepPhoneNumber.length > 0) {
+						if (values.plantationRepPhoneNumber.length > 10) {
 							return new Promise(resolve =>
 								setTimeout(() => {
 									firebaseApp.db.collection('users')
@@ -189,7 +199,7 @@ const DialogForm: FunctionComponent = () => {
 									error={props.errors.plantationRepPhoneNumber}
 									touched={props.touched.plantationRepPhoneNumber}
 									type="search"
-									label="Add Producer Rep"
+									label="Enter Mobile Number"
 									autoFocus
 									fullWidth
 									startAdornment={
@@ -217,7 +227,7 @@ const DialogForm: FunctionComponent = () => {
 								</List>
 								:
 								<>
-									{props.isValid && props.values.plantationRepPhoneNumber.length > 0 &&
+									{props.isValid && props.values.plantationRepPhoneNumber.length > 3 &&
 										<div className={classes.contentWrapper}>
 											<Typography color="textSecondary" align="center">
 												No user found
