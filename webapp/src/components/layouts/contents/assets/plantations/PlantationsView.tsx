@@ -10,7 +10,6 @@ import { PlantationAssetContext } from '../AssetsContents';
 const useStyles = makeStyles((theme: Theme) => ({
 	paper: {
 		margin: 'auto',
-		height: "100%",
 		overflow: 'hidden',
 		borderRadius: 0,
 		[theme.breakpoints.up('md')]: {
