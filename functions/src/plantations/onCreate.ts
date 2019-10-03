@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
-import bqStreamInsert from "./bqStreamInsert"
 
 /** add entry into user's plantation map when a plantation doc is created*/
 export default functions.region("asia-east2").firestore

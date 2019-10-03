@@ -7,7 +7,8 @@ import profileOnCreate from  "./profile/onCreate"
 import profileOnUpdate from  "./profile/onUpdate"
 import plantationOnCreate from "./plantations/onCreate";
 import plantationOnUpdate from "./plantations/onUpdate";
-
+import assistanceOnCreate from  "./assistance/onCreate"
+import assistanceOnUpdate from  "./assistance/onUpdate"
 
 admin.initializeApp();
 
@@ -19,6 +20,9 @@ export {
 	profileOnCreate,
 	profileOnUpdate,
 	plantationOnCreate,
-	plantationOnUpdate
+	plantationOnUpdate,
+	assistanceOnCreate,
+	assistanceOnUpdate
+	
 }
 
