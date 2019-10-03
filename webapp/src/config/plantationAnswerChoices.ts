@@ -10,6 +10,7 @@ export const ManagementType = [
 export const CertificationType = [
 	"ISPO",
 	"RSPO",
+	"Belum ada sertifikasi",
 	"Lainnya"
 ]
 
