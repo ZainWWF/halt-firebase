@@ -39,7 +39,6 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 
 
 	const reloadCallback = useCallback(() => {
-		console.log(location.pathname)
 		if (location.pathname) {
 			const path = /^.+\/(map|reps)\/(.*)/.exec(location.pathname) as string[]
 			if (path) {

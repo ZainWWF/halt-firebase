@@ -108,7 +108,6 @@ const DialogForm: FunctionComponent<IProps> = ({ match }) => {
 	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 	const { selectedPlantationDetailState } = statePlantationAssetContext!
 
-	console.log(selectedPlantationDetailState)
 	const [plantationNewRep, setPlantationNewRep] = useState();
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 

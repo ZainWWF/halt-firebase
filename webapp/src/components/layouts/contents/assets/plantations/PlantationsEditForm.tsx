@@ -16,8 +16,7 @@ type IProps = {
 
 
 const EditForm: FunctionComponent<IProps> = ({ selectedPlantationDetailState }) => {
-
-	console.log("render")
+	
 	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 	const [ selectedPlantationDetail, setSelectedPlantationDetail] = useState(selectedPlantationDetailState);
 	const [mapPolygonBounds, setMapPolygonBounds] = useState<turfHelpers.Feature<turfHelpers.Polygon>>()
