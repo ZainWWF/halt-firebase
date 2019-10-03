@@ -8,17 +8,15 @@ import { PlantationAssetContext } from '../AssetsContents';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	paper: {
-		margin: 'auto',
-		height: "100%",
+
+		minWidth: 345,
+		maxWidth: 680,
+		margin: "auto",
+		height: "fit-content",
 		overflow: 'hidden',
 		borderRadius: 0,
 		[theme.breakpoints.up('md')]: {
 			maxWidth: 680,
-			borderRadius: 10,
-			margin: "40px auto"
-		},
-		[theme.breakpoints.up('lg')]: {
-			maxWidth: 936,
 			borderRadius: 10,
 			margin: "40px auto"
 		},

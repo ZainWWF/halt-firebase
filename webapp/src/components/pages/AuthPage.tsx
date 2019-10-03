@@ -31,12 +31,14 @@ const useStyles = makeStyles({
 		}
 	},
 	mainContent: {
+		height: "100vh",
 		width: "100%",
+
 		[theme.breakpoints.down('sm')]: {
 			padding: 0,
 		},
 		flex: 1,
-		padding: '48px 36px 0',
+		padding: '40px',
 		background: '#eaeff1'
 	}
 });

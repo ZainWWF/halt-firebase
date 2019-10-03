@@ -6,6 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import IconButton from '@material-ui/core/IconButton';
 import { red, grey } from '@material-ui/core/colors';
+import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
@@ -23,9 +24,10 @@ const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		card: {
 			minWidth: 345,
+			maxWidth: 680,
+			margin: "auto",
 			[theme.breakpoints.down('xs')]: {
 				borderRadius: 0,
-				margin: "auto",
 				maxHeight: "100vh",
 				width: "100vw"
 			},
@@ -67,11 +69,11 @@ type IProps = {
 }
 
 const DetailCard: FunctionComponent<IProps> = ({ match }) => {
-	
+
 	const classes = useStyles();
 	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
 	const { selectedPlantationDetailState } = statePlantationAssetContext!
-	
+
 	const [isLoading, setIsLoading] = useState(false)
 
 	useEffect(() => {
@@ -93,6 +95,7 @@ const DetailCard: FunctionComponent<IProps> = ({ match }) => {
 	useEffect(() => {
 		dispatchCallback()
 	}, [dispatchCallback])
+
 
 	const editPlantationDetailOnClick = () => dispatchPlantationAssetContext!({
 		setPlantationEditModalOpen: {
@@ -120,6 +123,11 @@ const DetailCard: FunctionComponent<IProps> = ({ match }) => {
 		<>
 			<Card className={classes.card} >
 				<CardHeader
+					action={
+						<IconButton aria-label="close" component={Link} to="/assets/plantations" className={classes.delete}>
+							<CloseIcon />
+						</IconButton>
+					}
 					title={selectedPlantationDetailState.name}
 					subheader={selectedPlantationDetailState.management!.type === "Pribadi" ? "owned by Me" : `owned by ${selectedPlantationDetailState.management!.name}`}
 				/>
@@ -130,12 +138,12 @@ const DetailCard: FunctionComponent<IProps> = ({ match }) => {
 					<Button size="small" color="primary" component={Link} to={`/assets/plantations/reps/${match.params.id}`}>
 						Reps
 				</Button>
-				<IconButton aria-label="edit" onClick={editPlantationDetailOnClick} className={classes.edit}>
-								<EditIcon />
-							</IconButton>
-							<IconButton aria-label="delete" onClick={removePlantationDetailOnClick} className={classes.delete}>
-								<DeleteIcon />
-							</IconButton>
+					<IconButton aria-label="edit" onClick={editPlantationDetailOnClick} className={classes.edit}>
+						<EditIcon />
+					</IconButton>
+					<IconButton aria-label="delete" onClick={removePlantationDetailOnClick} className={classes.delete}>
+						<DeleteIcon />
+					</IconButton>
 				</CardActions>
 
 				<CardContent className={classes.content}>

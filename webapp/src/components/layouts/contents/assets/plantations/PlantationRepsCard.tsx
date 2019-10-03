@@ -15,6 +15,8 @@ const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		card: {
 			minWidth: 345,
+			maxWidth: 680,
+			margin: "auto",
 			[theme.breakpoints.down('xs')]: {
 				borderRadius: 0,
 				margin: "auto",

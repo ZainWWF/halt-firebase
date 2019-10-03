@@ -17,8 +17,9 @@ import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-d
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		card: {
-			height: "100%",
-			minWidth: 480,
+			minWidth: 345,
+			maxWidth: 680,
+			margin: "auto",
 			[theme.breakpoints.down('xs')]: {
 				borderRadius: 0,
 				margin: "auto",
@@ -29,6 +30,9 @@ const useStyles = makeStyles((theme: Theme) =>
 		button: {
 			margin: "auto",
 		},
+		content:{
+			margin : 40
+		}
 
 	}),
 );
@@ -87,7 +91,7 @@ const DetailCard: FunctionComponent<IProps> = ({match}) => {
       </Button>
 
 			</CardActions>
-			<CardContent>
+			<CardContent className={classes.content}>
 				<Typography display={"block"} variant={"caption"} align={"center"}>
 					drag and drop the Geojson geometry of the plantation into the map.
 				</Typography>

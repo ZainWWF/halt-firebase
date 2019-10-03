@@ -46,7 +46,7 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location}) => {
 			container
 			justify="center"
 			alignItems="center"
-			style={{ height: "100vh" }}
+			// style={{ height: "100vh" }}
 		>
 			<CircularProgress />
 		</Grid>

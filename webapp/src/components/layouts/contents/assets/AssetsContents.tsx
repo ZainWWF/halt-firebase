@@ -202,11 +202,7 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 					/>
 					<Route
 						path="/assets/plantations"
-						component={() => {
-							return (
-								<PlantationsView />
-							)
-						}}
+						component={PlantationsView}
 					/>
 				</Switch>
 			</PlantationAssetContext.Provider>
