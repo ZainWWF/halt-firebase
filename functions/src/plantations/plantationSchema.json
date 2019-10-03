@@ -21,14 +21,9 @@
 			"mode": "NULLABLE"
 		},
 		{
-			"name": "createdAt",
+			"name": "TIMESTAMP",
 			"type": "TIMESTAMP",
-			"mode": "NULLABLE"
-		},
-		{
-			"name": "updatedAt",
-			"type": "TIMESTAMP",
-			"mode": "NULLABLE"
+			"mode": "REQUIRED"
 		},
 		{
 			"name": "isRemoved",

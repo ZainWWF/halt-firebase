@@ -40,18 +40,6 @@ export default functions.region("asia-east2").firestore
 				}
 			})
 
-			bqStreamInsert({
-				userId,
-				name,
-				createdAt,
-				isActive,
-				unAudited,
-				auditAcceptedAt,
-				auditAt,
-				auditBy,
-				isRemoved,
-			})
-
 			return;
 
 		} catch (error) {
