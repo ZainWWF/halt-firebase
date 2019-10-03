@@ -141,9 +141,19 @@ service cloud.firestore {
 
 
 		match /plantations/{plantationId}/buyers/{buyerId} {
-			allow read, write;
+				allow read:	if isSignedIn() &&  ( isAssetOwner() || isProducerRep() )	
+				allow create:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow delete: if false
 		}	
 
+
+		match/assistance/{assistanceId} {
+				allow read:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow create:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow delete: if false
+		}
 	
  }
 }
