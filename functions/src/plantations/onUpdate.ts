@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
 import { ownPlantationMapBuilder, repPlantationMapBuilder } from "./mapBuilder"
+import bqStreamInsert from './bqStreamInsert';
 
 
 const isPropValueChanged = (restNewData, previousData): boolean => {
@@ -24,10 +25,12 @@ export default functions.region("asia-east2").firestore
 			// if no change found, do not proceed
 			if (!isPropValueChanged(restNewData, previousData)) return null
 
+			const updatedAtTimeStamp = admin.firestore.Timestamp.fromMillis(Date.now());
+
 			await admin.firestore()
 				.doc(plantationRef)
 				.update({
-					updatedAt: admin.firestore.Timestamp.fromMillis(Date.now())
+					updatedAt : updatedAtTimeStamp
 				})
 
 			// refresh User.plantation map with unremoved Plantation docs for the userID
@@ -44,6 +47,13 @@ export default functions.region("asia-east2").firestore
 
 			// update all current and add new the Producer/Plantation reps plantation map entries
 			await updateUserRepPlantation(newData, plantationRef)
+
+
+			bqStreamInsert({
+				updatedAt : updatedAtTimeStamp, 
+				...auditAcceptedAt,
+				...restNewData,		
+			}) 
 
 			return
 

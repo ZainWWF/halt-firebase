@@ -2,7 +2,6 @@
 import * as admin from "firebase-admin";
 import { BigQuery } from "@google-cloud/bigquery"
 import schema from "./plantationSchema.json"
-// import { stringify } from "wellknown"
 const bigquery = new BigQuery();
 const dataset = bigquery.dataset('haltgisfiles');
 const table = dataset.table('PlantationsUnaudited');
@@ -39,15 +38,16 @@ type Plantation = {
 export default function (plantation: Plantation) {
 
 	const {
+		auditAcceptedAt,
 		unAudited,
 		userId,
 		name,
 		isActive,
-		createdAt,
+		updatedAt,
 		isRemoved } = plantation
 
 	const {
-		// geometry,
+		geometry,
 		geoLocation,
 		age,
 		treesPlanted,
@@ -60,12 +60,10 @@ export default function (plantation: Plantation) {
 		previousLandCover } = unAudited
 
 
-
 	const initRow = {
 		userId,
 		name,
 		isActive,
-		createdAt: bigquery.timestamp(createdAt.toDate()),
 		isRemoved,
 		age,
 		treesPlanted,
@@ -78,26 +76,39 @@ export default function (plantation: Plantation) {
 		previousLandCover
 	}
 
-	// const r1 = geometry ? { geometry: stringify(JSON.parse(geometry)) } : {}
-	const r1 = {}
-
 	const point = {
 		"type": "Point",
 		"coordinates": [
 			geoLocation.longitude,
 			geoLocation.latitude
 		]
-	}
-	const r2 = geoLocation ? { geoLocation: bigquery.geography(JSON.stringify(point)) } : {}
+	};
+	const r1 = geoLocation ? { geoLocation: bigquery.geography(JSON.stringify(point)) } : {};
+	const r2 = geometry ? { geometry: bigquery.geography(geometry) } : {};
+	const r3 = auditAcceptedAt ? { updatedAt: bigquery.timestamp(auditAcceptedAt.toDate()) } : {};
+	const r4 = updatedAt ? { TIMESTAMP: bigquery.timestamp(updatedAt.toDate()) } : {};
 
 
-	table.insert({ ...initRow, ...r1, ...r2 }, { schema })
+
+	const row = {
+		...initRow,
+		...r1,
+		...r2,
+		...r3,
+		...r4,
+
+	};
+
+	console.log("insert row: ", row)
+	
+	
+	table.insert(row, { schema })
 
 		.then((data) => {
 			console.log("insert result: ", data[0]);
 		})
 		.catch((err) => {
-			console.log("insert error: ", JSON.stringify(err))
+			console.error("insert error: ", JSON.stringify(err))
 		});
 }
 
