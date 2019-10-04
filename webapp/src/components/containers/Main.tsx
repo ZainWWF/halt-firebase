@@ -27,8 +27,6 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 
 	useEffect(() => {
 		const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-			console.log(user)
-
 			if (user) {
 				firebaseApp!.db
 					.collection("users")
@@ -65,7 +63,7 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 			container
 			justify="center"
 			alignItems="center"
-		// style={{ height: "100vh" }}
+			style={{ height: "100vh" }}
 		>
 			<CircularProgress />
 		</Grid>
