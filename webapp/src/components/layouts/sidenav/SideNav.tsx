@@ -103,16 +103,6 @@ const SideNav: FunctionComponent<RouteComponentProps & DrawerProps> = ({ locatio
 	}, [location]);
 
 
-	const logout = () => {
-		firebase.auth().signOut().then(async () => {
-			window.location.assign("/");
-			// Sign-out successful.
-		}).catch(function (error) {
-			// An error happened.
-		});
-
-	}
-
 	return (
 		<Drawer
 			variant={variant}
@@ -135,23 +125,6 @@ const SideNav: FunctionComponent<RouteComponentProps & DrawerProps> = ({ locatio
 					>
 						Halt App
           </ListItem>
-					<ListItem
-						key="2"
-						button
-						onClick={() => logout()}
-						className={classNames(classes.item, classes.itemCategory)}
-					>
-						<ListItemIcon>
-							<ToggleOffIcon />
-						</ListItemIcon>
-						<ListItemText
-							classes={{
-								primary: classes.itemPrimary
-							}}
-						>
-							Logout
-            </ListItemText>
-					</ListItem>
 					{navItems.map(({ id, children, group }) => {
 						const matchGroup = userGroup ? userGroup.filter(g => group.includes(g)) : []
 						return (group.length === 0 || matchGroup.length > 0 ?
