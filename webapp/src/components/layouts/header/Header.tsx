@@ -11,7 +11,10 @@ import navItems from "../sidenav/nav-items";
 import { Route, Switch } from "react-router-dom";
 import { SideNavContext } from "../../providers/SideNav/SideNavProvider";
 import { makeStyles } from "@material-ui/core/styles";
-import { AuthContext } from  "../../containers/Main";
+import { AuthContext } from "../../containers/Main";
+import { Avatar } from "@material-ui/core";
+import { grey } from "@material-ui/core/colors";
+import ExpandMoreSharpIcon from '@material-ui/icons/ExpandMoreSharp';
 
 const useStyles = makeStyles((theme: Theme) => ({
 
@@ -20,15 +23,29 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 	topBar: {
 		minHeight: 60
+	},
+	iconButtonAvatar: {
+		padding: 4,
+		marginRight: 5
+		// backgroundColor: grey[500],
+	},
+	iconDropDownAvatar: {
+		
+		position: "absolute",
+		top:10,
+		right:10
+		
 	}
 }));
+
 
 const Header: FunctionComponent = () => {
 
 	const classes = useStyles();
 	const { dispatchSideNav } = useContext(SideNavContext);
-	const user = useContext(AuthContext) as firebase.User;
-
+	// const user = useContext(AuthContext) as  firebase.User;
+	const user = useContext(AuthContext) as any
+	console.log(user)
 	return (
 		<>
 			<AppBar color="primary" position="sticky" elevation={0}>
@@ -50,9 +67,18 @@ const Header: FunctionComponent = () => {
 						<Grid item >
 						</Grid>
 						<Grid item>
-							<Typography color="inherit" variant="subtitle1">
+							<IconButton color="inherit" className={classes.iconButtonAvatar}>
+								<Avatar alt={""} src={user ? user!.photoUrl : ""} >
+									{
+										user!.photoUrl && user.name ? user.name.slice(0, 1)[0].toUpperCase() : null
+									}
+								</Avatar>
+
+							</IconButton>
+							<ExpandMoreSharpIcon className={classes.iconDropDownAvatar} />
+							{/* <Typography color="inherit" variant="subtitle1">
 									{user.phoneNumber}
-							</Typography>
+							</Typography> */}
 						</Grid>
 					</Grid>
 				</Toolbar>
