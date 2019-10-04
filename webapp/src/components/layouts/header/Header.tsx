@@ -5,7 +5,6 @@ import Hidden from "@material-ui/core/Hidden";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import { Theme } from "@material-ui/core/styles";
 import navItems from "../sidenav/nav-items";
 import { Route, Switch } from "react-router-dom";
@@ -13,8 +12,7 @@ import { SideNavContext } from "../../providers/SideNav/SideNavProvider";
 import { makeStyles } from "@material-ui/core/styles";
 import { AuthContext } from "../../containers/Main";
 import { Avatar } from "@material-ui/core";
-import { grey } from "@material-ui/core/colors";
-import ExpandMoreSharpIcon from '@material-ui/icons/ExpandMoreSharp';
+import HeaderAvatarMenu from "./HeaderAvatarMenu";
 
 const useStyles = makeStyles((theme: Theme) => ({
 
@@ -26,16 +24,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 	iconButtonAvatar: {
 		padding: 4,
-		marginRight: 5
-		// backgroundColor: grey[500],
 	},
-	iconDropDownAvatar: {
-		
-		position: "absolute",
-		top:10,
-		right:10
-		
-	}
 }));
 
 
@@ -43,9 +32,19 @@ const Header: FunctionComponent = () => {
 
 	const classes = useStyles();
 	const { dispatchSideNav } = useContext(SideNavContext);
-	// const user = useContext(AuthContext) as  firebase.User;
+
 	const user = useContext(AuthContext) as any
-	console.log(user)
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const openAvatarMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const onCloseAvatarMenu = () => {
+    setAnchorEl(null);
+  };
+
 	return (
 		<>
 			<AppBar color="primary" position="sticky" elevation={0}>
@@ -67,7 +66,7 @@ const Header: FunctionComponent = () => {
 						<Grid item >
 						</Grid>
 						<Grid item>
-							<IconButton color="inherit" className={classes.iconButtonAvatar}>
+							<IconButton color="inherit" className={classes.iconButtonAvatar} onClick={openAvatarMenu}>
 								<Avatar alt={""} src={user ? user!.photoUrl : ""} >
 									{
 										user!.photoUrl && user.name ? user.name.slice(0, 1)[0].toUpperCase() : null
@@ -75,10 +74,7 @@ const Header: FunctionComponent = () => {
 								</Avatar>
 
 							</IconButton>
-							<ExpandMoreSharpIcon className={classes.iconDropDownAvatar} />
-							{/* <Typography color="inherit" variant="subtitle1">
-									{user.phoneNumber}
-							</Typography> */}
+							<HeaderAvatarMenu anchorEl={anchorEl} onCloseAvatarMenu={onCloseAvatarMenu} />		
 						</Grid>
 					</Grid>
 				</Toolbar>
