@@ -40,7 +40,8 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 
 	const reloadCallback = useCallback(() => {
 		if (location.pathname) {
-			const path = /^.+\/(map|reps)\/(.*)/.exec(location.pathname) as string[]
+			// check which plantation route is current and reload
+			const path = /^.+\/(map|reps|detail)\/(.*)/.exec(location.pathname) as string[]
 			if (path) {
 				const [, route, id] = path
 				if (route === "map" || route === "reps") {
@@ -58,6 +59,37 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 		reloadCallback()
 	}, [reloadCallback])
 
+
+	// useEffect(() => {
+	// 	// if (location.pathname) {
+	// 	// 	// when path is at assets/plantation clear the selectedPlantationId
+	// 	// 	// this will cause a fresh collection to be dispatch out
+	// 	// 	const path = /^.+\/(map|reps|detail)\/(.*)/.exec(location.pathname) as string[]
+	// 	// 	if (/^\/assets\/plantations/.test(location.pathname)) {
+	// 	// 		dispatchPlantationAssetContext!({
+	// 	// 			selectPlantationId: {
+	// 	// 				payload: null
+	// 	// 			}
+	// 	// 		})
+	// 	// 	}
+	// 	// }
+
+	// 	if (location.pathname) {
+	// 		// check which plantation route is current and reload
+	// 				// 	if (/^\/assets\/plantations/.test(location.pathname)) {
+	// 		const path = /^.+\/(map|reps|detail)\/(.*)/.exec(location.pathname) as string[]
+	// 		if (path) {
+	// 			const [, route, id] = path
+	// 			if (route === "map" || route === "reps") {
+	// 				dispatchPlantationAssetContext!({
+	// 					selectPlantationId: {
+	// 						payload: id
+	// 					}
+	// 				})
+	// 			}
+	// 		}
+	// 	}
+	// }, [location.pathname])
 
 	const unsubscribeRef = useRef<any>()
 	useEffect(() => {
@@ -109,6 +141,7 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 						ref: plantationCollection[statePlantationAssetContext.selectedPlantationIdState!].ref
 					})
 
+					// for each of the rep in the selected plantation, get their details
 					Promise.all(plantationDetail.repIds.map((repId: string) =>
 						firebaseApp.db.doc(`users/${repId}`)
 							.get()))
