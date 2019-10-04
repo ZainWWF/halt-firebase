@@ -72,29 +72,51 @@ const DetailCard: FunctionComponent<IProps> = ({ match }) => {
 
 	const classes = useStyles();
 	const { statePlantationAssetContext, dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
-	const { selectedPlantationDetailState } = statePlantationAssetContext!
+	const { selectedPlantationDetailState, plantationCollectionState } = statePlantationAssetContext!
 
 	const [isLoading, setIsLoading] = useState(false)
+	const [repOfInfo, setRepOfInfo] = useState()
+	const [owner, setOwner] = useState()
 
 	useEffect(() => {
 		let timer = setTimeout(() => {
 			setIsLoading(true)
-		}, 500)
+		}, 800)
 		return () => clearTimeout(timer)
 	}, [])
 
 
 	const dispatchCallback = useCallback(() => {
+		if (plantationCollectionState[match.params.id]) {
+			const { repOfId, repOfName } = plantationCollectionState[match.params.id]
+			setRepOfInfo({ repOfId, repOfName })
+		}
 		dispatchPlantationAssetContext!({
 			selectPlantationId: {
 				payload: match.params.id
 			},
 		})
-	}, [dispatchPlantationAssetContext, match.params.id])
+	}, [plantationCollectionState, dispatchPlantationAssetContext, match.params.id])
 
 	useEffect(() => {
 		dispatchCallback()
 	}, [dispatchCallback])
+
+
+	const repIdCallback = useCallback(() => {
+		if(selectedPlantationDetailState && selectedPlantationDetailState!.management){
+			let owner = selectedPlantationDetailState!.management!.type === "Pribadi" ? "owned by Me" : `owned by ${selectedPlantationDetailState!.management!.name}`
+			if (repOfInfo && repOfInfo.repOfId) {				
+				owner = selectedPlantationDetailState!.management!.type === "Pribadi" ? `owned by ${repOfInfo.repOfName ? repOfInfo.repOfName : "Unknown"}` : `owned by ${selectedPlantationDetailState!.management!.name}`
+			}
+			setOwner(owner)
+		}
+	}, [repOfInfo, selectedPlantationDetailState])
+
+	useEffect(() => {
+		repIdCallback()
+	}, [repOfInfo, repIdCallback])
+
 
 
 	const editPlantationDetailOnClick = () => dispatchPlantationAssetContext!({
@@ -118,7 +140,6 @@ const DetailCard: FunctionComponent<IProps> = ({ match }) => {
 		}
 	})
 
-
 	return (isLoading && selectedPlantationDetailState && Object.keys(selectedPlantationDetailState).length > 0 ?
 		<>
 			<Card className={classes.card} >
@@ -129,7 +150,7 @@ const DetailCard: FunctionComponent<IProps> = ({ match }) => {
 						</IconButton>
 					}
 					title={selectedPlantationDetailState.name}
-					subheader={selectedPlantationDetailState.management!.type === "Pribadi" ? "owned by Me" : `owned by ${selectedPlantationDetailState.management!.name}`}
+					subheader={owner}
 				/>
 				<CardActions >
 					<Button size="small" color="primary" component={Link} to={`/assets/plantations/map/${match.params.id}`}>
