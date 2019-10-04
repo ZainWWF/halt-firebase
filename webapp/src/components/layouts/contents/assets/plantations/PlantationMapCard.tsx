@@ -31,7 +31,8 @@ const useStyles = makeStyles((theme: Theme) =>
 			margin: "auto",
 		},
 		content:{
-			margin : 40
+			padding : 40,
+			backgroundColor: "#f5f5f5",
 		}
 
 	}),
