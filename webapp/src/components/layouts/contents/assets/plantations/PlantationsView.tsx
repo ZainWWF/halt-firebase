@@ -1,4 +1,4 @@
-import React, { useState, FunctionComponent, memo, useContext } from 'react';
+import React, { useState, FunctionComponent, memo, useContext, useEffect } from 'react';
 import { Paper, Grid, Theme, Button, Toolbar, AppBar, Snackbar } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import PlantationList from "./PlantationList";
@@ -40,6 +40,17 @@ const View: FunctionComponent = memo(() => {
 	const [showError, setShowError] = useState(false);
 
 	const { dispatchPlantationAssetContext } = useContext(PlantationAssetContext)
+
+	useEffect(()=>{
+
+		dispatchPlantationAssetContext!({
+			selectPlantationId: {
+				payload: null
+			}
+		})
+	
+
+	},[dispatchPlantationAssetContext])
 
 	const addPlantationOnClick = () => {
 		dispatchPlantationAssetContext!({
