@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import * as firebase from 'firebase/app';
@@ -6,22 +6,27 @@ import * as firebase from 'firebase/app';
 type Props = {
 	anchorEl :  HTMLElement | null
 	onCloseAvatarMenu: ()=>void
+	setOpenAssistance: Dispatch<SetStateAction<boolean>>
 }
 
 export default function SimpleMenu(props: Props) {
 
 
-	const {anchorEl, onCloseAvatarMenu } = props
+	const {anchorEl, onCloseAvatarMenu, setOpenAssistance } = props
 	
 	
-	const logout = () => {
+	const onClickSignOut = () => {
 		firebase.auth().signOut().then(async () => {
 			onCloseAvatarMenu()
 			window.location.assign("/");
 		}).catch(function (error) {
 			// An error happened.
 		});
+	}
 
+	const onClickRequestAssistance=()=>{
+		setOpenAssistance(true)
+		onCloseAvatarMenu()
 	}
 	
 	return (
@@ -34,8 +39,8 @@ export default function SimpleMenu(props: Props) {
         onClose={onCloseAvatarMenu}
       >
         <MenuItem onClick={onCloseAvatarMenu}>Account Details</MenuItem>
-        <MenuItem onClick={onCloseAvatarMenu}>Request Assistance</MenuItem>
-        <MenuItem onClick={logout}>Sign Out</MenuItem>
+        <MenuItem onClick={onClickRequestAssistance}>Request Assistance</MenuItem>
+        <MenuItem onClick={onClickSignOut}>Sign Out</MenuItem>
       </Menu>
     </div>
   );

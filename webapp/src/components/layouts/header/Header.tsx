@@ -1,4 +1,4 @@
-import React, { useContext, FunctionComponent } from "react";
+import React, { useContext, FunctionComponent, useState } from "react";
 import AppBar from "@material-ui/core/AppBar";
 import Grid from "@material-ui/core/Grid";
 import Hidden from "@material-ui/core/Hidden";
@@ -13,6 +13,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { AuthContext } from "../../containers/Main";
 import { Avatar } from "@material-ui/core";
 import HeaderAvatarMenu from "./HeaderAvatarMenu";
+import AssistanceFormModal from "./assistance/AssistanceFormModal"
+import AssistanceForm from "./assistance/AssistanceForm"
 
 const useStyles = makeStyles((theme: Theme) => ({
 
@@ -35,15 +37,20 @@ const Header: FunctionComponent = () => {
 
 	const user = useContext(AuthContext) as any
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const [openAssistance, setOpenAssistance] = useState(false);
 
-  const openAvatarMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+	const openAvatarMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
 
-  const onCloseAvatarMenu = () => {
-    setAnchorEl(null);
-  };
+	const onCloseAvatarMenu = () => {
+		setAnchorEl(null);
+	};
+
+	const onCloseAssistance = () => {
+		setOpenAssistance(false)
+	}
 
 	return (
 		<>
@@ -74,7 +81,7 @@ const Header: FunctionComponent = () => {
 								</Avatar>
 
 							</IconButton>
-							<HeaderAvatarMenu anchorEl={anchorEl} onCloseAvatarMenu={onCloseAvatarMenu} />		
+							<HeaderAvatarMenu anchorEl={anchorEl} onCloseAvatarMenu={onCloseAvatarMenu} setOpenAssistance={setOpenAssistance} />
 						</Grid>
 					</Grid>
 				</Toolbar>
@@ -92,6 +99,9 @@ const Header: FunctionComponent = () => {
 						/>
 					))}
 			</Switch>
+			<AssistanceForm openAssistance={openAssistance} onCloseAssistance={onCloseAssistance}>
+				{(setAssistanceRequest) => <AssistanceFormModal setAssistanceRequest={setAssistanceRequest} />}
+			</AssistanceForm>
 		</>
 	);
 }
