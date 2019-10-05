@@ -34,7 +34,8 @@ export default functions.region("asia-east2").firestore
 						name,
 						management: unAudited.management,
 						auditAcceptedAt,
-						isActive
+						isActive,
+						sortDate: createdAt
 					}
 				}
 			})
@@ -42,7 +43,7 @@ export default functions.region("asia-east2").firestore
 			return;
 
 		} catch (error) {
-
+			console.error(error)
 			return "Error: " + error;
 		}
 
