@@ -97,14 +97,26 @@ async function syncRemovedMapWithDoc(newMap, previousMap, userId): Promise<boole
 		// process for Plantation Only
 		// get the ref  of the removed item. if removed map entry is an action from rep, do not remove main document
 		// only remove userId from the Plantation.repIds array
-		const { removedRef, isRep } = getRemovedRef(previousMap, newMap);	
+		const { removedRef, isRep } = getRemovedRef(previousMap, newMap);
 		if (isRep && removedRef) {
 			console.log("Producer Rep userId: ", userId)
-			console.log("Plantation Ref: ",  removedRef.path)
+			console.log("Plantation Ref: ", removedRef.path)
 			try {
 				await removedRef.update({
 					"repIds": admin.firestore.FieldValue.arrayRemove(userId)
 				})
+
+				const repJournalSnap = await removedRef.collection("journal")
+					.where("userId", "==", userId)
+					.where("isRemoved", "==", false)
+					.select()
+					.limit(1)
+					.get()
+
+				await repJournalSnap.docs[0].ref.update({
+					isRemoved: true
+				})
+
 				return false;
 			} catch (error) {
 				console.log(error)
