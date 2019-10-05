@@ -60,37 +60,6 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 	}, [reloadCallback])
 
 
-	// useEffect(() => {
-	// 	// if (location.pathname) {
-	// 	// 	// when path is at assets/plantation clear the selectedPlantationId
-	// 	// 	// this will cause a fresh collection to be dispatch out
-	// 	// 	const path = /^.+\/(map|reps|detail)\/(.*)/.exec(location.pathname) as string[]
-	// 	// 	if (/^\/assets\/plantations/.test(location.pathname)) {
-	// 	// 		dispatchPlantationAssetContext!({
-	// 	// 			selectPlantationId: {
-	// 	// 				payload: null
-	// 	// 			}
-	// 	// 		})
-	// 	// 	}
-	// 	// }
-
-	// 	if (location.pathname) {
-	// 		// check which plantation route is current and reload
-	// 				// 	if (/^\/assets\/plantations/.test(location.pathname)) {
-	// 		const path = /^.+\/(map|reps|detail)\/(.*)/.exec(location.pathname) as string[]
-	// 		if (path) {
-	// 			const [, route, id] = path
-	// 			if (route === "map" || route === "reps") {
-	// 				dispatchPlantationAssetContext!({
-	// 					selectPlantationId: {
-	// 						payload: id
-	// 					}
-	// 				})
-	// 			}
-	// 		}
-	// 	}
-	// }, [location.pathname])
-
 	const unsubscribeRef = useRef<any>()
 	useEffect(() => {
 		console.log("unsubscribe")
@@ -129,7 +98,8 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 		if (plantationCollection && statePlantationAssetContext.selectedPlantationIdState &&
 			plantationCollection[statePlantationAssetContext.selectedPlantationIdState]
 		) {
-			plantationCollection[statePlantationAssetContext.selectedPlantationIdState].ref.get().then((doc: firebase.firestore.DocumentData) => {
+		  const plantationDocRef   = 	plantationCollection[statePlantationAssetContext.selectedPlantationIdState].ref as firebase.firestore.DocumentReference
+			plantationDocRef.get().then((doc: firebase.firestore.DocumentData) => {
 				const result = doc.data() as PlantationDoc
 				if (result && isSubscribed) {
 
@@ -174,31 +144,35 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 	// remove plantation 
 	useEffect(() => {
 		if (statePlantationAssetContext.removedPlantationIdState) {
-			console.log("removing plantation Id: ", statePlantationAssetContext.removedPlantationIdState)
+			console.log("searching plantation Id: ", statePlantationAssetContext.removedPlantationIdState)
 			const updatePlantationCollection = Object.keys(plantationCollection).reduce((collection, plantationId: string) => {
-				if (plantationId !== statePlantationAssetContext.removedPlantationIdState) {
+				if (plantationId !== statePlantationAssetContext.removedPlantationIdState) {					
 					const plantation = { [plantationId]: plantationCollection[plantationId] }
 					return Object.assign({}, collection, plantation)
 				}
 				return collection
 			}, {})
 
-			console.log("updating plantation collection  with removed plantation to firestore: ", updatePlantationCollection)
-
-			firebaseApp.db.doc('users/' + user.uid).update({
-				plantations: updatePlantationCollection
-			}).then(() => {
-				console.log("upload success")
-				dispatchPlantationAssetContext!({
-					removePlantationId: {
-						payload: null
-					}
-				})
-				history.push("/assets/plantations")
-			}).catch((error: Error) => {
-
+			dispatchPlantationAssetContext!({
+				removePlantationId: {
+					payload: null
+				}
 			})
+			
+			if (Object.keys(updatePlantationCollection).length > 0) {
+				console.log("updating plantation collection  with removed plantation to firestore: ", updatePlantationCollection)
+				firebaseApp.db.doc('users/' + user.uid).update({
+					plantations: updatePlantationCollection
+				}).then(() => {
+					console.log("upload success")
+					history.push("/assets/plantations")
+				}).catch((error: Error) => {
+					console.error(error)
+				})
+			}
+
 		}
+
 	}, [firebaseApp, statePlantationAssetContext.removedPlantationIdState, plantationCollection, user, history])
 
 
