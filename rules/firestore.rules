@@ -83,7 +83,6 @@ service cloud.firestore {
 										// && incomingData().make.type is string
 										// && incomingData().make.detail is string
 
-
 				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
 										&& incomingData().userId == existingData().userId
 										&& incomingData().isRemoved == existingData().isRemoved
@@ -91,8 +90,6 @@ service cloud.firestore {
 										&& incomingData().updatedAt == existingData().updatedAt
 										&& existingData().isRemoved == false
 		
-
-
 				allow delete: if false
 
 		}
@@ -133,7 +130,6 @@ service cloud.firestore {
 											&& incomingData().auditAt == existingData().auditAt
 											&& incomingData().auditBy == existingData().auditBy
 											&& existingData().isRemoved == false
-
 								
 				allow delete: if false
 
@@ -148,10 +144,10 @@ service cloud.firestore {
 		}	
 
 
-		match/assistance/{assistanceId} {
-				allow read:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
-				allow create:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
-				allow update:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
+		match /assistance/{assistanceId} {
+				allow read:	if isSignedIn() && isOwner(incomingData().userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow create:	if isSignedIn() && isOwner(incomingData().userId) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isOwner(incomingData().userId) //TODO: isAdmin(userId) && isAuditor(userId)
 				allow delete: if false
 		}
 	
