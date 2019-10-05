@@ -2,6 +2,8 @@ import * as admin from "firebase-admin"
 
 async function ownPlantationMapBuilder(userId) {
 
+	console.log("***function: ownPlantationMapBuilder***")
+
 	// refresh User.plantation map with unremoved Plantation docs for the userID
 	const plantationsOwnSnapshot = await admin.firestore().collection("plantations")
 		.where("userId", "==", userId)
@@ -25,6 +27,8 @@ async function ownPlantationMapBuilder(userId) {
 
 async function repPlantationMapBuilder(userId) {
 
+	console.log("***function: repPlantationMapBuilder***")
+
 	// refresh User.plantation map with unremoved Plantation docs for the repID
 	const plantationsRepSnapshot = await admin.firestore().collection("plantations")
 		.where("repIds", "array-contains", userId)
@@ -36,9 +40,13 @@ async function repPlantationMapBuilder(userId) {
 
 		const resolvedAcc = await Promise.resolve(acc)
 		// const producer = await admin.auth().getUser(plantation.data().userId)
-		const producer = await admin.firestore().doc(`profiles/${userId}`).get()
+		const producer = await admin.firestore().doc(`profiles/${plantation.data().userId}`).get()
 		const producerData = producer.data();
 
+		
+		console.log("Rep Ids being updated:  ", plantation.data().userId)
+		console.log("plantation Id: ", plantation.id)
+		console.log("Producer name:  ", producerData!.name)
 
 		return Promise.resolve({
 			...resolvedAcc,
