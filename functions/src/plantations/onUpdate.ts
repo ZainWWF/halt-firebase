@@ -68,11 +68,12 @@ export default functions.region("asia-east2").firestore
 
 async function removeUserRepPlantation(previousData, newData, plantationRef) {
 
+	console.log("***function: removeUserRepPlantation***")
+	
 	if (!previousData.repIds || !newData.repIds) return;
 
 	console.log("previousData.repIds: ", previousData.repIds)
 	console.log("newData.repIds: ", newData.repIds)
-
 
 	if (previousData.repIds.length > newData.repIds.length) {
 
@@ -96,20 +97,22 @@ async function removeUserRepPlantation(previousData, newData, plantationRef) {
 		return
 	}
 
-
 	return
 }
 
 // update all the Producer/Plantation reps plantation map entries
 async function updateUserRepPlantation(newData, plantationRef) {
 
+	console.log("***function: updateUserRepPlantation***")
+
 	if (!newData.repIds || newData.repIds.length === 0) return;
 
 	const producer = await admin.firestore().doc(`profiles/${newData.userId}`).get();
 	const producerData = producer.data();
 
-	console.log("newData:  ", newData)
-	console.log("producer:  ", producer)
+	console.log("Rep Ids being updated:  ", newData.repIds)
+	console.log("plantation Id: ", plantationRef.replace("/", "."))
+	console.log("Producer name:  ", producerData!.name)
 
 	await Promise.all(newData.repIds.map(async repId => await admin.firestore().doc(`users/${repId}`)
 		.update({
