@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, useEffect, createContext, ReactElement, Dispatch, SetStateAction, useContext } from "react";
+import React, { FunctionComponent, useState, useEffect, createContext, ReactElement, Dispatch, SetStateAction, useContext, useCallback } from "react";
 import { FirebaseContext, Firebase } from '../../../providers/Firebase/FirebaseProvider';
 import { AuthContext } from "../../../containers/Main";
 import { CircularProgress, Dialog, DialogTitle, DialogContent } from "@material-ui/core";
@@ -14,36 +14,37 @@ const FC: FunctionComponent<Props> = ({ children, openAssistance, onCloseAssista
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const user = useContext(AuthContext) as firebase.User;
 
-	const [assistanceRequest, setAssistanceRequest] = useState()
+	const [assistanceRequest, setAssistanceRequest] = useState<any| null>(null)
 	const [isUploading, setIsUploading] = useState(false)
 
-	useEffect((
-	) => {
-		if (assistanceRequest) {
-			console.log(assistanceRequest)
-			console.log(user.uid)
-			setIsUploading(true)
+	const assistanceRequestCallback =  useCallback(()=>{
 			firebaseApp.db.collection("assistance").add({
 				userId: user.uid,
 				...assistanceRequest
 			}).then(() => {
 				console.log("upload success")
+				setAssistanceRequest(null)
 				setIsUploading(false)
 				onCloseAssistance()
 			}).catch((error: Error) => {
 				console.log(error)
 			})
-		}
+	},[assistanceRequest, onCloseAssistance, firebaseApp, user])
 
-	}, [assistanceRequest])
+	useEffect((
+	) => {
+		console.log(assistanceRequest)
+		if (assistanceRequest) {
+			setIsUploading(true)
+			assistanceRequestCallback()
+		}
+	}, [assistanceRequest, assistanceRequestCallback])
 
 	return (isUploading ?
-
 		<Dialog
 			maxWidth={"sm"}
 			open={true}
-			scroll={"paper"}
-			aria-labelledby="scroll-dialog-title"
+			aria-labelledby="wait-in-progress"
 		>
 			<DialogTitle >Please Wait...</DialogTitle>
 			<DialogContent dividers={true}>
@@ -57,7 +58,5 @@ const FC: FunctionComponent<Props> = ({ children, openAssistance, onCloseAssista
 			{children(setAssistanceRequest)}
 		</AssistanceFormContext.Provider>
 	)
-
 }
-
 export default FC
