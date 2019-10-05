@@ -1,5 +1,5 @@
 
-import React, { FunctionComponent, memo, useContext } from 'react';
+import React, { FunctionComponent, memo, useContext, useEffect,useState } from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -53,6 +53,7 @@ const ListView: FunctionComponent = memo(() => {
 
 	const { statePlantationAssetContext} = useContext(PlantationAssetContext)
 	const { plantationCollectionState } = statePlantationAssetContext!
+	const [ sortedPlantationList, setSortedPlantationList] = useState()
 
 	const ownership = (plantation: PlantationSummary) => {
 		if (!plantation.repOfId) {
@@ -62,13 +63,36 @@ const ListView: FunctionComponent = memo(() => {
 		}
 	}
 
+	useEffect(()=>{
+		const sortedP = Object.keys(plantationCollectionState).reduce((sortedPlantation:{[k: string]: any}[] , plantationId:string)=>{		
+			if(sortedPlantation.length === 0){
+			 return [...sortedPlantation,	{ ...plantationCollectionState[plantationId], id: plantationId}]
+			}	
+				let i;
+				for( i=sortedPlantation.length ; i >= 0; i--){
+					if(sortedPlantation[i-1] && (plantationCollectionState[plantationId].sortDate <  sortedPlantation[i-1].sortDate)){
+						sortedPlantation.splice(i,0,{ ...plantationCollectionState[plantationId], id: plantationId})
+						break;
+					}
+					if(i===0){
+						sortedPlantation.splice(0,0,{ ...plantationCollectionState[plantationId], id: plantationId})
+					}
+				}
+				return [...sortedPlantation]
+	
+		},[])
+		setSortedPlantationList(sortedP)
+	},[plantationCollectionState])
+
+
+
+
 	return (
 		<List className={classes.root}>
-			{plantationCollectionState && Object.keys(plantationCollectionState).length > 0 ?
-				Object.keys(plantationCollectionState).map((plantationId: string) => {
-					const plantation: PlantationSummary = plantationCollectionState[plantationId];
+			{sortedPlantationList && sortedPlantationList.length > 0 ?
+				sortedPlantationList.map((plantation: any) => {
 					return (
-						<ListItem button component={LinkDetails} to={`/assets/plantations/detail/${plantationId}`} key={plantationId} id={plantationId} >
+						<ListItem button component={LinkDetails} to={`/assets/plantations/detail/${plantation.id}`} key={plantation.id} id={plantation.id} >
 							<ListItemAvatar>
 								<Avatar alt={plantation.name} className={plantation.auditAcceptedAt ? classNames(classes.bigAvatar, classes.auditedAvatar) : classNames(classes.bigAvatar, classes.nonAuditedAvatar)} >
 									{plantation.auditAcceptedAt ? <AssignmentTurnedInIcon /> : <AssignmentLateIcon />}
