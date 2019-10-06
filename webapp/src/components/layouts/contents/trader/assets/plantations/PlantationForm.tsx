@@ -2,17 +2,17 @@ import React, { FunctionComponent, memo } from "react";
 import { Form, Field } from "formik";
 import Button from "@material-ui/core/Button";
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { PlantationDetails } from '../../../../types/Plantation';
+import { PlantationDetails } from '../../../../../types/Plantation';
 import { FormGroup, FormLabel, Card, CardContent, CardActions } from "@material-ui/core";
-import SingleField from "../../../fields/SingleField"
-import SelectField from "../../../fields/SelectField"
+import SingleField from "../../../../fields/SingleField"
+import SelectField from "../../../../fields/SelectField"
 import {
 	ManagementType,
 	CertificationType,
 	LicenseType,
 	PreviousLandCoverType,
 	LandClearingMethodType
-} from "../../../../../config/plantationAnswerChoices";
+} from "../../../../../../config/plantationAnswerChoices";
 import { grey } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme: Theme) =>

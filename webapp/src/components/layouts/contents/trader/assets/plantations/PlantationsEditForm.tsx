@@ -3,7 +3,7 @@ import { Formik } from "formik";
 import plantationValidationSchema from "./plantationValidationSchema";
 import * as turfHelpers from "@turf/helpers";
 import * as turfPointInPolygon from "@turf/boolean-point-in-polygon";
-import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
+import * as SumatraMapBounds from "../../../../../../config/PlantationMapBounds.json"
 import * as firebase from 'firebase/app';
 import PlantationForm from "./PlantationForm";
 import { PlantationAssetContext } from "../AssetsContents";

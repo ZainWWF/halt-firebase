@@ -3,10 +3,10 @@ import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import { Form, Field } from "formik";
 import { DialogContent, DialogActions } from "@material-ui/core";
-import SingleField from "../../../fields/SingleField"
-import SelectField from "../../../fields/SelectField"
+import SingleField from "../../../../fields/SingleField"
+import SelectField from "../../../../fields/SelectField"
 import { makeStyles } from "@material-ui/core/styles";
-import { MakeType } from "../../../../../config/vehicleAnswerChoices";
+import { MakeType } from "../../../../../../config/vehicleAnswerChoices";
 
 const useStyles = makeStyles({
 	form: {

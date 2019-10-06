@@ -1,5 +1,5 @@
 
-import { VehicleDoc, VehicleSummary } from "../../../../types/Vehicle";
+import { VehicleDoc, VehicleSummary } from "../../../../../types/Vehicle";
 
 type VehicleAssetContextState = {
 	newDialogState: boolean

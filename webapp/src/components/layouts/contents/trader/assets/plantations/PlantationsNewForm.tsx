@@ -1,13 +1,13 @@
 import React, { useState, FunctionComponent, useCallback, useEffect, useContext } from "react";
 import { Formik } from "formik";
-import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
+import * as SumatraMapBounds from "../../../../../../config/PlantationMapBounds.json"
 import plantationValidationSchema from "./plantationValidationSchema";
 import * as turfHelpers from "@turf/helpers";
 import * as turfPointInPolygon from "@turf/boolean-point-in-polygon";
 import * as firebase from 'firebase/app';
 import PlantationForm from "./PlantationForm";
-import { FirebaseContext, Firebase } from "../../../../providers/Firebase/FirebaseProvider";
-import { AuthContext } from "../../../../containers/Main";
+import { FirebaseContext, Firebase } from "../../../../../providers/Firebase/FirebaseProvider";
+import { AuthContext } from "../../../../../containers/Main";
 import { PlantationAssetContext } from "../AssetsContents";
 
 

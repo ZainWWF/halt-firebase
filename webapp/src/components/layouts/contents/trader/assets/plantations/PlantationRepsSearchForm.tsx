@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useContext, useState } from "react";
-import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
+import { FirebaseContext, Firebase } from '../../../../../providers/Firebase/FirebaseProvider';
 import * as firebase from 'firebase/app';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import 'firebase/firestore';
@@ -10,7 +10,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import debounce from 'just-debounce-it';
 import { List, ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, IconButton, Typography, InputAdornment, Card, CardHeader, CardContent } from "@material-ui/core";
 import { grey } from '@material-ui/core/colors';
-import SearchField from "../../../fields/SearchField"
+import SearchField from "../../../../fields/SearchField"
 import SearchIcon from '@material-ui/icons/Search';
 import { PlantationAssetContext } from "../AssetsContents";
 import CloseIcon from '@material-ui/icons/Close';

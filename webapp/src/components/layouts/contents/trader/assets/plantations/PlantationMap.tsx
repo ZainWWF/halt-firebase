@@ -1,6 +1,6 @@
 import React, { memo, useRef, useEffect, useCallback, useState, FunctionComponent, Dispatch, SetStateAction, } from "react"
 import { makeStyles, Theme, createStyles } from "@material-ui/core";
-import * as SumatraMapBounds from "../../../../../config/PlantationMapBounds.json"
+import * as SumatraMapBounds from "../../../../../../config/PlantationMapBounds.json"
 import * as turfHelpers from "@turf/helpers";
 import * as turfContains from "@turf/boolean-contains";
 declare global {

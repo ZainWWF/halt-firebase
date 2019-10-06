@@ -1,5 +1,5 @@
 
-import {  PlantationDetails } from "../../../../types/Plantation";
+import {  PlantationDetails } from "../../../../../types/Plantation";
 
 export type PlantationAssetContextState = {
 	uploadInProgressState: boolean | undefined

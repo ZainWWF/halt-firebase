@@ -12,7 +12,7 @@ import { grey, green } from '@material-ui/core/colors';
 import classNames from "classnames";
 import { PlantationAssetContext } from '../AssetsContents';
 import { Typography } from '@material-ui/core';
-import { PlantationSummary } from '../../../../types/Plantation';
+import { PlantationSummary } from '../../../../../types/Plantation';
 import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
 
 

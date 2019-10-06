@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useRef, createContext, useReducer, Dispatch, FunctionComponent, useCallback } from 'react';
-import { FirebaseContext, Firebase } from '../../../providers/Firebase/FirebaseProvider';
+import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
 import { Switch, Route } from 'react-router-dom';
 import VehiclesView from './vehicles/VehiclesView';
 import PlantationsView from './plantations/PlantationsView';
@@ -7,10 +7,10 @@ import PlantationMapCard from './plantations/PlantationMapCard';
 import PlantationDetailCard from './plantations/PlantationDetailCard';
 import PlantationRepsView from './plantations/PlantationsRepsView';
 import { withRouter } from 'react-router-dom'
-import { AuthContext } from '../../../containers/Main';
+import { AuthContext } from '../../../../containers/Main';
 import { initialVehicleState, vehicleAssetContextReducer } from './vehicles/vehicleAssetContext';
 import { initialPlantationState, plantationAssetContextReducer, PlantationAssetContextState, PlantationAssetContextAction } from './plantations/plantationAssetContext';
-import { PlantationDoc } from '../../../types/Plantation';
+import { PlantationDoc } from '../../../../types/Plantation';
 
 
 export const VehicleAssetContext = createContext<any>(initialVehicleState);
