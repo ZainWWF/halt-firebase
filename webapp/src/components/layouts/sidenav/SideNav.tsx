@@ -18,6 +18,7 @@ import navItems from './nav-items';
 import 'firebase/auth';
 import classNames from 'classnames';
 import { RouteComponentProps } from 'react-router';
+import { ListSubheader } from '@material-ui/core';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	categoryHeader: {
@@ -26,6 +27,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 	categoryHeaderPrimary: {
 		color: theme.palette.common.white
+	},
+	backgroundImage :{
+		backgroundImage: "url(../halt-side-banner-tesso-nilo.png)"
 	},
 	item: {
 		paddingTop: 4,
@@ -113,16 +117,17 @@ const SideNav: FunctionComponent<RouteComponentProps & DrawerProps> = ({ locatio
 				onClick={() => dispatchSideNav({ type: 'close' })}
 			>
 				<List disablePadding>
-					<ListItem
-						key="1"
+					<ListSubheader
+						// key="1"
 						className={classNames(
 							classes.firebase,
 							classes.item,
-							classes.itemCategory
+							classes.itemCategory,
+							classes.backgroundImage
 						)}
 					>
 						Halt App
-          </ListItem>
+          </ListSubheader>
 					{navItems.map(({ id, children, group }) => {
 						const matchGroup = userGroup ? userGroup.filter(g => group.includes(g)) : []
 						return (group.length === 0 || matchGroup.length > 0 ?
