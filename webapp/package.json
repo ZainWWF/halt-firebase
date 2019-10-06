@@ -1,54 +1,54 @@
 {
-  "name": "webapp",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@material-ui/core": "^4.4.1",
-    "@material-ui/icons": "^4.4.1",
-    "@turf/boolean-contains": "^6.0.1",
-    "@turf/boolean-point-in-polygon": "^6.0.1",
-    "@turf/helpers": "^6.1.4",
-    "@types/classnames": "^2.2.9",
-    "@types/googlemaps": "^3.37.5",
-    "@types/jest": "24.0.18",
-    "@types/just-debounce-it": "^1.1.0",
-    "@types/node": "12.7.3",
-    "@types/react": "16.9.2",
-    "@types/react-dom": "16.9.0",
-    "@types/react-router-dom": "^4.3.5",
-    "@types/yup": "^0.26.23",
-    "classnames": "^2.2.6",
-    "firebase": "^6.5.0",
-    "formik": "^2.0.1-rc.13",
-    "just-debounce-it": "^1.1.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "react-router-dom": "^5.0.1",
-    "react-scripts": "3.1.1",
-    "request": "^2.88.0",
-    "typescript": "^3.5.3",
-    "yup": "^0.27.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "deploy": "firebase deploy --only hosting"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+	"name": "webapp",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"@types/jest": "24.0.18",
+		"@types/node": "12.7.11",
+		"@types/react": "16.9.5",
+		"@types/react-dom": "16.9.1",
+		"react": "^16.10.2",
+		"react-dom": "^16.10.2",
+		"react-scripts": "3.2.0",
+		"typescript": "3.6.3",
+		"@material-ui/core": "^4.4.1",
+		"@material-ui/icons": "^4.4.1",
+		"@turf/boolean-contains": "^6.0.1",
+		"@turf/boolean-point-in-polygon": "^6.0.1",
+		"@turf/helpers": "^6.1.4",
+		"@types/classnames": "^2.2.9",
+		"@types/googlemaps": "^3.37.5",
+		"@types/just-debounce-it": "^1.1.0",
+		"@types/react-router-dom": "^4.3.5",
+		"@types/yup": "^0.26.23",
+		"classnames": "^2.2.6",
+		"firebase": "^6.5.0",
+		"formik": "^2.0.1-rc.13",
+		"just-debounce-it": "^1.1.0",
+		"react-router-dom": "^5.1.2",
+		"request": "^2.88.0",
+		"yup": "^0.27.0"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject",
+		"deploy": "firebase deploy --only hosting"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	}
 }
