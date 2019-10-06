@@ -150,6 +150,12 @@ service cloud.firestore {
 				allow update:	if isSignedIn() && isOwner(incomingData().userId) //TODO: isAdmin(userId) && isAuditor(userId)
 				allow delete: if false
 		}
+
+		match /mills/{millsId} {
+				allow read:	if true
+				allow write: if false
+		}
+	
 	
  }
 }
