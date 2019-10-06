@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 		}
 	},
 	itemActiveItem: {
-		color: '#4fc3f7'
+		color: theme.palette.common.white
 	},
 	itemPrimary: {
 		color: 'inherit',

@@ -12,9 +12,9 @@ import {
 		},
 		palette: {
 			primary: {
-				light: '#63ccff',
-				main: '#009be5',
-				dark: '#006db3',
+				light: '#EDF7EB',
+				main: '#384954',
+				dark: '#2BAB7B',
 			},
 		},
 		shape: {
