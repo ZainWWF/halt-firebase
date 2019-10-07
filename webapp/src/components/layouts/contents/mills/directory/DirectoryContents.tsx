@@ -30,7 +30,7 @@ const Contents = memo(() => {
 				console.error(error)
 			})
 		return () => { isSubscribed = false }
-	}, [])
+	}, [firebaseApp])
 
 	return (
 		<Switch>
