@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState, useEffect, createContext, ReactElement, Dispatch, SetStateAction, useContext, useCallback } from "react";
 import { FirebaseContext, Firebase } from '../../../providers/Firebase/FirebaseProvider';
 import { AuthContext } from "../../../containers/Main";
-import { CircularProgress, Dialog, DialogTitle, DialogContent } from "@material-ui/core";
+import PleaseWaitCircular from "../../../progress/PleaseWaitCircular"
 
 export const AssistanceFormContext = createContext<any>(undefined)
 
@@ -41,18 +41,7 @@ const FC: FunctionComponent<Props> = ({ children, openAssistance, onCloseAssista
 	}, [assistanceRequest, assistanceRequestCallback])
 
 	return (isUploading ?
-		<Dialog
-			maxWidth={"sm"}
-			open={true}
-			aria-labelledby="wait-in-progress"
-		>
-			<DialogTitle >Please Wait...</DialogTitle>
-			<DialogContent dividers={true}>
-				<div style={{ margin: "20px 55px", padding: 20, width: "50%" }}>
-					<CircularProgress />
-				</div>
-			</DialogContent>
-		</Dialog>
+		<PleaseWaitCircular/>
 		:
 		<AssistanceFormContext.Provider value={{ openAssistance, onCloseAssistance }}>
 			{children(setAssistanceRequest)}
