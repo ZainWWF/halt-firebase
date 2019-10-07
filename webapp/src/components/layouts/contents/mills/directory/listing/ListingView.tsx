@@ -6,7 +6,6 @@ import Grid from '@material-ui/core/Grid';
 import Snackbar from '@material-ui/core/Snackbar';
 import { Theme } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
-import ListingQuery from "./ListingQuery"
 import ListingMills from "./ListingMills"
 import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular"
 
