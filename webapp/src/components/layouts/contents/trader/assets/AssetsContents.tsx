@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef, createContext, useReducer, Dispatch, FunctionComponent, useCallback } from 'react';
 import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import VehiclesView from './vehicles/VehiclesView';
 import PlantationsView from './plantations/PlantationsView';
 import PlantationMapCard from './plantations/PlantationMapCard';
@@ -26,9 +26,10 @@ export const PlantationAssetContext = createContext<Partial<PlantationContextTyp
 type IProps = {
 	history: any
 	location: any
+	match: any
 }
 
-const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
+const AssetsContents: FunctionComponent<IProps> = ({ history, location, match }) => {
 
 	const [stateVehicleAssetContext, dispatchVehicleAssetContext] = useReducer(vehicleAssetContextReducer, initialVehicleState);
 	const [statePlantationAssetContext, dispatchPlantationAssetContext] = useReducer(plantationAssetContextReducer, initialPlantationState);
@@ -98,7 +99,7 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 		if (plantationCollection && statePlantationAssetContext.selectedPlantationIdState &&
 			plantationCollection[statePlantationAssetContext.selectedPlantationIdState]
 		) {
-		  const plantationDocRef   = 	plantationCollection[statePlantationAssetContext.selectedPlantationIdState].ref as firebase.firestore.DocumentReference
+			const plantationDocRef = plantationCollection[statePlantationAssetContext.selectedPlantationIdState].ref as firebase.firestore.DocumentReference
 			plantationDocRef.get().then((doc: firebase.firestore.DocumentData) => {
 				const result = doc.data() as PlantationDoc
 				if (result && isSubscribed) {
@@ -146,7 +147,7 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 		if (statePlantationAssetContext.removedPlantationIdState) {
 			console.log("searching plantation Id: ", statePlantationAssetContext.removedPlantationIdState)
 			const updatePlantationCollection = Object.keys(plantationCollection).reduce((collection, plantationId: string) => {
-				if (plantationId !== statePlantationAssetContext.removedPlantationIdState) {					
+				if (plantationId !== statePlantationAssetContext.removedPlantationIdState) {
 					const plantation = { [plantationId]: plantationCollection[plantationId] }
 					return Object.assign({}, collection, plantation)
 				}
@@ -158,7 +159,7 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 					payload: null
 				}
 			})
-			
+
 			if (Object.keys(updatePlantationCollection).length > 0) {
 				console.log("updating plantation collection  with removed plantation to firestore: ", updatePlantationCollection)
 				firebaseApp.db.doc('users/' + user.uid).update({
@@ -179,6 +180,7 @@ const AssetsContents: FunctionComponent<IProps> = ({ history, location }) => {
 	return (
 		<>
 			<Switch>
+				<Redirect exact from="/assets" to={"/assets/plantations"} />
 				<Route
 					path="/assets/vehicles"
 					component={() => {

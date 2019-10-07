@@ -72,10 +72,7 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 			/** user authenticated pages */
 			return (
 				<AuthContext.Provider value={user}>
-					<Switch>
-						<Route exact path={defaultPath} component={AuthPage} />
-						<Redirect from="/*" to={"/assets/plantations"} />
-					</Switch>
+					<AuthPage/>
 				</AuthContext.Provider>
 			)
 		} else {

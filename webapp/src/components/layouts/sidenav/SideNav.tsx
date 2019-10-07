@@ -118,7 +118,6 @@ const SideNav: FunctionComponent<RouteComponentProps & DrawerProps> = ({ locatio
 			>
 				<List disablePadding>
 					<ListSubheader
-						// key="1"
 						className={classNames(
 							classes.firebase,
 							classes.item,

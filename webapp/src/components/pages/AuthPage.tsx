@@ -3,11 +3,9 @@
  *  The routes to other pages are retrieve
  *  from config file "src/config/nav-items.config.tsx"
  */
-import React, { memo } from 'react';
+import React, { memo, FunctionComponent } from 'react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import {
-	BrowserRouter as Router,
-} from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Hidden from '@material-ui/core/Hidden';
 import SideNav from '../layouts/sidenav/SideNav';
@@ -43,9 +41,10 @@ const useStyles = makeStyles({
 	}
 });
 
-const  AuthPage = memo(()=> {
+
+const  AuthPage:FunctionComponent = memo(()=> {
 	const classes = useStyles();
- 
+
 	return (
 		<MuiThemeProvider theme={theme}>
 			<div className={classes.root}>
@@ -66,18 +65,19 @@ const  AuthPage = memo(()=> {
 					</Hidden>
 				</nav>
 				<Grid container direction="column">
-					<Router>
+					
 						<Header />
+						<Redirect exact from="/" to="/assets/plantations" />			
 						<main data-testid="main-content" className={classes.mainContent}>
 							{navItems
 								.reduce((acc: any[], curr) => {
 									return [...acc, ...curr.children];
 								}, [])
-								.map(({ content }) => {
-									return content
+								.map(({ content, path, id }) => {
+									return  <Route  key={id} path={path} component={content}/>
 								})}
 						</main>
-					</Router>
+		
 				</Grid>
 
 			</div>
