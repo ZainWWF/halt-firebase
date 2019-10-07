@@ -41,11 +41,26 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 				setShowProgress(false)
 				unsubscribe();
 			}
-
-
 		})
 		return () => unsubscribe();
 	}, [firebaseApp])
+
+	useEffect(() => {
+		let isSubscribed = true
+		if (user) {
+			firebase.auth().currentUser!.getIdTokenResult()
+				.then((idTokenResult) => {
+					if (isSubscribed) {
+						console.log(idTokenResult.claims)
+					}
+				})
+				.catch((error) => {
+					console.log(error);
+				});
+		}
+		return () => { isSubscribed = false }
+	}, [user])
+
 
 	useEffect(() => {
 		localStorage.setItem("path", location.pathname)
@@ -72,7 +87,7 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 			/** user authenticated pages */
 			return (
 				<AuthContext.Provider value={user}>
-					<AuthPage/>
+					<AuthPage />
 				</AuthContext.Provider>
 			)
 		} else {
