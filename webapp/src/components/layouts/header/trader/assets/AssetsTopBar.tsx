@@ -33,8 +33,6 @@ const useStyle = makeStyles({
 
 const  TopBar = () => {
 
-
-
 	const classes = useStyle();
   return (
 		<Grid container direction="column" justify="space-between">
@@ -42,7 +40,7 @@ const  TopBar = () => {
 				<Grid container justify="space-between">
 					<Grid item>
 						<Typography className={classes.title} color="inherit">
-							Assets
+							Trader Assets
 						</Typography>
 					</Grid>
 					<Grid item>
