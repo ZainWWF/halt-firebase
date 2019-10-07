@@ -64,7 +64,7 @@ const DialogForm: FunctionComponent = () => {
 	const newPlantationUpload = (plantationDoc:any) => {
 
 		firebaseApp.db.collection('plantations')
-			.add({ ...plantationDoc, userId: user.uid })
+			.add({ ...plantationDoc, userId: user.uid , geometry: ""  })
 			.then(() => {
 				console.log("upload success")
 				dispatchPlantationAssetContext!({
