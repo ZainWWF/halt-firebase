@@ -6,6 +6,7 @@ import AssetsTopBar from "../header/trader/assets/AssetsTopBar";
 import { Omit } from '@material-ui/types';
 import AssetsContents from "../contents/trader/assets/AssetsContents";
 import DirectoryContents from "../contents/mills/directory/DirectoryContents"
+import DirectoryTopBar from "../header/mills/directory/DirectoryTopBar"
 
 export type NavItemChildren = {
 	id: string
@@ -55,7 +56,7 @@ const navItems: NavItem[] = [
 					(props, ref) => <Link innerRef={ref as any} to="/directory/" {...props} />,
 				),
 				content: DirectoryContents,
-				header: () => <div>test</div >
+				header: () => <DirectoryTopBar/ >
 			},
 
 		]
