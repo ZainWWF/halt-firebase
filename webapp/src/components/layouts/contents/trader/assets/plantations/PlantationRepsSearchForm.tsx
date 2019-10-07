@@ -85,8 +85,11 @@ const AutoSave: FunctionComponent<{ debounceMs: number }> = ({ debounceMs }) => 
 };
 
 const ValidatePlantationRepSchema = Yup.lazy((value: any)=>{
-	if(value.plantationRepPhoneNumber && value.plantationRepPhoneNumber.length === 3){
-		return Yup.mixed()
+	if(value){
+		return Yup.object().shape({
+			plantationRepPhoneNumber: Yup.string().notRequired()
+		});
+	
 	}else{
 		return Yup.object().shape({
 				plantationRepPhoneNumber: Yup.string()
