@@ -3,17 +3,17 @@ import React, { useContext, useEffect, useState, memo } from 'react';
 import { Switch, Route, Redirect, } from 'react-router-dom';
 import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
 import ListingView from "./listing/ListingView"
-// import RepsView from "./reps/RepsView"
 
 const Contents = memo(() => {
 
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const [mills, setMills] = useState()
-	const [isRetrieving, setIsRetrieving] = useState(true)
+	const [isRetrievingMill, setIsRetrieving] = useState(false)
 
 	useEffect((
 	) => {
 		let isSubscribed = true
+		setIsRetrieving(true)
 		firebaseApp.db.collection("mills")
 			.get()
 			.then((data) => {
@@ -38,13 +38,9 @@ const Contents = memo(() => {
 
 			<Route
 				path="/directory/listing"
-				component={() => <ListingView mills={mills} isRetrieving={isRetrieving} />}
+				component={() => <ListingView mills={mills} isRetrievingMill={isRetrievingMill} />}
 			/>
 
-			{/* <Route
-				path="/directory/reps"
-				component={RepsView}
-			/> */}
 		</Switch>
 	)
 
