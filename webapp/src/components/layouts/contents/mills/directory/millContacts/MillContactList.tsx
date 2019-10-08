@@ -1,5 +1,5 @@
 
-import React, { FunctionComponent, memo } from 'react';
+import React, { FunctionComponent, memo, useState } from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -40,18 +40,26 @@ const useStyles = makeStyles((theme: Theme) =>
 
 
 type IProps = {
-	selectedMillRef: firebase.firestore.DocumentReference
+	selectedMillRef: firebase.firestore.DocumentReference | any
 }
 
 const ListView: FunctionComponent<IProps> = memo(({ selectedMillRef }) => {
 
 	const classes = useStyles();
-	
-	const removeMillContact = (phoneNumber: string) => {
-		console.log(phoneNumber)
+	const [reload, setReload] = useState(false)
+
+
+	const removeMillContact = (millContactRef: firebase.firestore.DocumentReference) => {
+		setReload(true)
+		millContactRef.delete()
+			.then(() => {
+				console.log("deleted")
+				setReload(false)
+			})
+			.catch(e => console.log(e))
 	}
 
-	return (
+	return (!reload && selectedMillRef &&
 		<>
 			<MillContactsQuery selectedMillRef={selectedMillRef}>
 				{(millContacts: Map<number, any>) => {
@@ -62,8 +70,8 @@ const ListView: FunctionComponent<IProps> = memo(({ selectedMillRef }) => {
 								Object.values(millContacts).map((millContact: any) => {
 									return (
 										<ListItem key={millContact.name}  >
-											<ListItemText primary={ millContact.isAdmin ?  `${millContact.name} -  Admin` : millContact.name  } secondary={millContact.phoneNumber ? millContact.phoneNumber : ""} />
-											<ListItemSecondaryAction onClick={() => removeMillContact(millContact.phoneNumber)}>
+											<ListItemText primary={millContact.isAdmin ? `${millContact.name} -  Admin` : millContact.name} secondary={millContact.phoneNumber ? millContact.phoneNumber : ""} />
+											<ListItemSecondaryAction onClick={() => removeMillContact(millContact.ref)}>
 												<Tooltip title="Remove Mill Contacts">
 													<IconButton edge="end" aria-label="remove-reps">
 														<HighlightOffIcon />
@@ -84,7 +92,8 @@ const ListView: FunctionComponent<IProps> = memo(({ selectedMillRef }) => {
 				}}
 			</MillContactsQuery>
 		</>
-	);
+		)
+
 
 })
 

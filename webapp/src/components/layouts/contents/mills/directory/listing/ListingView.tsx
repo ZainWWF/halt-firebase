@@ -99,14 +99,14 @@ const View: FunctionComponent<IProps> = memo(({ mills, isRetrievingMill }) => {
 			</AppBar>
 			{Boolean(selectedMill && selectedMill.ref) ?
 				<>
-					{!openMillContact && <MillContactsList selectedMillRef={selectedMill ? selectedMill.ref : ""} />}
+					{!openMillContact && <MillContactsList selectedMillRef={selectedMill ? selectedMill.ref : null} />}
 				</>
 				:
 				<>
 					{isRetrievingMill ? <PleaseWaitCircular /> : <ListingMills mills={mills} selectMill={selectMill} />}
 				</>
 			}
-			<MillContactForm openMillContact={openMillContact} onCloseMillContact={onCloseMillContact} millContactRef={selectedMill ? selectedMill.ref : ""}>
+			<MillContactForm openMillContact={openMillContact} onCloseMillContact={onCloseMillContact} millContactRef={selectedMill ? selectedMill.ref : null}>
 				{(setNewMillContact) => <MillContactFormModal setNewMillContact={setNewMillContact} />}
 			</MillContactForm>
 			<Snackbar

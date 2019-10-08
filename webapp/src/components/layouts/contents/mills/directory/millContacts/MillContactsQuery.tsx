@@ -5,7 +5,7 @@ import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular"
 
 type Props = {
 	children: any
-	selectedMillRef: firebase.firestore.DocumentReference
+	selectedMillRef: firebase.firestore.DocumentReference | null
 }
 const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 
@@ -19,40 +19,48 @@ const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 	) => {
 		let isSubscribed = true
 		setIsRetrievingMillContacts(true)
-		selectedMillRef.collection("millReps")
-			.get()
-			.then((millRepsData) => {
+		if (selectedMillRef) {
 
-				const millRepContacts = millRepsData.docs.map(millRep => {
-					return millRep.data()
+			selectedMillRef.collection("millReps")
+				.get()
+				.then((millRepsData) => {
+
+					const millRepContacts = millRepsData.docs.map(millRep => {
+						return { ...millRep.data(), ref: millRep.ref }
+					})
+
+					if (isSuperUser) {
+						selectedMillRef.collection("millAdmins")
+							.get()
+							.then((millAdminsData) => {
+								if (isSubscribed) {
+									console.log("retrieve done")
+									const millAdminContacts = millAdminsData.docs.map(millAdmin => {
+										return { ...millAdmin.data(), ref: millAdmin.ref }
+									})
+									setMillContacts({ ...millAdminContacts, ...millRepContacts })
+									setIsRetrievingMillContacts(false)
+								}
+							}).catch((error: Error) => {
+								console.error(error)
+							})
+					} else {
+						if (isSubscribed) {
+							console.log("retrieve done")
+							setMillContacts(millRepContacts)
+							setIsRetrievingMillContacts(false)
+						}
+					}
+
+				}).catch((error: Error) => {
+					console.error(error)
 				})
 
-				if (isSuperUser) {
-					selectedMillRef.collection("millAdmins")
-						.get()
-						.then((millAdminsData) => {
-							if (isSubscribed) {
-								console.log("retrieve done")
-								const millAdminContacts = millAdminsData.docs.map(millAdmin => {
-									return millAdmin.data()
-								})
-								setMillContacts({ ...millAdminContacts, ...millRepContacts })
-								setIsRetrievingMillContacts(false)
-							}
-						}).catch((error: Error) => {
-							console.error(error)
-						})
-				} else {
-					if (isSubscribed) {
-						console.log("retrieve done")
-						setMillContacts(millRepContacts)
-						setIsRetrievingMillContacts(false)
-					}
-				}
 
-			}).catch((error: Error) => {
-				console.error(error)
-			})
+
+		}
+
+
 
 		return () => { isSubscribed = false }
 	}, [selectedMillRef, isSuperUser])
