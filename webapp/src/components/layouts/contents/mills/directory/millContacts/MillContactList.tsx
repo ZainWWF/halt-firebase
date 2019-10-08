@@ -8,7 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import { grey, green } from '@material-ui/core/colors';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import MillRepsQuery from "../millReps/MillRepsQuery"
+import MillContactsQuery from "./MillContactsQuery"
 import Tooltip from '@material-ui/core/Tooltip';
 import { Typography } from '@material-ui/core';
 
@@ -47,23 +47,24 @@ const ListView: FunctionComponent<IProps> = memo(({ selectedMillRef }) => {
 
 	const classes = useStyles();
 	
-	const removeMillRep = (phoneNumber: string) => {
+	const removeMillContact = (phoneNumber: string) => {
 		console.log(phoneNumber)
 	}
 
 	return (
 		<>
-			<MillRepsQuery selectedMillRef={selectedMillRef}>
-				{(millReps: any[]) => {
+			<MillContactsQuery selectedMillRef={selectedMillRef}>
+				{(millContacts: Map<number, any>) => {
+					console.log(millContacts)
 					return (
 						<List className={classes.root}>
-							{millReps && millReps.length > 0 ?
-								millReps.map((millRep: any) => {
+							{millContacts ?
+								Object.values(millContacts).map((millContact: any) => {
 									return (
-										<ListItem key={millRep.name}  >
-											<ListItemText primary={millRep.name} secondary={millRep.phoneNumber ? millRep.phoneNumber : ""} />
-											<ListItemSecondaryAction onClick={() => removeMillRep(millRep.phoneNumber)}>
-												<Tooltip title="Remove Mill Reps">
+										<ListItem key={millContact.name}  >
+											<ListItemText primary={ millContact.isAdmin ?  `${millContact.name} -  Admin` : millContact.name  } secondary={millContact.phoneNumber ? millContact.phoneNumber : ""} />
+											<ListItemSecondaryAction onClick={() => removeMillContact(millContact.phoneNumber)}>
+												<Tooltip title="Remove Mill Contacts">
 													<IconButton edge="end" aria-label="remove-reps">
 														<HighlightOffIcon />
 													</IconButton>
@@ -74,14 +75,14 @@ const ListView: FunctionComponent<IProps> = memo(({ selectedMillRef }) => {
 								}) :
 								<div className={classes.contentWrapper}>
 									<Typography color="textSecondary" align="center">
-										No mill reps registered yet
+										No mill contact registered yet
 									</Typography>
 								</div>
 							}
 						</List>
 					)
 				}}
-			</MillRepsQuery>
+			</MillContactsQuery>
 		</>
 	);
 

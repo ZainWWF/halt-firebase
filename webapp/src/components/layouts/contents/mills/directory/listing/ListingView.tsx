@@ -9,9 +9,9 @@ import { Theme, Button } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import ListingMills from "./ListingMills"
 import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular"
-import MillRepsList from "../millReps/MillRepsList"
-import MillRepForm from "../millReps/MillRepForm"
-import MillRepFormModal from "../millReps/MillRepFormModal"
+import MillContactsList from "../millContacts/MillContactList"
+import MillContactForm from "../millContacts/MillContactForm"
+import MillContactFormModal from "../millContacts/MillContactFormModal"
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import IconButton from '@material-ui/core/IconButton';
 
@@ -59,15 +59,15 @@ const View: FunctionComponent<IProps> = memo(({ mills, isRetrievingMill }) => {
 	const [selectedMill, selectMill] = useState()
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
-	const [openMillRep, setMillRep] = useState(false);
+	const [openMillContact, setMillContact] = useState(false);
 
-	const onCloseMillRep = () => {
-		setMillRep(false)
+	const onCloseMillContact = () => {
+		setMillContact(false)
 
 	}
 
-	const addMillRepOnClick = () => {
-		setMillRep(true)
+	const addMillContactOnClick = () => {
+		setMillContact(true)
 	}
 
 	return (
@@ -88,8 +88,8 @@ const View: FunctionComponent<IProps> = memo(({ mills, isRetrievingMill }) => {
 									</Typography>
 								</Grid>
 								<Grid item>
-									<Button variant="contained" color="primary" className={classes.addUser} onClick={addMillRepOnClick}>
-										Add Mill Reps
+									<Button variant="contained" color="primary" className={classes.addUser} onClick={addMillContactOnClick}>
+										Add Mill Contacts
 									</Button>
 								</Grid>
 							</>
@@ -99,16 +99,16 @@ const View: FunctionComponent<IProps> = memo(({ mills, isRetrievingMill }) => {
 			</AppBar>
 			{Boolean(selectedMill && selectedMill.ref) ?
 				<>
-					{!openMillRep && <MillRepsList selectedMillRef={selectedMill ? selectedMill.ref : ""} />}
+					{!openMillContact && <MillContactsList selectedMillRef={selectedMill ? selectedMill.ref : ""} />}
 				</>
 				:
 				<>
 					{isRetrievingMill ? <PleaseWaitCircular /> : <ListingMills mills={mills} selectMill={selectMill} />}
 				</>
 			}
-			<MillRepForm openMillRep={openMillRep} onCloseMillRep={onCloseMillRep} millRepRef={selectedMill ? selectedMill.ref : ""}>
-				{(setNewMillRep) => <MillRepFormModal setNewMillRep={setNewMillRep} />}
-			</MillRepForm>
+			<MillContactForm openMillContact={openMillContact} onCloseMillContact={onCloseMillContact} millContactRef={selectedMill ? selectedMill.ref : ""}>
+				{(setNewMillContact) => <MillContactFormModal setNewMillContact={setNewMillContact} />}
+			</MillContactForm>
 			<Snackbar
 				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 				key={`bottom,center`}

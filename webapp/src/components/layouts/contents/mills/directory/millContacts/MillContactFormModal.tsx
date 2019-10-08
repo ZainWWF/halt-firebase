@@ -1,21 +1,24 @@
-import React, { useContext, Dispatch, SetStateAction } from 'react';
+import React, { useContext, Dispatch, SetStateAction, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Formik, Form } from 'formik';
-import MillRepFormFields from "./MillRepFormFields"
+import MillContactFormFields from "./MillContactFormFields"
 import * as Yup from "yup";
-import { MillRepFormContext } from './MillRepForm';
+import { MillContactFormContext } from './MillContactForm';
 
 type Props = {
-	setNewMillRep: Dispatch<SetStateAction<any>>
+	setNewMillContact: Dispatch<SetStateAction<any>>
 }
 
 export default function ScrollDialog(props: Props) {
-	const { setNewMillRep } = props
-	const { openMillRep, onCloseMillRep } = useContext(MillRepFormContext)
+	const { setNewMillContact } = props
+	const { openMillContact, onCloseMillContact } = useContext(MillContactFormContext)
+	const [checkBoxState, setCheckBoxState] = useState(false)
+
+
 	const assistanceValidationSchema = Yup.object().shape({
 		name: Yup.string()
 			.required("Required"),
@@ -28,35 +31,41 @@ export default function ScrollDialog(props: Props) {
 			<Dialog
 				fullWidth={true}
 				maxWidth={"sm"}
-				open={openMillRep}
-				onClose={onCloseMillRep}
+				open={openMillContact}
+				onClose={onCloseMillContact}
 				scroll={"paper"}
 				aria-labelledby="scroll-dialog-title"
 			>
 				<Formik
 					initialValues={{
 						name: "",
-						phoneNumber: ""
+						phoneNumber: "",
+						isAdmin: false // this field is actually not use
 					}}
 					validationSchema={assistanceValidationSchema}
 					onSubmit={(values) => {
-						setNewMillRep(values)
+						setNewMillContact({
+							name: values.name,
+							phoneNumber: values.phoneNumber,
+							isAdmin: checkBoxState
+						})
 					}}
 				>
 					{({ isValid, errors, touched }) => {
 						return (
 							<>
 								<Form>
-									<DialogTitle id="scroll-dialog-title">New Mill Rep</DialogTitle>
+									<DialogTitle id="scroll-dialog-title">New Mill Contact</DialogTitle>
 									<DialogContent dividers={true}>
-										< MillRepFormFields
+										< MillContactFormFields
 											errors={errors}
 											touched={touched}
+											setCheckBoxState={setCheckBoxState}
 										/>
 
 									</DialogContent>
 									<DialogActions>
-										<Button onClick={onCloseMillRep} color="primary">
+										<Button onClick={onCloseMillContact} color="primary">
 											Cancel
           				</Button>
 										<Button
@@ -73,6 +82,6 @@ export default function ScrollDialog(props: Props) {
 					}}
 				</Formik>
 			</Dialog>
-		</div>
+		</div >
 	);
 }
