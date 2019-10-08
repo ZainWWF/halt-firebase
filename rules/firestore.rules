@@ -160,14 +160,15 @@ service cloud.firestore {
 		}
 	
 		// millAdminId needs to be the userId
-		match /mills/{millsId}/millAdmin/{millAdminId} {
+		match /mills/{millsId}/millAdmins/{millAdminId} {
 				allow read:	if isSignedIn() 
 				allow create: if isSignedIn() && isSuperUser()
-											&& incomingData().size() == 3
+											&& incomingData().size() == 4
 											&& incomingData().name is string
 											&& incomingData().phoneNumber is string
 											&& incomingData().registrarId is string
 											&& incomingData().registrarId == request.auth.uid
+											&& incomingData().isAdmin == true
 				allow delete: if isSignedIn() && isSuperUser()
 				allow update: if false
 		}
@@ -176,11 +177,12 @@ service cloud.firestore {
 		match /mills/{millsId}/millReps/{millRepId} {
 				allow read:	if isSignedIn() // get(/databases/$(database)/documents/user/$(request.auth.uid)).data.role == "ADMIN";
 				allow create: if isSignedIn()
-											&& incomingData().size() == 3
+											&& incomingData().size() == 4
 											&& incomingData().name is string
 											&& incomingData().phoneNumber is string
 											&& incomingData().registrarId is string
 											&& incomingData().registrarId == request.auth.uid
+											&& incomingData().isAdmin == false
 				allow delete: if isSignedIn() && isSuperUser()
 				allow update: if false
 		}
