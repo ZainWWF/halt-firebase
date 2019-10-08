@@ -12,7 +12,7 @@ import assistanceOnUpdate from "./assistance/onUpdate"
 import superUserOnCreate from "./superUser/onCreate"
 import superUserOnDelete from "./superUser/onDelete"
 import superUserOnUpdate from "./superUser/onUpdate"
-
+import millAdminOnCreate from "./millAdmin/onCreate"
 
 admin.initializeApp();
 
@@ -29,6 +29,7 @@ export {
 	assistanceOnUpdate,
 	superUserOnCreate,
 	superUserOnUpdate,
-	superUserOnDelete
+	superUserOnDelete,
+	millAdminOnCreate
 }
 
