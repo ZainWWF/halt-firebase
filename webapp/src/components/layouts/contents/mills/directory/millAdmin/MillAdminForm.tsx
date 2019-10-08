@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useState, useEffect, createContext, ReactElement, Dispatch, SetStateAction, useContext, useCallback } from "react";
-import { FirebaseContext, Firebase } from '../../../../../providers/Firebase/FirebaseProvider';
 import { AuthContext } from "../../../../../containers/Main";
 import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular";
 
@@ -35,7 +34,6 @@ const FC: FunctionComponent<Props> = ({ children, openMillAdmin, onCloseMillAdmi
 
 	useEffect((
 	) => {
-		console.log(newMillAdmin)
 		if (newMillAdmin) {
 			setIsUploading(true)
 			newMillAdminCallback()
