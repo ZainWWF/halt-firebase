@@ -13,7 +13,10 @@ import 'firebase/auth';
 import { CircularProgress, Grid } from '@material-ui/core';
 import { FirebaseContext, Firebase } from '../providers/Firebase/FirebaseProvider';
 
-export const AuthContext = createContext<firebase.User | null>(null);
+interface User extends firebase.User {
+	claims: any;
+}
+export const AuthContext = createContext<Partial<User> | null>(null);
 
 const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 
@@ -33,8 +36,16 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 					.doc(user!.uid)
 					.onSnapshot((doc) => {
 						const data = doc.data();
-						setUser({ ...user, ...data!.profile });
-						setShowProgress(false)
+						if (user) {
+							firebase.auth().currentUser!.getIdTokenResult()
+								.then((idTokenResult) => {
+									setUser({ ...user, ...data!.profile, claims: idTokenResult.claims })
+									setShowProgress(false)
+								})
+								.catch((error) => {
+									console.error(error);
+								});
+						}
 					})
 			} else {
 				setUser(user);
@@ -44,22 +55,6 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 		})
 		return () => unsubscribe();
 	}, [firebaseApp])
-
-	useEffect(() => {
-		let isSubscribed = true
-		if (user) {
-			firebase.auth().currentUser!.getIdTokenResult()
-				.then((idTokenResult) => {
-					if (isSubscribed) {
-						console.log(idTokenResult.claims)
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-				});
-		}
-		return () => { isSubscribed = false }
-	}, [user])
 
 
 	useEffect(() => {

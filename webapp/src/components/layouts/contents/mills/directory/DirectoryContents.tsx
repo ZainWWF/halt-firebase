@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState, memo } from 'react';
 import { Switch, Route, Redirect, } from 'react-router-dom';
 import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
 import ListingView from "./listing/ListingView"
-import RepsView from "./reps/RepsView"
+// import RepsView from "./reps/RepsView"
 
 const Contents = memo(() => {
 
@@ -20,7 +20,7 @@ const Contents = memo(() => {
 				if (isSubscribed) {
 					console.log("retrieve done")
 					const mills = data.docs.map(snap => {
-						return snap.data()
+						return { ...snap.data(), ref: snap.ref }
 					})
 					setMills(mills)
 					setIsRetrieving(false)
@@ -41,10 +41,10 @@ const Contents = memo(() => {
 				component={() => <ListingView mills={mills} isRetrieving={isRetrieving} />}
 			/>
 
-			<Route
+			{/* <Route
 				path="/directory/reps"
 				component={RepsView}
-			/>
+			/> */}
 		</Switch>
 	)
 
