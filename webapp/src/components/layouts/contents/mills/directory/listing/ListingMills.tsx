@@ -43,10 +43,10 @@ const useStyles = makeStyles((theme: Theme) =>
 
 type IProps = {
 	mills: any[]
-	selectMillRef: Dispatch<SetStateAction<firebase.firestore.DocumentReference>>
+	selectMill: Dispatch<SetStateAction<any>>
 }
 
-const ListView: FunctionComponent<IProps> = memo(({ mills, selectMillRef }) => {
+const ListView: FunctionComponent<IProps> = memo(({ mills, selectMill }) => {
 
 	const classes = useStyles();
 	const user = useContext(AuthContext)
@@ -63,8 +63,8 @@ const ListView: FunctionComponent<IProps> = memo(({ mills, selectMillRef }) => {
 		setMillAdminRef(millRef)
 	}
 
-	const onClickMill = (millRef: firebase.firestore.DocumentReference) => {
-		selectMillRef(millRef)
+	const onClickMill = (mill: any) => {
+		selectMill(mill)
 	}
 	
 	return (
@@ -73,7 +73,7 @@ const ListView: FunctionComponent<IProps> = memo(({ mills, selectMillRef }) => {
 				{mills && mills.length > 0 ?
 					mills.map((mill: any) => {
 						return (
-							<ListItem button key={mill.name}  onClick={()=>onClickMill(mill.ref)}>
+							<ListItem button key={mill.name}  onClick={()=>onClickMill(mill)}>
 								<ListItemText primary={mill.name} secondary={mill.group ? mill.group : ""} />
 								{isSuperUser &&
 									<ListItemSecondaryAction onClick={() => addMillAdmin(mill.ref)}>

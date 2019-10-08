@@ -9,7 +9,6 @@ const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 
 	const [millReps, setMillReps] = useState<any[] | null>(null)
 	const [isRetrievingMillReps, setIsRetrievingMillReps] = useState(false)
-	console.log(selectedMillRef)
 
 	useEffect((
 	) => {
