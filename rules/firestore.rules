@@ -29,6 +29,9 @@ function isAssetOwner() {
 	return request.auth.uid == existingData().userId 
 }
 
+function isSuperUser(){
+	return request.auth.token.superUser == true;
+}
 
 function isProducerRep() {
 	return [request.auth.uid].hasAny(existingData().repIds)
@@ -156,6 +159,21 @@ service cloud.firestore {
 				allow write: if false
 		}
 	
+		match /mills/{millsId}/millAdmin/{millAdminId} {
+				allow read:	if isSignedIn() 
+				allow create: if isSignedIn() && isSuperUser()
+											&& incomingData().size() == 3
+											&& incomingData().name is string
+											&& incomingData().phoneNumber is string
+											&& incomingData().registrarId is string
+											&& incomingData().registrarId == request.auth.uid
+				allow delete: if isSignedIn() && isSuperUser()
+				allow update: if false
+		}
+
+		match /transactions/{transactionId}{
+				allow read, write;
+		}
 	
  }
 }
