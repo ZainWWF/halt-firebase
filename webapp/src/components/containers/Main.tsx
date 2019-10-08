@@ -13,6 +13,7 @@ import 'firebase/auth';
 import { CircularProgress, Grid } from '@material-ui/core';
 import { FirebaseContext, Firebase } from '../providers/Firebase/FirebaseProvider';
 
+
 interface User extends firebase.User {
 	claims: any;
 }
@@ -82,6 +83,7 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 			/** user authenticated pages */
 			return (
 				<AuthContext.Provider value={user}>
+					<Redirect  from="/*" to={defaultPath} />
 					<AuthPage />
 				</AuthContext.Provider>
 			)

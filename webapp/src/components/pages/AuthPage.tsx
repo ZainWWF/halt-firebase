@@ -5,7 +5,7 @@
  */
 import React, { memo, FunctionComponent } from 'react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import { Route, Redirect } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Hidden from '@material-ui/core/Hidden';
 import SideNav from '../layouts/sidenav/SideNav';
@@ -65,9 +65,8 @@ const  AuthPage:FunctionComponent = memo(()=> {
 					</Hidden>
 				</nav>
 				<Grid container direction="column">
-					
+
 						<Header />
-						<Redirect exact from="/" to="/assets/plantations" />			
 						<main data-testid="main-content" className={classes.mainContent}>
 							{navItems
 								.reduce((acc: any[], curr) => {
