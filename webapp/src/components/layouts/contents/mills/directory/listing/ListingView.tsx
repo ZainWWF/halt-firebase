@@ -4,11 +4,13 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Snackbar from '@material-ui/core/Snackbar';
-import { Theme } from '@material-ui/core';
+import { Theme, Button } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import ListingMills from "./ListingMills"
 import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular"
-
+import MillRepsList from "../millReps/MillRepsList"
+import MillRepForm from "../millReps/MillRepForm"
+import MillRepFormModal from "../millReps/MillRepFormModal"
 
 const useStyles = makeStyles((theme: Theme) => ({
 	paper: {
@@ -43,16 +45,27 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 type IProps = {
 	mills: any[]
-	isRetrieving: boolean
+	isRetrievingMill: boolean
 }
 
-const View: FunctionComponent<IProps> = memo(({ mills, isRetrieving }) => {
+const View: FunctionComponent<IProps> = memo(({ mills, isRetrievingMill }) => {
 
-	console.log(mills)
 	const classes = useStyles();
 
+	const [selectedMillRef, selectMillRef] = useState()
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
+	const [openMillRep, setMillRep] = useState(false);
+
+	const onCloseMillRep = () => {
+		setMillRep(false)
+
+	}
+
+	const addMillRepOnClick = () => {
+		setMillRep(true)
+	}
+
 	return (
 		<Paper className={classes.paper}>
 			<AppBar className={classes.topBar} position="static" color="default" elevation={0}>
@@ -63,13 +76,27 @@ const View: FunctionComponent<IProps> = memo(({ mills, isRetrieving }) => {
 						<Grid item xs>
 						</Grid>
 						<Grid item>
+							{Boolean(selectedMillRef) &&
+								<Button variant="contained" color="primary" className={classes.addUser} onClick={addMillRepOnClick}>
+									Add Mill Reps
+							</Button>
+							}
 						</Grid>
 					</Grid>
 				</Toolbar>
 			</AppBar>
-			{isRetrieving ?
-				<PleaseWaitCircular /> : <ListingMills mills={mills}/>
+			{Boolean(selectedMillRef) ?
+				<>
+					{!openMillRep && <MillRepsList selectedMillRef={selectedMillRef} />}
+				</>
+				:
+				<>
+					{isRetrievingMill ? <PleaseWaitCircular /> : <ListingMills mills={mills} selectMillRef={selectMillRef} />}
+				</>
 			}
+			<MillRepForm openMillRep={openMillRep} onCloseMillRep={onCloseMillRep} millRepRef={selectedMillRef}>
+				{(setNewMillRep) => <MillRepFormModal setNewMillRep={setNewMillRep} />}
+			</MillRepForm>
 			<Snackbar
 				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 				key={`bottom,center`}
