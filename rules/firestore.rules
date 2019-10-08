@@ -159,9 +159,23 @@ service cloud.firestore {
 				allow write: if false
 		}
 	
+		// millAdminId needs to be the userId
 		match /mills/{millsId}/millAdmin/{millAdminId} {
 				allow read:	if isSignedIn() 
 				allow create: if isSignedIn() && isSuperUser()
+											&& incomingData().size() == 3
+											&& incomingData().name is string
+											&& incomingData().phoneNumber is string
+											&& incomingData().registrarId is string
+											&& incomingData().registrarId == request.auth.uid
+				allow delete: if isSignedIn() && isSuperUser()
+				allow update: if false
+		}
+
+	// millRepId needs to be the userId
+		match /mills/{millsId}/millReps/{millRepId} {
+				allow read:	if isSignedIn() // get(/databases/$(database)/documents/user/$(request.auth.uid)).data.role == "ADMIN";
+				allow create: if isSignedIn()
 											&& incomingData().size() == 3
 											&& incomingData().name is string
 											&& incomingData().phoneNumber is string
