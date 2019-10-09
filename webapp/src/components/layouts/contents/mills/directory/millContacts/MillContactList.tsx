@@ -69,7 +69,7 @@ const ListView: FunctionComponent<IProps> = memo(({ selectedMillRef }) => {
 							{millContacts ?
 								Object.values(millContacts).map((millContact: any) => {
 									return (
-										<ListItem key={millContact.name}  >
+										<ListItem key={millContact.ref.path}  >
 											<ListItemText primary={millContact.isAdmin ? `${millContact.name} -  Admin` : millContact.name} secondary={millContact.phoneNumber ? millContact.phoneNumber : ""} />
 											<ListItemSecondaryAction onClick={() => removeMillContact(millContact.ref)}>
 												<Tooltip title="Remove Mill Contacts">

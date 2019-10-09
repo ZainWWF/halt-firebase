@@ -38,11 +38,12 @@ const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 									const millAdminContacts = millAdminsData.docs.map(millAdmin => {
 										return { ...millAdmin.data(), ref: millAdmin.ref }
 									})
-									setMillContacts({ ...millAdminContacts, ...millRepContacts })
+									setMillContacts([ ...Object.values(millAdminContacts), ...Object.values(millRepContacts)])
 									setIsRetrievingMillContacts(false)
 								}
 							}).catch((error: Error) => {
 								console.error(error)
+								setIsRetrievingMillContacts(false)
 							})
 					} else {
 						if (isSubscribed) {
@@ -54,6 +55,7 @@ const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 
 				}).catch((error: Error) => {
 					console.error(error)
+					setIsRetrievingMillContacts(false)
 				})
 
 
