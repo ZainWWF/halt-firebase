@@ -197,5 +197,14 @@ service cloud.firestore {
 				allow read, write;
 		}
 	
+		match /tradeboard/{userId}{
+				allow read:	if isSignedIn() &&  isOwner(userId) // can access your own tradebaord only
+				allow create:	if false
+				allow create:	if false  
+				allow update: if false
+		}
+
+
+
  }
 }
