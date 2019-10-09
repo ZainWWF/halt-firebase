@@ -7,6 +7,8 @@ import { Omit } from '@material-ui/types';
 import AssetsContents from "../contents/trader/assets/AssetsContents";
 import DirectoryContents from "../contents/mills/directory/DirectoryContents"
 import DirectoryTopBar from "../header/mills/directory/DirectoryTopBar"
+import TransactionsContents from "../contents/trader/transactions/TransactionsContents";
+import TransactionsTopBar from "../header/trader/transactions/TransactionsTopBar";
 
 export type NavItemChildren = {
 	id: string
@@ -39,6 +41,18 @@ const navItems: NavItem[] = [
 				),
 				content: AssetsContents,
 				header: () => <AssetsTopBar />
+				
+			},
+			{
+				id: "Transactions",
+				group: [],
+				icon: <WorkIcon />,
+				path: "/transactions",
+				link: forwardRef<HTMLAnchorElement, Omit<LinkProps, 'innerRef' | 'to'>>(
+					(props, ref) => <Link innerRef={ref as any} to="/transactions/" {...props} />,
+				),
+				content: TransactionsContents,
+				header: () => <TransactionsTopBar />
 			},
 
 		]
