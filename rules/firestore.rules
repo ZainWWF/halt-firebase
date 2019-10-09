@@ -41,8 +41,14 @@ function userEmail(userId) {
 	return get(/databases/$(database)/documents/users/$(userId)).data.email;
 }
 
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+		function isMillAdmin(millsId){
+			return exists(/databases/$(database)/documents/mills/$(millsId)/millAdmins/$(request.auth.uid));
+		}		
+
     match /{document=**} {
       allow read: if false;
 			allow write: if false;
@@ -161,7 +167,7 @@ service cloud.firestore {
 	
 		// millAdminId needs to be the userId
 		match /mills/{millsId}/millAdmins/{millAdminId} {
-				allow read:	if isSignedIn() 
+				allow read:	if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
 				allow create: if isSignedIn() && isSuperUser()
 											&& incomingData().size() == 4
 											&& incomingData().name is string
@@ -169,21 +175,21 @@ service cloud.firestore {
 											&& incomingData().registrarId is string
 											&& incomingData().registrarId == request.auth.uid
 											&& incomingData().isAdmin == true
-				allow delete: if isSignedIn() && isSuperUser()
+				allow delete: if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
 				allow update: if false
 		}
 
 	// millRepId needs to be the userId
 		match /mills/{millsId}/millReps/{millRepId} {
-				allow read:	if isSignedIn() // get(/databases/$(database)/documents/user/$(request.auth.uid)).data.role == "ADMIN";
-				allow create: if isSignedIn()
+				allow read:	if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
+				allow create: if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())
 											&& incomingData().size() == 4
 											&& incomingData().name is string
 											&& incomingData().phoneNumber is string
 											&& incomingData().registrarId is string
 											&& incomingData().registrarId == request.auth.uid
 											&& incomingData().isAdmin == false
-				allow delete: if isSignedIn() && isSuperUser()
+				allow delete: if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
 				allow update: if false
 		}
 
