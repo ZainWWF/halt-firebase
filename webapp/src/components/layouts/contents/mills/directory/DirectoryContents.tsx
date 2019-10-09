@@ -28,6 +28,7 @@ const Contents = memo(() => {
 
 			}).catch((error: Error) => {
 				console.error(error)
+				setIsRetrieving(false)
 			})
 		return () => { isSubscribed = false }
 	}, [firebaseApp])
