@@ -22,7 +22,7 @@ const RecipientType = [
 interface IProps {
 	errors: { [key: string]: any },
 	touched: { [key: string]: any }
-
+	amountRef: React.MutableRefObject<null>
 }
 
 const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
@@ -77,7 +77,8 @@ const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
 				label="Recipient" />
 
 			<Field name="amount"
-				as={SingleField}
+				as={SingleFieldRef}
+				inputRef={amountRef}
 				error={errors.amount}
 				touched={touched.amount}
 				type="number"
