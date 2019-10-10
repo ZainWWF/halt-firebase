@@ -9,6 +9,11 @@ import {
 				fontSize: 26,
 				letterSpacing: 0.5,
 			},
+			h6: {
+				fontWeight: 100,
+				fontSize: "1rem",
+				letterSpacing: 0.5,
+			},
 		},
 		palette: {
 			primary: {
