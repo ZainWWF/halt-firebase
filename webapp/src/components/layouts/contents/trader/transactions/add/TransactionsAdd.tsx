@@ -1,7 +1,7 @@
 import React, { useState, FunctionComponent } from "react";
 import { Button, makeStyles, Theme } from "@material-ui/core";
-import TransactionsAddModal from "./TransactionAddModal"
-import TransactionAddForm from "./TransactionAddForm"
+import TransactionsAddModal from "./TransactionAddFormModal"
+import TransactionAddFormRequests from "./TransactionAddFormRequests"
 
 const useStyles = makeStyles((theme: Theme) => ({
 	openDialog: {
@@ -29,9 +29,9 @@ const FC: FunctionComponent = () => {
 			<Button variant="contained" color="primary" className={classes.openDialog} onClick={onClickOpenDialog}>
 				Add Transaction
     </Button>
-		<TransactionAddForm  openDialog={openDialog} onCloseDialog={onCloseDialog}>
-		{(setNewTransactionAdd)=> <TransactionsAddModal setNewTransactionAdd={setNewTransactionAdd}  />}
-		</TransactionAddForm>
+		<TransactionAddFormRequests  openDialog={openDialog} onCloseDialog={onCloseDialog}>
+		{()=><TransactionsAddModal/>}
+		</TransactionAddFormRequests>
 
 		</>
 	)

@@ -1,20 +1,22 @@
 import React, { FunctionComponent, Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
-import { Field } from "formik";
+import { Field, FormikErrors, FormikValues } from "formik";
 import SingleField from "../../../../fields/SingleField"
+import SingleFieldRef from "../../../../fields/SingleFieldRef"
 import SelectField from "../../../../fields/SelectField"
-import TransactioAddTable from "../table/TransactionAddTable"
-import { TransactionAddFormContext } from "./TransactionAddForm"
+import TransactioAddTable from "./TransactionAddTable"
+import { TransactionAddFormContext } from "./TransactionAddFormRequests"
+import { FormLabel } from "@material-ui/core";
 const TransactionType = [
 	"Buy",
 	"Sell",
 ]
 
 const TransportationType = [
-	"By Buyer",
-	"By Seller"
+	"Buyer",
+	"Seller"
 ]
 
-const RecipientType = [
+const ClientType = [
 	"Agent",
 	"Mill"
 ]
@@ -22,23 +24,23 @@ const RecipientType = [
 interface IProps {
 	errors: { [key: string]: any },
 	touched: { [key: string]: any }
+	setAmountSource: Dispatch<SetStateAction<any>>
 	amountRef: React.MutableRefObject<null>
 }
 
-const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
+const SimpleForm: FunctionComponent<IProps> = ({ amountRef, errors, touched, setAmountSource }) => {
 
 	const { profileData } = useContext(TransactionAddFormContext)
-
 	const [plantations, setPlantations] = useState();
 	const [VehicleType, setVehicleType] = useState();
 
+
 	useEffect(() => {
 		if (profileData) {
-			console.log(profileData)
 			const plantationData = Object.keys(profileData.plantations).reduce((acc: any, key: any) => {
 				return { ...acc, [key]: profileData.plantations[key].name }
 			}, {})
-			setPlantations(plantationData)
+			setPlantations({ holdings: "HOLDINGS", ...plantationData })
 
 			const vehicleType = Object.keys(profileData.vehicles).map(key => {
 				const { make, model, license } = profileData.vehicles[key]
@@ -50,7 +52,6 @@ const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
 		}
 	}, [profileData])
 
-
 	return (
 		<>
 			<Field name="transactionType"
@@ -61,20 +62,20 @@ const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
 				label="Transaction Type"
 				choices={TransactionType} />
 
-			<Field name="recipientType"
+			<Field name="clientType"
 				as={SelectField}
-				error={errors.recipientType}
-				touched={errors.recipientType}
+				error={errors.clientType}
+				touched={errors.clientType}
 				type="text"
-				label="Recipient Type"
-				choices={RecipientType} />
+				label="Client Type"
+				choices={ClientType} />
 
-			<Field name="recipient"
+			<Field name="clientPhoneNumber"
 				as={SingleField}
-				error={errors.recipient}
-				touched={touched.recipient}
+				error={errors.clientPhoneNumber}
+				touched={touched.clientPhoneNumber}
 				type="text"
-				label="Recipient" />
+				label="Client Phone Number" />
 
 			<Field name="amount"
 				as={SingleFieldRef}
@@ -83,15 +84,16 @@ const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
 				touched={touched.amount}
 				type="number"
 				label="Amount" />
+
 			{plantations &&
-				<TransactioAddTable plantations={plantations}/>
+				<TransactioAddTable plantations={plantations} setAmountSource={setAmountSource} amountRef={amountRef} />
 			}
 			<br />
 
-			<Field name="transportation"
+			<Field name="transportationBy"
 				as={SelectField}
-				error={errors.transportation}
-				touched={errors.transportation}
+				error={errors.transportationBy}
+				touched={errors.transportationBy}
 				type="text"
 				label="Transportation"
 				choices={TransportationType} />
@@ -103,20 +105,21 @@ const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
 				type="text"
 				label="Vehicle"
 				choices={VehicleType ? VehicleType : []} />
-
+			<br />
+			<FormLabel component="legend">Collection Point </FormLabel>
 			<Field
-				name="geoLocation.latitude"
+				name="collectionPoint.latitude"
 				as={SingleField}
-				error={errors.geoLocation && errors.geoLocation.latitude}
-				touched={touched.geoLocation && touched.geoLocation.latitude}
+				error={errors.collectionPoint && errors.collectionPoint.latitude}
+				touched={touched.collectionPoint && touched.collectionPoint.latitude}
 				type="number"
 				label="latitude" />
 
 			<Field
-				name="geoLocation.longitude"
+				name="collectionPoint.longitude"
 				as={SingleField}
-				error={errors.geoLocation && errors.geoLocation.longitude}
-				touched={touched.geoLocation && touched.geoLocation.longitude}
+				error={errors.collectionPoint && errors.collectionPoint.longitude}
+				touched={touched.collectionPoint && touched.collectionPoint.longitude}
 				type="number"
 				label="longitude" />
 
@@ -126,3 +129,5 @@ const SimpleForm: FunctionComponent<IProps> = ({ errors, touched }) => {
 
 
 export default SimpleForm
+
+
