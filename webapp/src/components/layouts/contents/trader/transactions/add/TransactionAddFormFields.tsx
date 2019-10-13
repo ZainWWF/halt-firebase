@@ -1,11 +1,10 @@
-import React, { FunctionComponent, Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
-import { Field, FormikErrors, FormikValues } from "formik";
+import React, { FunctionComponent, Dispatch, SetStateAction } from "react";
+import { Field } from "formik";
 import SingleField from "../../../../fields/SingleField"
 import SingleFieldRef from "../../../../fields/SingleFieldRef"
 import SelectField from "../../../../fields/SelectField"
 import TransactioAddTable from "./TransactionAddTable"
-import { TransactionAddFormContext } from "./TransactionAddFormRequests"
-import { FormLabel } from "@material-ui/core";
+
 const TransactionType = [
 	"Buy",
 	"Sell",
@@ -26,31 +25,28 @@ interface IProps {
 	touched: { [key: string]: any }
 	setAmountSource: Dispatch<SetStateAction<any>>
 	amountRef: React.MutableRefObject<null>
+	plantations: Record<string, any>
+	vehicleSelections: string[]
+	millNameSelections: string[]
+	selectedMillType: string
+	collectionPointRequired: boolean
+	vehicleRequired: boolean
+	selectedTransactionType: string
 }
 
-const SimpleForm: FunctionComponent<IProps> = ({ amountRef, errors, touched, setAmountSource }) => {
-
-	const { profileData } = useContext(TransactionAddFormContext)
-	const [plantations, setPlantations] = useState();
-	const [VehicleType, setVehicleType] = useState();
-
-
-	useEffect(() => {
-		if (profileData) {
-			const plantationData = Object.keys(profileData.plantations).reduce((acc: any, key: any) => {
-				return { ...acc, [key]: profileData.plantations[key].name }
-			}, {})
-			setPlantations({ holdings: "HOLDINGS", ...plantationData })
-
-			const vehicleType = Object.keys(profileData.vehicles).map(key => {
-				const { make, model, license } = profileData.vehicles[key]
-				const m = make.type === "lainnya" ? make.detail : make.type
-				return `${m} ${model} ${license}`
-			})
-			setVehicleType(vehicleType)
-
-		}
-	}, [profileData])
+const SimpleForm: FunctionComponent<IProps> = ({
+	amountRef,
+	errors,
+	touched,
+	setAmountSource,
+	plantations,
+	vehicleSelections,
+	millNameSelections,
+	selectedMillType,
+	collectionPointRequired,
+	vehicleRequired,
+	selectedTransactionType
+}) => {
 
 	return (
 		<>
@@ -62,6 +58,13 @@ const SimpleForm: FunctionComponent<IProps> = ({ amountRef, errors, touched, set
 				label="Transaction Type"
 				choices={TransactionType} />
 
+			<Field name="clientPhoneNumber"
+				as={SingleField}
+				error={errors.clientPhoneNumber}
+				touched={touched.clientPhoneNumber}
+				type="text"
+				label="Client Phone Number" />
+
 			<Field name="clientType"
 				as={SelectField}
 				error={errors.clientType}
@@ -70,12 +73,16 @@ const SimpleForm: FunctionComponent<IProps> = ({ amountRef, errors, touched, set
 				label="Client Type"
 				choices={ClientType} />
 
-			<Field name="clientPhoneNumber"
-				as={SingleField}
-				error={errors.clientPhoneNumber}
-				touched={touched.clientPhoneNumber}
-				type="text"
-				label="Client Phone Number" />
+			{selectedMillType === "Mill" &&
+
+				<Field name="millName"
+					as={SelectField}
+					error={errors.millName}
+					touched={errors.millName}
+					type="text"
+					label="MillName"
+					choices={millNameSelections ? millNameSelections : ["..not available"]} />
+			}
 
 			<Field name="amount"
 				as={SingleFieldRef}
@@ -85,7 +92,7 @@ const SimpleForm: FunctionComponent<IProps> = ({ amountRef, errors, touched, set
 				type="number"
 				label="Amount" />
 
-			{plantations &&
+			{plantations && selectedTransactionType === "Sell" &&
 				<TransactioAddTable plantations={plantations} setAmountSource={setAmountSource} amountRef={amountRef} />
 			}
 			<br />
@@ -98,30 +105,47 @@ const SimpleForm: FunctionComponent<IProps> = ({ amountRef, errors, touched, set
 				label="Transportation"
 				choices={TransportationType} />
 
-			<Field name="vehicle"
-				as={SelectField}
-				error={errors.vehicle}
-				touched={errors.vehicle}
-				type="text"
-				label="Vehicle"
-				choices={VehicleType ? VehicleType : []} />
-			<br />
-			<FormLabel component="legend">Collection Point </FormLabel>
-			<Field
-				name="collectionPoint.latitude"
-				as={SingleField}
-				error={errors.collectionPoint && errors.collectionPoint.latitude}
-				touched={touched.collectionPoint && touched.collectionPoint.latitude}
-				type="number"
-				label="latitude" />
+			{vehicleRequired &&
+				<>
+					<Field name="vehicle"
+						as={SelectField}
+						error={errors.vehicle}
+						touched={errors.vehicle}
+						type="text"
+						label="Vehicle"
+						choices={vehicleSelections ? vehicleSelections : ["...not avalailble"]} />
+					<br />
+				</>
+			}
 
-			<Field
-				name="collectionPoint.longitude"
-				as={SingleField}
-				error={errors.collectionPoint && errors.collectionPoint.longitude}
-				touched={touched.collectionPoint && touched.collectionPoint.longitude}
-				type="number"
-				label="longitude" />
+			<Field name="collectionPoint"
+				as={SelectField}
+				error={errors.collectionPoint}
+				touched={errors.collectionPoint}
+				type="text"
+				label="Collection Point?"
+				choices={["Yes", "No"]} />
+
+
+			{collectionPointRequired &&
+				<>
+					<Field
+						name="collectLocation.latitude"
+						as={SingleField}
+						error={errors.collectLocation && errors.collectLocation.latitude}
+						touched={touched.collectLocation && touched.collectLocation.latitude}
+						type="number"
+						label="latitude" />
+
+					<Field
+						name="collectLocation.longitude"
+						as={SingleField}
+						error={errors.collectLocation && errors.collectLocation.longitude}
+						touched={touched.collectLocation && touched.collectLocation.longitude}
+						type="number"
+						label="longitude" />
+				</>
+			}
 
 		</>
 	)

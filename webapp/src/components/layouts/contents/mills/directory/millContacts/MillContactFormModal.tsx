@@ -7,7 +7,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { Formik, Form } from 'formik';
 import MillContactFormFields from "./MillContactFormFields"
 import * as Yup from "yup";
-import { MillContactFormContext } from './MillContactForm';
+import { MillContactFormContext } from './MillContactUpdate';
 
 type Props = {
 	setNewMillContact: Dispatch<SetStateAction<any>>

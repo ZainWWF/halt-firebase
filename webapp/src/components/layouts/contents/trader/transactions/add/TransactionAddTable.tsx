@@ -1,9 +1,7 @@
-import React, { useContext, useState, useEffect, Dispatch, SetStateAction } from 'react';
+import React, {  useState, useEffect, Dispatch, SetStateAction } from 'react';
 import MaterialTable from 'material-table';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
-import { FormikErrors, FormikValues } from 'formik';
-
 
 const defaultTheme = createMuiTheme();
 defaultTheme.shadows[2] = defaultTheme.shadows[0]
@@ -30,13 +28,12 @@ export default function FC(props: Props) {
 
 	useEffect(() => {
 		setAmountSource(state.data)
-		console.log(state.data)
-		if(state.data.length != 0){
+		if (state.data.length !== 0) {
 			amountRef!.current.focus()
-			setTimeout(()=>amountRef!.current.blur(),1000)		
+			setTimeout(() => amountRef!.current.blur(), 1000)
 		}
 
-	},[state.data, setAmountSource])
+	}, [state.data, setAmountSource, amountRef])
 
 
 	return (
@@ -61,21 +58,26 @@ export default function FC(props: Props) {
 					actionsColumnIndex: -1
 
 				}}
-				// components={{ Pagination: props => null }}
 				editable={{
 					onRowAdd: (newData: any) =>
 						new Promise((resolve, reject) => {
-							setTimeout(() => {
-								if (!newData.amount || !newData.origin || Number(newData.amount) <= 0) {
-									console.log("reject")
-									reject()
-								} else {
-									resolve();
-									const data = [...state.data];
-									data.push(newData);
-									setState({ ...state, data });
-								}
-							}, 600);
+							let timer = setTimeout(() => {
+								const data = [...state.data];
+								resolve();
+								data.push(newData);
+								setState({ ...state, data });
+							}, 1000);
+							// amount of origin must be greater than 0
+							if (Number(newData.amount) <= 0) {
+								clearTimeout(timer)
+								reject()
+							}
+							// disallow duplicate origins
+							const origins = [...state.data].map(d => d.origin)
+							if (origins.includes(newData.origin)) {
+								clearTimeout(timer)
+								reject()
+							}
 						}),
 					onRowUpdate: (newData, oldData) =>
 						new Promise(resolve => {

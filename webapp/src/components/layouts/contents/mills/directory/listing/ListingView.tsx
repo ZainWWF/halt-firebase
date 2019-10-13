@@ -10,7 +10,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import ListingMills from "./ListingMills"
 import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular"
 import MillContactsList from "../millContacts/MillContactList"
-import MillContactForm from "../millContacts/MillContactForm"
+import MillContactUpdate from "../millContacts/MillContactUpdate"
 import MillContactFormModal from "../millContacts/MillContactFormModal"
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import IconButton from '@material-ui/core/IconButton';
@@ -106,9 +106,9 @@ const View: FunctionComponent<IProps> = memo(({ mills, isRetrievingMill }) => {
 					{isRetrievingMill ? <PleaseWaitCircular /> : <ListingMills mills={mills} selectMill={selectMill} />}
 				</>
 			}
-			<MillContactForm openMillContact={openMillContact} onCloseMillContact={onCloseMillContact} millContactRef={selectedMill ? selectedMill.ref : null}>
+			<MillContactUpdate openMillContact={openMillContact} onCloseMillContact={onCloseMillContact} selectedMill={selectedMill ? selectedMill : null}>
 				{(setNewMillContact) => <MillContactFormModal setNewMillContact={setNewMillContact} />}
-			</MillContactForm>
+			</MillContactUpdate>
 			<Snackbar
 				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 				key={`bottom,center`}

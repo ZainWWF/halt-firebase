@@ -34,7 +34,7 @@ const FC: FunctionComponent<Props> = ({ children, openDialog, onCloseDialog }) =
 				// setIsRetrievingMillContacts(false)
 			})
 			return () => { isSubscribed = false }
-	}, [])
+	}, [firebaseApp, user])
 
 	useEffect(()=>{
 		getPlantationsCallback()
@@ -51,14 +51,16 @@ const FC: FunctionComponent<Props> = ({ children, openDialog, onCloseDialog }) =
 			setIsUploading(false)
 			onCloseDialog()
 		}).catch((error: Error) => {
+			setIsUploading(false)
 			console.log(error)
 		})
 
-	}, [newTransactionAdd, onCloseDialog, firebaseApp, user])
+	}, [newTransactionAdd, onCloseDialog, firebaseApp])
 
 	useEffect((
 	) => {
 		if (newTransactionAdd) {
+			console.log("newTransactionAdd: ",newTransactionAdd)
 			setIsUploading(true)
 			newTransactionAddCallback()
 		}

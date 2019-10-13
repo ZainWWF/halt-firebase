@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useState, useEffect, useContext, useCallback } from "react";
 import { AuthContext } from '../../../../../containers/Main';
 import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular"
+import { FirebaseContext, Firebase } from '../../../../../providers/Firebase/FirebaseProvider';
 
 
 type Props = {
@@ -11,6 +12,7 @@ const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 
 	const [millContacts, setMillContacts] = useState<any[] | null>(null)
 	const [isRetrievingMillContacts, setIsRetrievingMillContacts] = useState(false)
+	const firebaseApp = useContext(FirebaseContext) as Firebase;
 
 	const user = useContext(AuthContext)
 	const isSuperUser = user!.claims!.superUser;
@@ -21,51 +23,28 @@ const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 		setIsRetrievingMillContacts(true)
 		if (selectedMillRef) {
 
-			selectedMillRef.collection("millReps")
+			console.log(selectedMillRef.id)	
+			firebaseApp.db.collection("millReps")
+			.where("millId", "==", selectedMillRef.id)
 				.get()
 				.then((millRepsData) => {
-
-					const millRepContacts = millRepsData.docs.map(millRep => {
-						return { ...millRep.data(), ref: millRep.ref }
-					})
-
-					if (isSuperUser) {
-						selectedMillRef.collection("millAdmins")
-							.get()
-							.then((millAdminsData) => {
-								if (isSubscribed) {
-									console.log("retrieve done")
-									const millAdminContacts = millAdminsData.docs.map(millAdmin => {
-										return { ...millAdmin.data(), ref: millAdmin.ref }
-									})
-									setMillContacts([ ...Object.values(millAdminContacts), ...Object.values(millRepContacts)])
-									setIsRetrievingMillContacts(false)
-								}
-							}).catch((error: Error) => {
-								console.error(error)
-								setIsRetrievingMillContacts(false)
-							})
-					} else {
-						if (isSubscribed) {
-							console.log("retrieve done")
-							setMillContacts(millRepContacts)
-							setIsRetrievingMillContacts(false)
-						}
+					if (isSubscribed) {
+						console.log("retrieve done")
+						const millRepContacts = millRepsData.docs.map(millRep => {
+							return { ...millRep.data(), ref: millRep.ref }
+						})
+						setMillContacts([...Object.values(millRepContacts)])
+						setIsRetrievingMillContacts(false)
 					}
-
+		
 				}).catch((error: Error) => {
 					console.error(error)
 					setIsRetrievingMillContacts(false)
 				})
-
-
-
 		}
 
-
-
 		return () => { isSubscribed = false }
-	}, [selectedMillRef, isSuperUser])
+	}, [selectedMillRef, firebaseApp  ])
 
 
 	useEffect(() => {

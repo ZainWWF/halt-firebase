@@ -40,6 +40,7 @@ const Main: FunctionComponent<RouteComponentProps> = ({ location }) => {
 						if (user) {
 							firebase.auth().currentUser!.getIdTokenResult()
 								.then((idTokenResult) => {
+									console.log("isSuperUser: ",idTokenResult.claims.superUser)
 									setUser({ ...user, ...data!.profile, claims: idTokenResult.claims })
 									setShowProgress(false)
 								})

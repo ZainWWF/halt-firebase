@@ -1,4 +1,4 @@
-import React, { useContext, useRef, Dispatch, SetStateAction, useState, useCallback, useEffect } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -10,14 +10,14 @@ import TransactionAddFormFields from "./TransactionAddFormFields"
 import * as SumatraMapBounds from "../../../../../../config/PlantationMapBounds.json"
 import * as turfHelpers from "@turf/helpers";
 import * as turfPointInPolygon from "@turf/boolean-point-in-polygon";
-import { FirebaseContext, Firebase } from "../../../../../providers/Firebase/FirebaseProvider";
 import * as firebase from 'firebase/app';
 import * as Yup from "yup";
-import TransactioAddTable from "./TransactionAddTable"
-import { DialogContentText } from '@material-ui/core';
 import { AuthContext } from "../../../../../containers/Main";
-import { string } from 'prop-types';
+import { PhoneNumberUtil } from "google-libphonenumber"
+import { FirebaseContext, Firebase } from '../../../../../providers/Firebase/FirebaseProvider';
 
+
+const phoneUtil = PhoneNumberUtil.getInstance()
 
 type Vehicle = {
 	license: string
@@ -34,6 +34,7 @@ type AmountSource = {
 }
 
 type TransactionType = "Sell" | "Buy";
+type TransportationBy = "Seller" | "Buyer"
 
 type Profile = {
 	name: string
@@ -41,34 +42,94 @@ type Profile = {
 	photoUrl: string
 }
 
+type CollectionPoint = {
+	latitude: string
+	longitude: string
+}
+
+const validationSchema = Yup.object().shape({
+	transactionType: Yup.string()
+		.required("Required"),
+
+	clientType: Yup.string()
+		.required("Required"),
+
+	clientPhoneNumber: Yup.string()
+		.required("Required"),
+
+	amount: Yup.number()
+		.moreThan(0)
+		.required("Required"),
+
+	transportationBy: Yup.string()
+		.required("Required"),
+
+});
 
 export default function ScrollDialog() {
 
+	const firebaseApp = useContext(FirebaseContext) as Firebase;
 	const { openDialog, onCloseDialog } = useContext(TransactionAddFormContext)
-	const [mapPolygonBounds, setMapPolygonBounds] = useState<turfHelpers.Feature<turfHelpers.Polygon>>()
 	const [amountSource, setAmountSource] = useState()
 	const [submittedValues, submitValues] = useState()
+	const [repsMill, setRepsMill] = useState()
+	const [millRepSearchPhoneNumber, setMillRepSearchPhoneNumber] = useState()
 	const user = useContext(AuthContext) as firebase.User;
 	const { profileData, setNewTransactionAdd } = useContext(TransactionAddFormContext)
 	const amountRef = useRef(null)
-
-	// const { vehicles } = profileData;
-
-	// initalise the drawable bounds for the polygon
-	const initMapPolygonBound = () => {
-		const { features: [{ geometry: { coordinates } }] } = SumatraMapBounds;
-		const boundPolygon = turfHelpers.polygon(coordinates)
-		setMapPolygonBounds(boundPolygon)
-	}
-
-	const initMapCallback = useCallback(() => {
-		// initalise the drawable bounds for the polygon
-		initMapPolygonBound()
-	}, [])
+	const [plantations, setPlantations] = useState();
+	const [vehicleSelections, setVehicleSelections] = useState();
+	const [millNameSelections, setMillNameSelections] = useState();
+	const [collectionPointRequired, setCollectionPointRequired] = useState(false);
+	const [vehicleRequired, setVehicleRequired] = useState(false);
 
 	useEffect(() => {
-		initMapCallback()
-	}, [initMapCallback])
+		if (millRepSearchPhoneNumber) {
+			let isSubscribed = true
+			firebaseApp.db.collection("millReps")
+				.where("phoneNumber", "==", millRepSearchPhoneNumber)
+				.get()
+				.then(millRepSnap => {
+					if (isSubscribed) {
+
+						const mills = millRepSnap.docs.reduce((mills, repSnap)=>{
+							const rep = repSnap.data();
+							return { ...mills,   [ rep.millName] : rep }
+						},{})
+						console.log(mills)
+
+						setRepsMill(mills)
+						setMillNameSelections(Object.keys(mills))
+						
+					}
+				})
+				.catch((error: Error) => {
+					console.error(error)
+				})
+			return () => { isSubscribed = false }
+		}
+	}, [millRepSearchPhoneNumber, firebaseApp])
+
+
+	useEffect(() => {
+		if (profileData) {
+			if (profileData.plantations) {
+				const plantationData = Object.keys(profileData.plantations).reduce((acc: any, key: any) => {
+					return { ...acc, [key]: profileData.plantations[key].name }
+				}, {})
+				setPlantations({ holdings: "HOLDINGS", ...plantationData })
+			}
+
+			if (profileData.vehicles) {
+				const vehicleType = Object.keys(profileData.vehicles).map(key => {
+					const { make, model, license } = profileData.vehicles[key]
+					const m = make.type === "lainnya" ? make.detail : make.type
+					return `${m} ${model} ${license}`
+				})
+				setVehicleSelections(vehicleType)
+			}
+		}
+	}, [profileData])
 
 	// submit the form with valid values
 	// this is a hack as the submit button does not work
@@ -83,20 +144,25 @@ export default function ScrollDialog() {
 				clientPhoneNumber,
 				amount,
 				transportationBy,
+				collectionPoint,
+				collectLocation,
 				vehicle,
+				millName,
 			} = submittedValues
 
-			const collectionPoint = getGetGeopoint(submittedValues.collectionPoint)
 			const vehicleId = getVehicleId(profileData.vehicles, vehicle)
-			const origins = getOrigins(amountSource)
+			const origins = getOrigins(amountSource, transactionType)
 			const contact = getContact(user, profileData.profile, transactionType)
 
 			setNewTransactionAdd({
 				transactionType,
 				clientType,
 				clientPhoneNumber,
+				collectLocation,
 				collectionPoint,
 				transportationBy,
+				millName,
+				millId :  millName.length > 0 ? repsMill[millName].millId : null,
 				vehicle,
 				vehicleId,
 				...contact,
@@ -106,73 +172,61 @@ export default function ScrollDialog() {
 		}
 	}
 
-
-	const validateTest = () => {
-		console.log("validateTest", submittedValues, amountSource)
-		if (!amountSource || !submittedValues) return ""
-
-		const error = validateAmount(amountSource, submittedValues.amount)
-		console.log(error)
-	}
-
-	const validationSchema = Yup.object().shape({
-		transactionType: Yup.string()
-			.required("Required"),
-
-		clientType: Yup.string()
-			.required("Required"),
-
-		clientPhoneNumber: Yup.string()
-			.required("Required"),
-
-		amount: Yup.number().moreThan(0).required("Required"),
-
-		transportationBy: Yup.string()
-			.required("Required"),
-
-		vehicle: Yup.string()
-			.required("Required"),
-
-	});
-
 	return (
-
-
 		<Formik
 			initialValues={{
 				transactionType: "",
+				millName: "",
 				clientType: "",
 				clientPhoneNumber: "",
 				amount: 0,
 				transportationBy: "",
 				vehicle: "",
-				collectionPoint: {
-					latitude: 0,
-					longitude: 0
+				collectionPoint: "No",
+				collectLocation: {
+					latitude: "",
+					longitude: ""
 				}
 			}}
 			validateOnChange={true}
 			validate={values => {
-				console.log(values)
-				submitValues(values)
+
+				// custom validation	
 
 
+				const transactionType = values.transactionType as TransactionType
+				const transportationBy = values.transportationBy as TransportationBy
+				const amountError = validateAmount(amountSource, values.amount, transactionType)
+				const phoneNumberError = validatePhoneNumber(values.clientPhoneNumber)
+				const vehicleError = validateVehicle(transactionType, transportationBy)
+				const geoPointError = validateGeoPoint(values.collectLocation)
+				const error = { ...geoPointError, ...amountError, ...vehicleError, ...phoneNumberError }
 
-				const amountError = validateAmount(amountSource, values.amount)
-
-				// validate collectionPoint
-				let collectionPoint = turfHelpers.point([values.collectionPoint.longitude, values.collectionPoint.latitude])
-				let geoLocationError = {};
-				if (mapPolygonBounds && !turfPointInPolygon.default(collectionPoint, mapPolygonBounds)) {
-					geoLocationError = {
-						collectionPoint: {
-							latitude: "not within bounds!",
-							longitude: "not within bounds!"
-						}
-					}
+				//phoneNumber required on client type 
+				if (!phoneNumberError.clientPhoneNumber && values.clientType === "Mill") {
+					setMillRepSearchPhoneNumber(values.clientPhoneNumber)
+				} else {
+					setMillRepSearchPhoneNumber(null)
 				}
-				const error = { ...geoLocationError, ...amountError }
-				// const error = { ...geoLocationError}
+
+				// mill name reset on client type
+				if (values.clientType !== "Mill") {
+					values.millName = ""
+				}
+
+				// firestore  Geopoint formatting for collection point
+				const firestoreGeoPoint = new firebase.firestore.GeoPoint(
+					Number(values.collectLocation.latitude),
+					Number(values.collectLocation.longitude))
+				const collectionPoint = values.collectionPoint === "Yes" ? true : false
+				setCollectionPointRequired(collectionPoint)
+
+				// vehile required on validation result
+				vehicleError.vehicle ? setVehicleRequired(true) : setVehicleRequired(false)
+
+				// set values ready for submission to server
+				submitValues({ ...values, collectionPoint, collectLocation: firestoreGeoPoint })
+
 				return error
 			}}
 			validationSchema={validationSchema}
@@ -183,7 +237,6 @@ export default function ScrollDialog() {
 			}}
 		>
 			{({ isValid, errors, touched }) => {
-				console.log(isValid, errors, touched)
 				return (
 
 					<Form  >
@@ -201,6 +254,13 @@ export default function ScrollDialog() {
 									touched={touched}
 									setAmountSource={setAmountSource}
 									amountRef={amountRef}
+									plantations={plantations}
+									collectionPointRequired={collectionPointRequired}
+									vehicleRequired={vehicleRequired}
+									vehicleSelections={vehicleSelections}
+									millNameSelections={millNameSelections}
+									selectedTransactionType={submittedValues ? submittedValues.transactionType : null}
+									selectedMillType={submittedValues ? submittedValues.clientType : null}
 								/>
 							</DialogContent>
 							<DialogActions>
@@ -210,7 +270,7 @@ export default function ScrollDialog() {
 								<Button
 									onClick={onSubmitForm(isValid)}
 									color="primary"
-									disabled={!isValid && Boolean(touched) || !submittedValues}
+									disabled={(!isValid && Boolean(touched)) || !submittedValues}
 								>
 									Submit
           				</Button>
@@ -223,16 +283,11 @@ export default function ScrollDialog() {
 	);
 }
 
+// parse vehicle license from the form and return the vehicle id
+function getVehicleId(vehicles: Record<string, Vehicle>, submitted: string): string | null {
 
-function getGetGeopoint(collectionPoint: { latitude: number, longitude: number }): firebase.firestore.GeoPoint {
-	return new firebase.firestore.GeoPoint(
-		collectionPoint.latitude,
-		collectionPoint.longitude
-	);
-}
+	if (!submitted || submitted.length === 0) return null
 
-
-function getVehicleId(vehicles: Record<string, Vehicle>, submitted: string): string {
 	const [vehicleId] = Object.keys(vehicles).filter((key: string) => {
 		const regex = new RegExp(vehicles[key].license, `g`)
 		return regex.test(submitted)
@@ -240,32 +295,37 @@ function getVehicleId(vehicles: Record<string, Vehicle>, submitted: string): str
 	return vehicleId
 }
 
-
-
-function getOrigins(amountSource: AmountSource[]) {
+// parse the origins from the form table and return a map of origins for upload
+function getOrigins(amountSource: AmountSource[], transactionType: TransactionType) {
+	if (transactionType === "Buy") return {}
 	return amountSource.reduce((origins: any, source: any) => {
 		const { amount, origin } = source;
 		return { ...origins, [origin]: { amount: Number(amount) } }
 	}, {})
 }
 
-
+// set the role of owner (Seller/Buyer) depending on the transaction type
 function getContact(user: firebase.User, profile: Profile, transactionType: TransactionType) {
+
 	if (transactionType === "Sell") {
 		return {
 			sellerId: user.uid,
-			sellerName: profile.name
+			sellerName: profile.name ? profile.name : null
 		}
 	}
 	else {
 		return {
 			buyerId: user.uid,
-			buyerName: profile.name
+			buyerName: profile.name ? profile.name : null
 		}
 	}
 }
 
-function validateAmount(amountSource: AmountSource[], amount: number) {
+// validate the amount if owner is selling that the amount is more than holdings
+function validateAmount(amountSource: AmountSource[], amount: number, transactionType: string) {
+	if (transactionType === "Buy") {
+		return {}
+	}
 
 	if (amountSource) {
 		const total = amountSource.reduce((total: number, source: any) => {
@@ -281,6 +341,65 @@ function validateAmount(amountSource: AmountSource[], amount: number) {
 	}
 
 	return {}
+}
+
+
+//  set vehicle field as required if transportation is by owner
+function validateVehicle(transactionType: TransactionType, transportationBy: TransportationBy) {
+
+	if (transactionType === "Sell" && transportationBy === "Seller") {
+		return { vehicle: "vehicle is required" }
+	}
+
+	if (transactionType === "Buy" && transportationBy === "Buyer") {
+		return { vehicle: "vehicle is required" }
+	}
+	return {}
+}
+
+// validate collection point is within boundaries
+function validateGeoPoint(collectLocation: CollectionPoint) {
+
+	const { features: [{ geometry: { coordinates } }] } = SumatraMapBounds;
+	const boundPolygon = turfHelpers.polygon(coordinates)
+
+	if (collectLocation.latitude.length > 0 || collectLocation.latitude.length > 0) {
+
+		const geoPoint = getGeoPoint(collectLocation)
+		if (boundPolygon && !turfPointInPolygon.default(geoPoint, boundPolygon)) {
+			return {
+				collectLocation: {
+					latitude: "not within bounds!",
+					longitude: "not within bounds!"
+				}
+			}
+		}
+
+	}
+
+	return {}
+
+}
+
+// returm the Geojson point value of the collection Point
+function getGeoPoint(collectLocation: CollectionPoint) {
+	const lng = collectLocation.longitude.length === 0 ? 0 : Number(collectLocation.longitude)
+	const lat = collectLocation.latitude.length === 0 ? 0 : Number(collectLocation.latitude)
+
+	return turfHelpers.point([lng, lat])
+}
+
+// validate the clients phone number
+function validatePhoneNumber(phoneNumber: string) {
+	try {
+		phoneUtil.parseAndKeepRawInput(phoneNumber)
+		return {}
+	} catch (error) {
+		return {
+			clientPhoneNumber: error.message
+		}
+	}
+
 }
 
 
