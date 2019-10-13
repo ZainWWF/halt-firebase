@@ -12,8 +12,11 @@ import assistanceOnUpdate from "./assistance/onUpdate"
 import superUserOnCreate from "./superUser/onCreate"
 import superUserOnDelete from "./superUser/onDelete"
 import superUserOnUpdate from "./superUser/onUpdate"
-import millAdminOnCreate from "./millContact/onAdminCreate"
-import millRepOnCreate from "./millContact/onRepCreate"
+import millRepOnCreate from "./millReps/onCreate"
+import millRepOnDelete from "./millReps/onDelete"
+import transactionOnCreate from "./transactions/onCreate"
+// import millOnCreate from "./mills/onCreate"
+
 
 admin.initializeApp();
 
@@ -31,7 +34,9 @@ export {
 	superUserOnCreate,
 	superUserOnUpdate,
 	superUserOnDelete,
-	millAdminOnCreate,
-	millRepOnCreate
+	millRepOnCreate,
+	millRepOnDelete,
+	transactionOnCreate,
+	// millOnCreate
 }
 

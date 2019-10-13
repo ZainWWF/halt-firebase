@@ -3,6 +3,7 @@ import * as admin from "firebase-admin";
 
 import vehicleMapBuilder from "../vehicles/mapBuilder";
 import profileMapBuilder from "../profile/mapBuilder";
+import millsMapBuilder from "../millReps/mapBuilder"
 import { ownPlantationMapBuilder, repPlantationMapBuilder } from "../plantations/mapBuilder"
 
 /** update the vehicle collection when a the user's vehicle map entry is removed*/
@@ -13,7 +14,7 @@ export default functions.region("asia-east2").firestore
 			const newUserData = change.after.data() as FirebaseFirestore.DocumentData;
 
 			// if any if the Map field has been deleted skip the check and immediately restore
-			if (newUserData.vehicles && newUserData.plantations && newUserData.profile) {
+			if (newUserData.vehicles && newUserData.plantations && newUserData.profile && newUserData.mills) {
 
 				// check for changes in vehicles
 				const previousUserDataVehicles = previousUserData.vehicles ? previousUserData.vehicles : {}
@@ -43,13 +44,18 @@ export default functions.region("asia-east2").firestore
 			// refresh User.plantation map with unremoved Plantation docs for the repID
 			const plantationsRepMap = await repPlantationMapBuilder(context.params.userId)
 
+			// refresh User.mills map from MillReps docs
+			const millsRep = await millsMapBuilder(context.params.userId)
+
 			// refresh User.profile map with Profile docs for the userID
 			const profile = await profileMapBuilder(context.params.userId)
+
 
 			await admin.firestore().doc(`users/${context.params.userId}`)
 				.set({
 					profile,
 					vehicles: vehiclesMap,
+					mills: millsRep,
 					plantations: { ...plantationsOwnMap, ...plantationsRepMap }
 
 				})
