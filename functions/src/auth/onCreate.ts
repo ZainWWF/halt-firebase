@@ -12,14 +12,21 @@ export default functions.region("asia-east2").auth.user()
 				name: "",
 				phoneNumber: user.phoneNumber
 			},
-			mills:{}
+			mills: {}
 		});
 
 		await admin.firestore().doc('tradeboard/' + user.uid).set({
 			holdings: { onhand: 0, pending: 0 },
-			pending: {},
-			completed: {},
-			rejected: {},
+			agent: {
+				pending: {},
+				completed: {},
+				rejected: {},
+			},
+			mill: {
+				pending: {},
+				completed: {},
+				rejected: {},
+			},
 
 		});
 
