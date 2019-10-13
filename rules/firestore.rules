@@ -25,10 +25,6 @@ function isOwner(userId) {
 	return request.auth.uid == userId;
 }
 
-function isAssetOwner() {
-	return request.auth.uid == existingData().userId 
-}
-
 function isSuperUser(){
 	return request.auth.token.superUser == true;
 }
@@ -41,13 +37,14 @@ function userEmail(userId) {
 	return get(/databases/$(database)/documents/users/$(userId)).data.email;
 }
 
+function isTransactionOwner(){
+ return (request.auth.uid == incomingData().buyerId || request.auth.uid == incomingData().sellerId)
+}
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-		function isMillAdmin(millsId){
-			return exists(/databases/$(database)/documents/mills/$(millsId)/millAdmins/$(request.auth.uid));
-		}		
+
 
     match /{document=**} {
       allow read: if false;
@@ -79,7 +76,7 @@ service cloud.firestore {
 
 		match /vehicles/{vehicleId} {
 			// allow read, write;
-				allow read:	if isSignedIn() && isAssetOwner()
+				allow read:	if isSignedIn() && isOwner(existingData().userId)
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
 										// && incomingData().size() == 7
 										&& incomingData().license is string
@@ -92,7 +89,7 @@ service cloud.firestore {
 										// && incomingData().make.type is string
 										// && incomingData().make.detail is string
 
-				allow update:	if isSignedIn() && isAssetOwner() //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() && isOwner(existingData().userId) //TODO: isAdmin(userId) && isAuditor(userId)
 										&& incomingData().userId == existingData().userId
 										&& incomingData().isRemoved == existingData().isRemoved
 										&& incomingData().createdAt == existingData().createdAt
@@ -106,7 +103,7 @@ service cloud.firestore {
 
 		match /plantations/{plantationId} {
 			// allow read, write;
-				allow read:	if isSignedIn() &&  ( isAssetOwner() || isProducerRep() )
+				allow read:	if isSignedIn() &&  ( isOwner(existingData().userId) || isProducerRep() )
 				
 				allow create:	if isSignedIn() && isOwner(incomingData().userId)  //TODO: isAdmin(userId) && isAuditor(userId)
 											// && incomingData().size() == 3
@@ -129,7 +126,7 @@ service cloud.firestore {
 											// && incomingData().unAudited.landPreviousUse is string
 											// && incomingData().unAudited.landClearingMethod is string
 
-				allow update:	if isSignedIn() &&  ( isAssetOwner() || isProducerRep() ) //TODO: isAdmin(userId) && isAuditor(userId)
+				allow update:	if isSignedIn() &&  ( isOwner(existingData().userId) || isProducerRep() ) //TODO: isAdmin(userId) && isAuditor(userId)
 											&& incomingData().userId == existingData().userId
 											&& incomingData().isRemoved == existingData().isRemoved
 											&& incomingData().createdAt == existingData().createdAt
@@ -146,7 +143,7 @@ service cloud.firestore {
 
 
 		match /plantations/{plantationId}/buyers/{buyerId} {
-				allow read:	if isSignedIn() &&  ( isAssetOwner() || isProducerRep() )	
+				allow read:	if isSignedIn() &&  ( isOwner(existingData().userId) || isProducerRep() )	
 				allow create:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
 				allow update:	if isSignedIn() && isOwner(userId) //TODO: isAdmin(userId) && isAuditor(userId)
 				allow delete: if false
@@ -165,43 +162,72 @@ service cloud.firestore {
 				allow write: if false
 		}
 	
-		// millAdminId needs to be the userId
-		match /mills/{millsId}/millAdmins/{millAdminId} {
-				allow read:	if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
-				allow create: if isSignedIn() && isSuperUser()
-											&& incomingData().size() == 4
+		function isMillAdminRead(){
+			return existingData().millId in get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.millAdmins 
+		}		
+		
+		function isMillAdminCreate(millId){
+			return millId in get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.millAdmins 
+		}		
+
+		function canRegMillRep(){
+				return (isMillAdminCreate(incomingData().millId) || isSuperUser())  
+		}
+
+		function adminCamRegRepOnly(){
+			return isSuperUser()  ||  (isMillAdminCreate(incomingData().millId) && incomingData().isAdmin == false)
+		}
+
+		match /millReps/{millRepsId} {
+				allow read:	if isSignedIn() 
+				allow create: if  isSignedIn() && canRegMillRep()
+											&& incomingData().registrarId == request.auth.uid
+											&& adminCamRegRepOnly()// admin cannot create another admin
+ 											&& incomingData().size() == 6
+											&& incomingData().millId is string
+											&& incomingData().millName is string
 											&& incomingData().name is string
 											&& incomingData().phoneNumber is string
 											&& incomingData().registrarId is string
-											&& incomingData().registrarId == request.auth.uid
-											&& incomingData().isAdmin == true
-				allow delete: if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
+											&& incomingData().isAdmin is bool
+
+	
+				allow delete:	if isSignedIn() 
+												&& (isSuperUser() || (isMillAdminRead() && existingData().isAdmin == false)) // admin cannot delete himself or another admin
+											
 				allow update: if false
 		}
 
-	// millRepId needs to be the userId
-		match /mills/{millsId}/millReps/{millRepId} {
-				allow read:	if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
-				allow create: if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())
-											&& incomingData().size() == 4
-											&& incomingData().name is string
-											&& incomingData().phoneNumber is string
-											&& incomingData().registrarId is string
-											&& incomingData().registrarId == request.auth.uid
-											&& incomingData().isAdmin == false
-				allow delete: if isSignedIn() && (isMillAdmin(millsId)  || isSuperUser())  
-				allow update: if false
-		}
 
 		match /transactions/{transactionId}{
-				allow read, write;
+					allow create:	if isSignedIn()  && isTransactionOwner()
+													&&	incomingData().amount is number
+													// && 	(incomingData().buyerId is string || incomingData().sellerId is string)
+													// && 	(incomingData().buyerName is string || incomingData().sellerName is string)
+													&&	incomingData().clientPhoneNumber is string
+													&&	incomingData().clientType is string
+													&& 	incomingData().collectLocation is latlng
+													&&	incomingData().collectionPoint is bool
+													&&  incomingData().origins.size() >=0 
+													&&	incomingData().transactionType is string
+													&&	incomingData().transportationBy is string	
+													&&	incomingData().vehicle is string	
+													&&	(incomingData().vehicleId is string	|| (string(incomingData().vehicleId) == "null")) 
+							
+							
+					allow update:	if isSignedIn() && isTransactionOwner()
+													&& incomingData().buyerId == existingData().buyerId													
+													&& incomingData().buyerName == existingData().buyerName	
+													&& incomingData().sellerId == existingData().sellerId	
+													&& incomingData().sellerName == existingData().sellerName	
+													&& incomingData().clientType == existingData().clientType														
 		}
 	
 		match /tradeboard/{userId}{
-				allow read:	if isSignedIn() &&  isOwner(userId) // can access your own tradebaord only
-				allow create:	if false
-				allow create:	if false  
-				allow update: if false
+					allow read:	if isSignedIn() &&  isOwner(userId) // can access your own tradebaord only
+					allow create:	if false
+					allow create:	if false  
+					allow update: if false
 		}
 
 
