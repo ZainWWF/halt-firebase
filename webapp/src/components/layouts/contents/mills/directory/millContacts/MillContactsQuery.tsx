@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useState, useEffect, useContext, useCallback } from "react";
-import { AuthContext } from '../../../../../containers/Main';
 import PleaseWaitCircular from "../../../../../progress/PleaseWaitCircular"
 import { FirebaseContext, Firebase } from '../../../../../providers/Firebase/FirebaseProvider';
 
@@ -13,9 +12,6 @@ const FC: FunctionComponent<Props> = ({ children, selectedMillRef }) => {
 	const [millContacts, setMillContacts] = useState<any[] | null>(null)
 	const [isRetrievingMillContacts, setIsRetrievingMillContacts] = useState(false)
 	const firebaseApp = useContext(FirebaseContext) as Firebase;
-
-	const user = useContext(AuthContext)
-	const isSuperUser = user!.claims!.superUser;
 
 	const getMillContactsCalback = useCallback((
 	) => {

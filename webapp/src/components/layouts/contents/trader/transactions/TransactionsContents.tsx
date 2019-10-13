@@ -1,8 +1,5 @@
-import React, { useContext, useEffect, useState, useRef, createContext, useReducer, Dispatch, FunctionComponent, useCallback } from 'react';
-import { FirebaseContext, Firebase } from '../../../../providers/Firebase/FirebaseProvider';
+import React, {  FunctionComponent } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { withRouter } from 'react-router-dom'
-import { AuthContext } from '../../../../containers/Main';
 import TransactionsTradeboard from "./TransactionsTradeboard";
 
 

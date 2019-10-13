@@ -9,7 +9,6 @@ import {
 	createStyles,
 } from "@material-ui/core";
 import classNames from "classnames";
-import { fade } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
