@@ -60,10 +60,15 @@ const View: FunctionComponent = memo(() => {
 
 
 	const getDisplayList = (transaction: any) => {
-		const { createdBy, sellerId, sellerName, buyerName, error, createdAt, amount } = transaction
+		const { createdBy, sellerId, sellerName, buyerName, error, createdAt, amount, millId, millName } = transaction
 		const transactionType = createdBy === sellerId ? "Selling" : "Buying"
 
 		let transactionSecondaryLabel = transactionType === "Selling" ? `to ${buyerName}` : `from ${sellerName}`
+
+		if(millId){
+			transactionSecondaryLabel = transactionType === "Selling" ? `to ${buyerName} of ${millName}` : `from ${sellerName} of ${millName}`
+		}
+
 		if (error) {
 			transactionSecondaryLabel = error
 		}
