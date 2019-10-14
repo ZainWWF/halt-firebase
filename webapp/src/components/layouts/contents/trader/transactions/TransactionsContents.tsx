@@ -1,7 +1,7 @@
 import React, {  FunctionComponent } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import TransactionsTradeboard from "./TransactionsTradeboard";
-
+import TransactionsPendingView from "./pending/TransactionsPendingView"
 
 type IProps = {
 	match: any
@@ -18,11 +18,7 @@ const TransactionsContents: FunctionComponent<IProps> = ({ match }) => {
 						<Redirect exact from="/transactions" to={"/transactions/pending"} />
 						<Route
 							path="/transactions/pending"
-							component={() => {
-								return (
-									<div>Pending</div>
-								)
-							}}
+							component={	TransactionsPendingView}
 						/>
 						<Route
 							path="/transactions/completed"
