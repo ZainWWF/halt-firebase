@@ -4,7 +4,7 @@ import * as admin from "firebase-admin"
 
 /** new transaction*/
 export default functions.region("asia-east2").firestore
-	.document('/transactions/{transactionsId}').onCreate(async (snap, context) => {
+	.document('/transactionsPending/{transactionsId}').onCreate(async (snap, context) => {
 
 		console.log("**** New Transaction *****")
 
@@ -65,8 +65,8 @@ export default functions.region("asia-east2").firestore
 
 
 				// update the Transaction doc
-				const collectLocation = newTransaction.collectionPoint ? newTransaction.collectLocation : null;
-				await runner.update(snap.ref, { ...newTransaction, ...contactsProfile, createdAt, collectLocation, status: "Pending" })
+				const collectionPoint = newTransaction.collectionPointIsProvided ? newTransaction.collectionPoint : null;
+				await runner.update(snap.ref, { ...newTransaction, ...contactsProfile, createdAt, collectionPoint, status: "Pending" })
 
 				return
 

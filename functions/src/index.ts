@@ -14,7 +14,7 @@ import superUserOnDelete from "./superUser/onDelete"
 import superUserOnUpdate from "./superUser/onUpdate"
 import millRepOnCreate from "./millReps/onCreate"
 import millRepOnDelete from "./millReps/onDelete"
-import transactionOnCreate from "./transactions/onCreate"
+import transactionPendingOnCreate from "./transactionsPending/onCreate"
 // import millOnCreate from "./mills/onCreate"
 
 
@@ -36,7 +36,7 @@ export {
 	superUserOnDelete,
 	millRepOnCreate,
 	millRepOnDelete,
-	transactionOnCreate,
+	transactionPendingOnCreate,
 	// millOnCreate
 }
 
