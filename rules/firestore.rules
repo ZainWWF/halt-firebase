@@ -37,9 +37,7 @@ function userEmail(userId) {
 	return get(/databases/$(database)/documents/users/$(userId)).data.email;
 }
 
-function isTransactionOwner(){
- return (request.auth.uid == incomingData().buyerId || request.auth.uid == incomingData().sellerId)
-}
+
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -199,34 +197,46 @@ service cloud.firestore {
 		}
 
 
-		match /transactions/{transactionId}{
-					allow create:	if isSignedIn()  && isTransactionOwner()
-													&&	incomingData().amount is number
-													// && 	(incomingData().buyerId is string || incomingData().sellerId is string)
-													// && 	(incomingData().buyerName is string || incomingData().sellerName is string)
-													&&	incomingData().clientPhoneNumber is string
-													&&	incomingData().clientType is string
-													&& 	incomingData().collectLocation is latlng
-													&&	incomingData().collectionPoint is bool
-													&&  incomingData().origins.size() >=0 
-													&&	incomingData().transactionType is string
-													&&	incomingData().transportationBy is string	
-													&&	incomingData().vehicle is string	
-													&&	(incomingData().vehicleId is string	|| (string(incomingData().vehicleId) == "null")) 
-							
-							
-					allow update:	if isSignedIn() && isTransactionOwner()
-													&& incomingData().buyerId == existingData().buyerId													
-													&& incomingData().buyerName == existingData().buyerName	
-													&& incomingData().sellerId == existingData().sellerId	
-													&& incomingData().sellerName == existingData().sellerName	
-													&& incomingData().clientType == existingData().clientType														
+	  match /transactionsUpdate/{transactionsUpdateId} {
+				allow read:	if false
+				allow write: if false
+		}
+
+		function isTransactionOwnerWrite(){
+			return (request.auth.uid == incomingData().buyerId || request.auth.uid == incomingData().sellerId)
+		}
+ 
+		function isTransactionOwnerRead(){
+			return (request.auth.uid == existingData().buyerId || request.auth.uid == existingData().sellerId)
+		}
+
+		function isCollectionPointExist(){
+			return (!('collectionPoint' in incomingData().keys()) || incomingData().collectionPoint is latlng)
+		}
+	 
+		match /transactionsPending/{transactionsPendingId}{
+					allow read:	if isSignedIn()  && isTransactionOwnerRead()
+					allow create:	if isSignedIn() && isTransactionOwnerWrite()
+												&& 	isCollectionPointExist()
+												&&	incomingData().amount is number
+												&&	incomingData().clientPhoneNumber is string
+												&&	incomingData().clientType is string
+												&&  incomingData().origins.size() >= 0 
+												&&	incomingData().transactionType is string
+												&&	incomingData().transportationBy is string	
+												&&	incomingData().vehicle is string	
+												&&	(incomingData().vehicleId is string	|| (string(incomingData().vehicleId) == "null")) 
+												&&	incomingData().millName is string	
+												&&	(incomingData().millId is string	|| (string(incomingData().millId) == "null")) 
+
+					allow update:	if false											
+					allow delete:	if false  
 		}
 	
 		match /tradeboard/{userId}{
 					allow read:	if isSignedIn() &&  isOwner(userId) // can access your own tradebaord only
 					allow create:	if false
-					allow create:	if false  
+					allow delete:	if false  
 					allow update: if false
 		}
 
