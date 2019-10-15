@@ -42,7 +42,8 @@ const FC: FunctionComponent<Props> = ({ children, openDialog, onCloseDialog }) =
 
 
 	const newTransactionAddCallback = useCallback(() => {
-		firebaseApp.db.collection("transactions").add({
+		console.log(newTransactionAdd)
+		firebaseApp.db.collection("transactionsPending").add({
 
 			...newTransactionAdd
 		}).then(() => {

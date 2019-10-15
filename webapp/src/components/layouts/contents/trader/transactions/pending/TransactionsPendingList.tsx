@@ -1,65 +1,49 @@
 
-import React, { FunctionComponent, memo, useState } from 'react';
-import List from '@material-ui/core/List';
+import React from 'react';
+
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import IconButton from '@material-ui/core/IconButton';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
-import { grey, green } from '@material-ui/core/colors';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import TransactionDetailQuery from "../TransactionDetailQuery";
-import Tooltip from '@material-ui/core/Tooltip';
-import { Typography } from '@material-ui/core';
+
+import { Theme, makeStyles } from '@material-ui/core/styles';
 
 
-const useStyles = makeStyles((theme: Theme) =>
-	createStyles({
-		root: {
-			width: '100%',
-			backgroundColor: theme.palette.background.paper,
-		},
-		bigAvatar: {
-			margin: 10,
-			width: 60,
-			height: 60,
-		},
-		contentWrapper: {
-			margin: '40px 16px',
-		},
-		auditedAvatar: {
-			color: '#fff',
-			backgroundColor: green[500],
-		},
-		nonAuditedAvatar: {
-			color: '#fff',
-			backgroundColor: grey[500],
-		}
-	}),
-);
+const useStyles = makeStyles((theme: Theme) => ({
+	root: {
+		width: '100%',
+		backgroundColor: theme.palette.background.paper,
+	},
+	contentWrapper: {
+		margin: '40px 16px',
+	},
+	amount: {
+		fontWeight: 500,
+		fontSize: "1.1rem"
+	},
+}));
 
-
-type IProps = {
-	selectedTransactionId: firebase.firestore.DocumentReference | any
+type Props = {
+	pendingTransactionList: Record<string, any>[]
+	onClickPendingTransactionDetail: (p: any) => () => void
 }
 
-const ListView: FunctionComponent<IProps> = memo(({ selectedTransactionId }) => {
-
+export default function TransactionPendingList(props: Props) {
+	const { pendingTransactionList, onClickPendingTransactionDetail } = props
 	const classes = useStyles();
-	const [reload, setReload] = useState(false)
 
-
-	return (!reload && selectedTransactionId &&
+	return (
 		<>
-			<TransactionDetailQuery selectedTransactionId={selectedTransactionId}>
-			{(transactionDetail:any)=>{
-				return console.log(transactionDetail);
-			}	}
-			</TransactionDetailQuery>
+			{(pendingTransactionList.map((pendingTransaction: any) =>
+				<ListItem button key={pendingTransaction.id} onClick={onClickPendingTransactionDetail(pendingTransaction)}>
+					<ListItemText primary={pendingTransaction.transactionType} secondary={pendingTransaction.transactionSecondaryLabel} />
+					<ListItemSecondaryAction >
+						<>
+							<span className={classes.amount}>{`${pendingTransaction.amount} kg`}</span>
+							<br />
+							{pendingTransaction.transactionActionSecondaryAction}
+						</>
+					</ListItemSecondaryAction>
+				</ListItem>))}
 		</>
-		)
-
-
-})
-
-export default ListView;
+	)
+}

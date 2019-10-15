@@ -5,9 +5,9 @@ import { FirebaseContext, Firebase } from '../../../../providers/Firebase/Fireba
 
 type Props = {
 	children: any
-	selectedTransactionId: string
+	selectedPendingTransaction: any
 }
-const FC: FunctionComponent<Props> = ({ children, selectedTransactionId }) => {
+const FC: FunctionComponent<Props> = ({ children, selectedPendingTransaction }) => {
 
 	const [transactionDetail, setTransactionDetail] = useState()
 	const [isRetrievingTransactionDetail, setIsRetrievingTransactionDetail] = useState(false)
@@ -17,11 +17,11 @@ const FC: FunctionComponent<Props> = ({ children, selectedTransactionId }) => {
 	) => {
 		let isSubscribed = true
 		setIsRetrievingTransactionDetail(true)
-		if (selectedTransactionId) {
+		if (selectedPendingTransaction) {
 
-			console.log(selectedTransactionId)
-			firebaseApp.db.collection("transactions")
-				.doc(selectedTransactionId)
+			console.log(selectedPendingTransaction)
+			firebaseApp.db.collection("transactionsPending")
+				.doc(selectedPendingTransaction.id)
 				.get()
 				.then((transactionSnap) => {
 					if (isSubscribed) {
@@ -38,7 +38,7 @@ const FC: FunctionComponent<Props> = ({ children, selectedTransactionId }) => {
 		}
 
 		return () => { isSubscribed = false }
-	}, [selectedTransactionId, firebaseApp])
+	}, [selectedPendingTransaction, firebaseApp])
 
 
 	useEffect(() => {

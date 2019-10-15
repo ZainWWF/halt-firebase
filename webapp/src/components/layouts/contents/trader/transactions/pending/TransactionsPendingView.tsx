@@ -4,9 +4,13 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Snackbar from '@material-ui/core/Snackbar';
-import { Theme, List, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { Theme, List } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { TradeboardContext } from "../TransactionsTradeboard"
+import { AuthContext } from "../../../../../containers/Main";
+import TransactionDetailQuery from "../TransactionDetailQuery"
+import TransactionsPendingDetails from "../pending/TransactionsPendingDetails"
+import TransactionPendingList from "./TransactionsPendingList"
 
 const useStyles = makeStyles((theme: Theme) => ({
 	root: {
@@ -56,17 +60,21 @@ const View: FunctionComponent = memo(() => {
 
 	const [hasError, setHasError] = useState<Error>();
 	const [showError, setShowError] = useState(false);
-	const [openPendingTransaction, setPendingTransaction] = useState(false);
+	const [openPendingTransactionDetail, setPendingTransactionDetail] = useState(false);
+	const [selectedPendingTransaction, setSelectedPendingTransaction] = useState()
 
+	const getDisplayItems = (transaction: any) => {
 
-	const getDisplayList = (transaction: any) => {
-		const { createdBy, sellerId, sellerName, buyerName, error, createdAt, amount, millId, millName } = transaction
-		const transactionType = createdBy === sellerId ? "Selling" : "Buying"
+		const { userId } = tradeboardData
+		const {  sellerId, sellerName, buyerName, error, createdAt, amount, millId, millName, clientType } = transaction
+
+		const transactionType = userId === sellerId ? "Selling" : "Buying"
 
 		let transactionSecondaryLabel = transactionType === "Selling" ? `to ${buyerName}` : `from ${sellerName}`
+		console.log(transaction)
+		if (millId) {
 
-		if(millId){
-			transactionSecondaryLabel = transactionType === "Selling" ? `to ${buyerName} of ${millName}` : `from ${sellerName} of ${millName}`
+			transactionSecondaryLabel = transactionType === "Selling" ? `to ${millName} rep, ${buyerName}` : `from ${millName} rep, ${sellerName}`
 		}
 
 		if (error) {
@@ -74,24 +82,29 @@ const View: FunctionComponent = memo(() => {
 		}
 
 		let transactionActionSecondaryAction = `${createdAt.toDate().getDate()}/${createdAt.toDate().getMonth()}`
-		console.log(transactionActionSecondaryAction)
 		return { transactionSecondaryLabel, transactionType, transactionActionSecondaryAction, amount }
 	}
 
-	const getPendingTransactions = (pendings: Record<string, any>) => Object.keys(pendings).map(key => {
-		const displayList = getDisplayList(pendings[key])
-		return { ...pendings[key], id: key, ...displayList }
+	const processTransactionList = (pendings: Record<string, any>) => Object.keys(pendings).map(key => {
+		const displayItems = getDisplayItems(pendings[key])
+		return { ...pendings[key], id: key, ...displayItems }
 	})
 
-	const getSelectedPendingTransaction = () => {
+	const getPendingTransactionList = () => {
 		if (tradeboardData) {
 			const { agent, mill } = tradeboardData
-			const pendingAgentTransaction = getPendingTransactions(agent.pending)
-			const pendingMillTransaction = getPendingTransactions(mill.pending)
+			const pendingAgentTransaction = processTransactionList(agent.pending)
+			const pendingMillTransaction = processTransactionList(mill.pending)
 			return [...pendingAgentTransaction, ...pendingMillTransaction]
 		}
+		return []
 	}
-	const selectedPendingTransaction = getSelectedPendingTransaction()
+	const pendingTransactionList: Record<string, any>[] = getPendingTransactionList()
+
+	const onClickPendingTransactionDetail = (pendingTransaction: any) => () => {
+		setPendingTransactionDetail(true)
+		setSelectedPendingTransaction(pendingTransaction)
+	}
 
 
 	return (
@@ -104,34 +117,26 @@ const View: FunctionComponent = memo(() => {
 				</Toolbar>
 			</AppBar>
 			<List className={classes.root}>
-				{
-					selectedPendingTransaction &&
-					selectedPendingTransaction.map((pendingTransaction: any) => {
-						return (
-							<ListItem button key={pendingTransaction.id}  >
-								<ListItemText primary={pendingTransaction.transactionType} secondary={pendingTransaction.transactionSecondaryLabel} />
-								<ListItemSecondaryAction >
-									<>
-										<span className={classes.amount}>{`${pendingTransaction.amount} kg`}</span>
-										<br />
-										{pendingTransaction.transactionActionSecondaryAction}
-									</>
-								</ListItemSecondaryAction>
-							</ListItem>
-						)
-					})
+				{!openPendingTransactionDetail &&
+					<TransactionPendingList pendingTransactionList={pendingTransactionList} onClickPendingTransactionDetail={onClickPendingTransactionDetail} />
+				}
+				{openPendingTransactionDetail &&
+					<TransactionDetailQuery selectedPendingTransaction={selectedPendingTransaction}>
+						{(transactionDetail: any) => <TransactionsPendingDetails transactionDetail={transactionDetail} />}
+					</TransactionDetailQuery>
 				}
 			</List>
-			{/* {Boolean(selectedPendingTransaction && selectedPendingTransaction.ref) ?
+
+			{/* {Boolean(pendingTransactionList && pendingTransactionList.ref) ?
 				<>
-					{!openPendingTransaction && <PendingTransactionsList selectedPendingTransactionRef={selectedPendingTransaction ? selectedPendingTransaction.ref : null} />}
+					{!openPendingTransaction && <PendingTransactionsList pendingTransactionListRef={pendingTransactionList ? pendingTransactionList.ref : null} />}
 				</>
 				:
 				<>
 					{isRetrieving ? <PleaseWaitCircular /> : <ListingPendingTransactions pendingTransactions={pendingTransactions} selectPendingTransaction={selectPendingTransaction} />}
 				</>
 			} */}
-			{/* <PendingTransactionUpdate openPendingTransaction={openPendingTransaction} onClosePendingTransaction={onClosePendingTransaction} selectedPendingTransaction={selectedPendingTransaction ? selectedPendingTransaction : null}>
+			{/* <PendingTransactionUpdate openPendingTransaction={openPendingTransaction} onClosePendingTransaction={onClosePendingTransaction} pendingTransactionList={pendingTransactionList ? selectedPendingTransaction : null}>
 				{(setNewPendingTransaction) => <PendingTransactionFormModal setNewPendingTransaction={setNewPendingTransaction} />}
 			</PendingTransactionUpdate> */}
 			<Snackbar
@@ -151,3 +156,7 @@ const View: FunctionComponent = memo(() => {
 })
 
 export default View;
+
+
+
+

@@ -53,7 +53,7 @@ const SimpleForm: FunctionComponent<IProps> = ({
 			<Field name="transactionType"
 				as={SelectField}
 				error={errors.transactionType}
-				touched={errors.transactionType}
+				touched={touched.transactionType}
 				type="text"
 				label="Transaction Type"
 				choices={TransactionType} />
@@ -68,7 +68,7 @@ const SimpleForm: FunctionComponent<IProps> = ({
 			<Field name="clientType"
 				as={SelectField}
 				error={errors.clientType}
-				touched={errors.clientType}
+				touched={touched.clientType}
 				type="text"
 				label="Client Type"
 				choices={ClientType} />
@@ -78,7 +78,7 @@ const SimpleForm: FunctionComponent<IProps> = ({
 				<Field name="millName"
 					as={SelectField}
 					error={errors.millName}
-					touched={errors.millName}
+					touched={touched.millName}
 					type="text"
 					label="MillName"
 					choices={millNameSelections ? millNameSelections : ["..not available"]} />
@@ -100,7 +100,7 @@ const SimpleForm: FunctionComponent<IProps> = ({
 			<Field name="transportationBy"
 				as={SelectField}
 				error={errors.transportationBy}
-				touched={errors.transportationBy}
+				touched={touched.transportationBy}
 				type="text"
 				label="Transportation"
 				choices={TransportationType} />
@@ -110,7 +110,7 @@ const SimpleForm: FunctionComponent<IProps> = ({
 					<Field name="vehicle"
 						as={SelectField}
 						error={errors.vehicle}
-						touched={errors.vehicle}
+						touched={touched.vehicle}
 						type="text"
 						label="Vehicle"
 						choices={vehicleSelections ? vehicleSelections : ["...not avalailble"]} />
@@ -118,10 +118,10 @@ const SimpleForm: FunctionComponent<IProps> = ({
 				</>
 			}
 
-			<Field name="collectionPoint"
+			<Field name="collectionPointIsProvided"
 				as={SelectField}
-				error={errors.collectionPoint}
-				touched={errors.collectionPoint}
+				error={errors.collectionPointIsProvided}
+				touched={touched.collectionPointIsProvided}
 				type="text"
 				label="Collection Point?"
 				choices={["Yes", "No"]} />
@@ -130,19 +130,19 @@ const SimpleForm: FunctionComponent<IProps> = ({
 			{collectionPointRequired &&
 				<>
 					<Field
-						name="collectLocation.latitude"
+						name="collectionPoint.latitude"
 						as={SingleField}
-						error={errors.collectLocation && errors.collectLocation.latitude}
-						touched={touched.collectLocation && touched.collectLocation.latitude}
-						type="number"
+						error={errors.collectionPoint && errors.collectionPoint.latitude}
+						touched={touched.collectionPoint && touched.collectionPoint.latitude}
+						type="text"
 						label="latitude" />
 
 					<Field
-						name="collectLocation.longitude"
+						name="collectionPoint.longitude"
 						as={SingleField}
-						error={errors.collectLocation && errors.collectLocation.longitude}
-						touched={touched.collectLocation && touched.collectLocation.longitude}
-						type="number"
+						error={errors.collectionPoint && errors.collectionPoint.longitude}
+						touched={touched.collectionPoint && touched.collectionPoint.longitude}
+						type="text"
 						label="longitude" />
 				</>
 			}

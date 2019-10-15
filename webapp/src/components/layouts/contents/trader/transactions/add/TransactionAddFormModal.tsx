@@ -92,15 +92,15 @@ export default function ScrollDialog() {
 				.then(millRepSnap => {
 					if (isSubscribed) {
 
-						const mills = millRepSnap.docs.reduce((mills, repSnap)=>{
+						const mills = millRepSnap.docs.reduce((mills, repSnap) => {
 							const rep = repSnap.data();
-							return { ...mills,   [ rep.millName] : rep }
-						},{})
+							return { ...mills, [rep.millName]: rep }
+						}, {})
 						console.log(mills)
 
 						setRepsMill(mills)
 						setMillNameSelections(Object.keys(mills))
-						
+
 					}
 				})
 				.catch((error: Error) => {
@@ -144,8 +144,7 @@ export default function ScrollDialog() {
 				clientPhoneNumber,
 				amount,
 				transportationBy,
-				collectionPoint,
-				collectLocation,
+				collectionPointIsProvided,
 				vehicle,
 				millName,
 			} = submittedValues
@@ -153,21 +152,21 @@ export default function ScrollDialog() {
 			const vehicleId = getVehicleId(profileData.vehicles, vehicle)
 			const origins = getOrigins(amountSource, transactionType)
 			const contact = getContact(user, profileData.profile, transactionType)
+			const collectionPoint = collectionPointIsProvided ? { collectionPoint : submittedValues.collectionPoint } : {}
 
 			setNewTransactionAdd({
 				transactionType,
 				clientType,
 				clientPhoneNumber,
-				collectLocation,
-				collectionPoint,
 				transportationBy,
+				...collectionPoint,
 				millName,
-				millId :  millName.length > 0 ? repsMill[millName].millId : null,
+				millId: millName.length > 0 ? repsMill[millName].millId : null,
 				vehicle,
 				vehicleId,
 				...contact,
 				origins,
-				amount
+				amount,
 			})
 		}
 	}
@@ -182,8 +181,8 @@ export default function ScrollDialog() {
 				amount: 0,
 				transportationBy: "",
 				vehicle: "",
-				collectionPoint: "No",
-				collectLocation: {
+				collectionPointIsProvided: "No",
+				collectionPoint: {
 					latitude: "",
 					longitude: ""
 				}
@@ -192,16 +191,15 @@ export default function ScrollDialog() {
 			validate={values => {
 
 				// custom validation	
-
-
 				const transactionType = values.transactionType as TransactionType
 				const transportationBy = values.transportationBy as TransportationBy
 				const amountError = validateAmount(amountSource, values.amount, transactionType)
 				const phoneNumberError = validatePhoneNumber(values.clientPhoneNumber)
-				const vehicleError = validateVehicle(transactionType, transportationBy)
-				const geoPointError = validateGeoPoint(values.collectLocation)
+				const vehicleError = validateVehicle(transactionType, transportationBy, values.vehicle)
+				const geoPointError = validateGeoPoint(values.collectionPoint)
 				const error = { ...geoPointError, ...amountError, ...vehicleError, ...phoneNumberError }
 
+				
 				//phoneNumber required on client type 
 				if (!phoneNumberError.clientPhoneNumber && values.clientType === "Mill") {
 					setMillRepSearchPhoneNumber(values.clientPhoneNumber)
@@ -214,18 +212,22 @@ export default function ScrollDialog() {
 					values.millName = ""
 				}
 
-				// firestore  Geopoint formatting for collection point
-				const firestoreGeoPoint = new firebase.firestore.GeoPoint(
-					Number(values.collectLocation.latitude),
-					Number(values.collectLocation.longitude))
-				const collectionPoint = values.collectionPoint === "Yes" ? true : false
-				setCollectionPointRequired(collectionPoint)
+				const collectionPointIsProvided = values.collectionPointIsProvided === "Yes" ? true : false
+				setCollectionPointRequired(collectionPointIsProvided)
 
-				// vehile required on validation result
-				vehicleError.vehicle ? setVehicleRequired(true) : setVehicleRequired(false)
+				const firestoreGeoPoint = getFirestoreGeoPoint(values.collectionPoint)
+
+				// reset vehicle value
+				if ((transactionType === "Buy" && transportationBy === "Seller") ||
+					(transactionType === "Sell" && transportationBy === "Buyer")) {
+					values.vehicle = ""
+				}
+
+				// vehicle field show or hide
+				vehicleError.vehicle || values.vehicle.length > 0 ? setVehicleRequired(true) : setVehicleRequired(false)
 
 				// set values ready for submission to server
-				submitValues({ ...values, collectionPoint, collectLocation: firestoreGeoPoint })
+				submitValues({ ...values, collectionPointIsProvided, collectionPoint: firestoreGeoPoint })
 
 				return error
 			}}
@@ -345,30 +347,31 @@ function validateAmount(amountSource: AmountSource[], amount: number, transactio
 
 
 //  set vehicle field as required if transportation is by owner
-function validateVehicle(transactionType: TransactionType, transportationBy: TransportationBy) {
+function validateVehicle(transactionType: TransactionType, transportationBy: TransportationBy, vehicle: string) {
 
-	if (transactionType === "Sell" && transportationBy === "Seller") {
+	if (transactionType === "Sell" && transportationBy === "Seller" && vehicle.length === 0) {
 		return { vehicle: "vehicle is required" }
 	}
 
-	if (transactionType === "Buy" && transportationBy === "Buyer") {
+	if (transactionType === "Buy" && transportationBy === "Buyer" && vehicle.length === 0) {
 		return { vehicle: "vehicle is required" }
 	}
 	return {}
 }
 
 // validate collection point is within boundaries
-function validateGeoPoint(collectLocation: CollectionPoint) {
+function validateGeoPoint(collectionPoint: CollectionPoint) {
 
 	const { features: [{ geometry: { coordinates } }] } = SumatraMapBounds;
 	const boundPolygon = turfHelpers.polygon(coordinates)
 
-	if (collectLocation.latitude.length > 0 || collectLocation.latitude.length > 0) {
+	if (collectionPoint.latitude.length > 0 || collectionPoint.latitude.length > 0) {
 
-		const geoPoint = getGeoPoint(collectLocation)
+		const geoPoint = getGeoPoint(collectionPoint)
+		console.log(geoPoint)
 		if (boundPolygon && !turfPointInPolygon.default(geoPoint, boundPolygon)) {
 			return {
-				collectLocation: {
+				collectionPoint: {
 					latitude: "not within bounds!",
 					longitude: "not within bounds!"
 				}
@@ -378,16 +381,32 @@ function validateGeoPoint(collectLocation: CollectionPoint) {
 	}
 
 	return {}
-
 }
 
 // returm the Geojson point value of the collection Point
-function getGeoPoint(collectLocation: CollectionPoint) {
-	const lng = collectLocation.longitude.length === 0 ? 0 : Number(collectLocation.longitude)
-	const lat = collectLocation.latitude.length === 0 ? 0 : Number(collectLocation.latitude)
+function getGeoPoint(collectionPoint: CollectionPoint) {
+	const lng = collectionPoint.longitude.length === 0 ? 0 : Number(collectionPoint.longitude)
+	const lat = collectionPoint.latitude.length === 0 ? 0 : Number(collectionPoint.latitude)
 
 	return turfHelpers.point([lng, lat])
 }
+
+// return the Firebase Geopoint format for collection point
+function getFirestoreGeoPoint(collectionPoint: any) {
+
+	try {
+		const geopoint = new firebase.firestore.GeoPoint(
+			Number(collectionPoint.latitude),
+			Number(collectionPoint.longitude))
+
+		return geopoint
+
+	} catch (error) {
+		return { error }
+	}
+}
+
+
 
 // validate the clients phone number
 function validatePhoneNumber(phoneNumber: string) {

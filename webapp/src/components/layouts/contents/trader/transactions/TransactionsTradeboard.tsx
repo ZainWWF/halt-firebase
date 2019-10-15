@@ -32,7 +32,7 @@ const FC: FunctionComponent<Props> = ({ children }) => {
 			.doc(user.uid)
 			.onSnapshot((doc) => {
 				const data = doc.data();
-				setTradeBoardData(data)
+				setTradeBoardData({ ...data, userId: user.uid} )
 				console.log(data)
 			})
 
