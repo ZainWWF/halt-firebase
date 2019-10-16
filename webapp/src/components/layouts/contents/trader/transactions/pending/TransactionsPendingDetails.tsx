@@ -6,24 +6,37 @@ import { AuthContext } from '../../../../../containers/Main';
 
 const getDisplayItems = (transaction: any, userId: string) => {
 	if (!transaction) return null
-	const {  sellerId, sellerName,  buyerName, createdAt, amount, transportationBy } = transaction
+	const { createdBy,  sellerId, sellerName,  buyerName, createdAt, amount, transportationBy } = transaction
 	const transactionTypeLabel = userId === sellerId ? "Requested to Sell" : "Requested to Buy";
 	const dateLabel = `${createdAt.toDate().toDateString()} ${createdAt.toDate().toTimeString().split("GMT")[0]}hr`
 	const amountLabel = `${amount} kg`
 	const contactNameLabel = userId === sellerId ? `to ${buyerName}` : `from ${sellerName}`
 	const transportationByLabel = (userId === sellerId) && (transportationBy === "Buyer") ? "" : "Select a transport"
-	return {  transportationByLabel, transactionTypeLabel, dateLabel, amountLabel, contactNameLabel, ...transaction }
+	console.log(createdBy === userId)
+	return {  userId, transportationByLabel, transactionTypeLabel, dateLabel, amountLabel, contactNameLabel, ...transaction }
 }
 
 
 type Props = {
 	transactionDetail: any
+	onClosePendingTransactionDetail: ()=>void
 }
 
 export default function FC(props: Props) {
 	const user = useContext(AuthContext) as firebase.User;
-	const { transactionDetail } = props
+	const { transactionDetail, onClosePendingTransactionDetail } = props
 	const displayItems = getDisplayItems(transactionDetail, user.uid)
+
+
+	const onClickCancelTransaction = (transactionRef:firebase.firestore.DocumentReference) => ()=>{
+		 transactionRef.delete().then(()=>{
+			 console.log("delete succesfull")
+			onClosePendingTransactionDetail()
+		 }).catch((error:Error)=>{
+			 console.log(error)
+		 })
+	}
+
 	return (!transactionDetail ? null :
 		<>
 			<ListItem  >
@@ -53,11 +66,10 @@ export default function FC(props: Props) {
 			<ListItem >
 				<ListItemText />
 				<ListItemSecondaryAction >
-					{displayItems.createdBy === user.uid ?
+					{displayItems.createdBy === displayItems.userId ?
 						<Button
-							// onClick={onSubmitForm(isValid)}
+							onClick={onClickCancelTransaction(transactionDetail.ref)}
 							color="primary"
-						// disabled={(!isValid && Boolean(touched)) || !submittedValues}
 						>
 							Cancel
 						</Button>

@@ -6,8 +6,9 @@ import { FirebaseContext, Firebase } from '../../../../providers/Firebase/Fireba
 type Props = {
 	children: any
 	selectedPendingTransaction: any
+	onClosePendingTransactionDetail: ()=>void
 }
-const FC: FunctionComponent<Props> = ({ children, selectedPendingTransaction }) => {
+const FC: FunctionComponent<Props> = ({ children, selectedPendingTransaction, onClosePendingTransactionDetail }) => {
 
 	const [transactionDetail, setTransactionDetail] = useState()
 	const [isRetrievingTransactionDetail, setIsRetrievingTransactionDetail] = useState(false)
@@ -27,7 +28,7 @@ const FC: FunctionComponent<Props> = ({ children, selectedPendingTransaction }) 
 					if (isSubscribed) {
 						console.log("retrieve done")
 						console.log(transactionSnap.data())
-						setTransactionDetail(transactionSnap.data())
+						setTransactionDetail({ ...transactionSnap.data() ,ref: transactionSnap.ref})
 						setIsRetrievingTransactionDetail(false)
 					}
 
@@ -49,7 +50,7 @@ const FC: FunctionComponent<Props> = ({ children, selectedPendingTransaction }) 
 	return (isRetrievingTransactionDetail ?
 		<PleaseWaitCircular />
 		:
-		<>{children(transactionDetail)}</>
+		<>{children(transactionDetail, onClosePendingTransactionDetail)}</>
 	)
 }
 export default FC

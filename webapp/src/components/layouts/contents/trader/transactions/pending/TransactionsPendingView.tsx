@@ -106,6 +106,10 @@ const View: FunctionComponent = memo(() => {
 		setSelectedPendingTransaction(pendingTransaction)
 	}
 
+	const onClosePendingTransactionDetail = () => {
+		setPendingTransactionDetail(false)
+		setSelectedPendingTransaction(null)
+	}
 
 	return (
 		<Paper className={classes.paper}>
@@ -121,8 +125,8 @@ const View: FunctionComponent = memo(() => {
 					<TransactionPendingList pendingTransactionList={pendingTransactionList} onClickPendingTransactionDetail={onClickPendingTransactionDetail} />
 				}
 				{openPendingTransactionDetail &&
-					<TransactionDetailQuery selectedPendingTransaction={selectedPendingTransaction}>
-						{(transactionDetail: any) => <TransactionsPendingDetails transactionDetail={transactionDetail} />}
+					<TransactionDetailQuery selectedPendingTransaction={selectedPendingTransaction} onClosePendingTransactionDetail={onClosePendingTransactionDetail}>
+						{(transactionDetail: any, onClosePendingTransactionDetail:any) => <TransactionsPendingDetails transactionDetail={transactionDetail} onClosePendingTransactionDetail={onClosePendingTransactionDetail}/>}
 					</TransactionDetailQuery>
 				}
 			</List>
