@@ -15,7 +15,8 @@ import superUserOnUpdate from "./superUser/onUpdate"
 import millRepOnCreate from "./millReps/onCreate"
 import millRepOnDelete from "./millReps/onDelete"
 import transactionPendingOnCreate from "./transactionsPending/onCreate"
-// import millOnCreate from "./mills/onCreate"
+import transactionPendingOnDelete from "./transactionsPending/onDelete"
+
 
 
 admin.initializeApp();
@@ -37,6 +38,7 @@ export {
 	millRepOnCreate,
 	millRepOnDelete,
 	transactionPendingOnCreate,
-	// millOnCreate
+	transactionPendingOnDelete
+	
 }
 
