@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
+import deletePendingItem from "./deletePendingItem"
 
 /** delete pending transaction*/
 export default functions.region("asia-east2").firestore
@@ -9,23 +10,12 @@ export default functions.region("asia-east2").firestore
 
 			try {
 
-				const { buyerId, sellerId } = snap.data() as FirebaseFirestore.DocumentData;
-
-				const sellerPendingDocRef = await admin.firestore().collection("tradeboard").doc(buyerId)
-				await runner.update(sellerPendingDocRef, {
-					[`agent.pending.${snap.id}`]: admin.firestore.FieldValue.delete(),
-					[`mill.pending.${snap.id}`]: admin.firestore.FieldValue.delete()
-				})
-
-				const buyerPendingDocRef = await admin.firestore().collection("tradeboard").doc(sellerId)
-				await runner.update(buyerPendingDocRef, {
-					[`agent.pending.${snap.id}`]: admin.firestore.FieldValue.delete(),
-					[`mill.pending.${snap.id}`]: admin.firestore.FieldValue.delete()
-				})
+				const docData = snap.data() as FirebaseFirestore.DocumentData
+				await deletePendingItem(runner, docData, snap.id)
 
 				const transactionCancelledDocRef = admin.firestore().collection("transactionsCancelled").doc()
 				await runner.set(transactionCancelledDocRef, {
-					...snap.data(),
+					...docData,
 					cancelledAt: admin.firestore.Timestamp.fromMillis(Date.now())
 				})
 
