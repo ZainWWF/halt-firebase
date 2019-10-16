@@ -7,7 +7,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { Theme, List } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { TradeboardContext } from "../TransactionsTradeboard"
-import { AuthContext } from "../../../../../containers/Main";
 import TransactionDetailQuery from "../TransactionDetailQuery"
 import TransactionsPendingDetails from "../pending/TransactionsPendingDetails"
 import TransactionPendingList from "./TransactionsPendingList"
@@ -66,7 +65,7 @@ const View: FunctionComponent = memo(() => {
 	const getDisplayItems = (transaction: any) => {
 
 		const { userId } = tradeboardData
-		const {  sellerId, sellerName, buyerName, error, createdAt, amount, millId, millName, clientType } = transaction
+		const {  sellerId, sellerName, buyerName, error, createdAt, amount, millId, millName } = transaction
 
 		const transactionType = userId === sellerId ? "Selling" : "Buying"
 
@@ -130,19 +129,6 @@ const View: FunctionComponent = memo(() => {
 					</TransactionDetailQuery>
 				}
 			</List>
-
-			{/* {Boolean(pendingTransactionList && pendingTransactionList.ref) ?
-				<>
-					{!openPendingTransaction && <PendingTransactionsList pendingTransactionListRef={pendingTransactionList ? pendingTransactionList.ref : null} />}
-				</>
-				:
-				<>
-					{isRetrieving ? <PleaseWaitCircular /> : <ListingPendingTransactions pendingTransactions={pendingTransactions} selectPendingTransaction={selectPendingTransaction} />}
-				</>
-			} */}
-			{/* <PendingTransactionUpdate openPendingTransaction={openPendingTransaction} onClosePendingTransaction={onClosePendingTransaction} pendingTransactionList={pendingTransactionList ? selectedPendingTransaction : null}>
-				{(setNewPendingTransaction) => <PendingTransactionFormModal setNewPendingTransaction={setNewPendingTransaction} />}
-			</PendingTransactionUpdate> */}
 			<Snackbar
 				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 				key={`bottom,center`}
