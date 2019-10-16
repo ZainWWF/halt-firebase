@@ -230,7 +230,7 @@ service cloud.firestore {
 												&&	(incomingData().millId is string	|| (string(incomingData().millId) == "null")) 
 
 					allow update:	if false											
-					allow delete:	if false  
+					allow delete:	if isSignedIn() && isTransactionOwnerRead()  
 		}
 	
 		match /tradeboard/{userId}{
