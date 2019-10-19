@@ -80,7 +80,7 @@ const View: FunctionComponent = memo(() => {
 			transactionSecondaryLabel = error
 		}
 
-		let transactionActionSecondaryAction = `${createdAt.toDate().getDate()}/${createdAt.toDate().getMonth()}`
+		let transactionActionSecondaryAction = `${createdAt ? createdAt.toDate().getDate() : ""}/${createdAt ? createdAt.toDate().getMonth() : ""}`
 		return { transactionSecondaryLabel, transactionType, transactionActionSecondaryAction, amount }
 	}
 
