@@ -16,6 +16,7 @@ import millRepOnCreate from "./millReps/onCreate"
 import millRepOnDelete from "./millReps/onDelete"
 import transactionPendingOnCreate from "./transactionsPending/onCreate"
 import transactionPendingOnDelete from "./transactionsPending/onDelete"
+import transactionPendingOnUpdate from "./transactionsPending/onUpdate"
 
 
 
@@ -38,7 +39,7 @@ export {
 	millRepOnCreate,
 	millRepOnDelete,
 	transactionPendingOnCreate,
-	transactionPendingOnDelete
-	
+	transactionPendingOnDelete,
+	transactionPendingOnUpdate	
 }
 

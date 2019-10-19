@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin"
 import { ownPlantationMapBuilder, repPlantationMapBuilder } from "./mapBuilder"
-import bqStreamInsert from './bqStreamInsert';
+// import bqStreamInsert from './bqStreamInsert';
 
 
 const isPropValueChanged = (restNewData, previousData): boolean => {
@@ -49,11 +49,11 @@ export default functions.region("asia-east2").firestore
 			await updateUserRepPlantation(newData, plantationRef)
 
 
-			bqStreamInsert({
-				updatedAt : updatedAtTimeStamp, 
-				...auditAcceptedAt,
-				...restNewData,		
-			}) 
+			// bqStreamInsert({
+			// 	updatedAt : updatedAtTimeStamp, 
+			// 	...auditAcceptedAt,
+			// 	...restNewData,		
+			// }) 
 
 			return
 

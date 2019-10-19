@@ -18,12 +18,14 @@ export default functions.region("asia-east2").auth.user()
 		await admin.firestore().doc('tradeboard/' + user.uid).set({
 	
 			agent: {
+				origins: [],
 				holdings: { onhand: 0, pending: 0 },
 				pending: {},
 				completed: {},
 				rejected: {},
 			},
 			mill: {
+				origins: [],
 				holdings: { onhand: 0, pending: 0 },
 				pending: {},
 				completed: {},
