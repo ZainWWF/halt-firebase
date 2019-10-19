@@ -6,14 +6,15 @@ import { AuthContext } from '../../../../../containers/Main';
 
 const getDisplayItems = (transaction: any, userId: string) => {
 	if (!transaction) return null
-	const { createdBy, sellerId, sellerName, buyerName, createdAt, amount, transportationBy } = transaction
+	const {  sellerId, sellerName, buyerName, createdAt, amount, transportationBy, status } = transaction
 	const transactionTypeLabel = userId === sellerId ? "Requested to Sell" : "Requested to Buy";
 	const dateLabel = `${createdAt.toDate().toDateString()} ${createdAt.toDate().toTimeString().split("GMT")[0]}hr`
 	const amountLabel = `${amount} kg`
 	const contactNameLabel = userId === sellerId ? `to ${buyerName}` : `from ${sellerName}`
 	const transportationByLabel = (userId === sellerId) && (transportationBy === "Buyer") ? "" : "Select a transport"
-	console.log(createdBy === userId)
-	return { userId, transportationByLabel, transactionTypeLabel, dateLabel, amountLabel, contactNameLabel, ...transaction }
+	const error = status !== "Pending" ? true : false 
+	console.log(error)
+	return { error, userId, transportationByLabel, transactionTypeLabel, dateLabel, amountLabel, contactNameLabel, ...transaction }
 }
 
 
@@ -39,7 +40,7 @@ export default function FC(props: Props) {
 
 	const onClickAcceptTransaction = (transactionRef: firebase.firestore.DocumentReference) => () => {
 		transactionRef.update({
-			accept: true
+			state : "accept"
 		}).then(() => {
 			console.log("accept succesfull")
 			onClosePendingTransactionDetail()
@@ -77,7 +78,7 @@ export default function FC(props: Props) {
 			<ListItem >
 				<ListItemText />
 				<ListItemSecondaryAction >
-					{displayItems.createdBy === displayItems.userId ?
+					{(displayItems.createdBy === displayItems.userId) || displayItems.error?
 						<Button
 							onClick={onClickCancelTransaction(transactionDetail.ref)}
 							color="primary"
