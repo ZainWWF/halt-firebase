@@ -11,7 +11,7 @@ import { Route, Switch } from "react-router-dom";
 import { SideNavContext } from "../../providers/SideNav/SideNavProvider";
 import { makeStyles } from "@material-ui/core/styles";
 import { AuthContext } from "../../containers/Main";
-import { Avatar } from "@material-ui/core";
+import { Avatar, Typography } from "@material-ui/core";
 import HeaderAvatarMenu from "./HeaderAvatarMenu";
 import AssistanceFormModal from "./assistance/AssistanceFormModal"
 import AssistanceForm from "./assistance/AssistanceForm"
@@ -73,10 +73,13 @@ const Header: FunctionComponent = () => {
 						<Grid item >
 						</Grid>
 						<Grid item>
-							<IconButton color="inherit" className={classes.iconButtonAvatar} onClick={openAvatarMenu}>
-								<Avatar alt={""} src={user ? user!.photoUrl : ""} >
+							<Typography variant={"caption"}>
+							{user.name}
+							</Typography>
+							<IconButton className={classes.iconButtonAvatar} onClick={openAvatarMenu}>
+								<Avatar style={{background: `#${user.name ? user.name.charCodeAt() : "01"}ff` }}  alt={""} src={user ? user!.photoUrl : ""} >
 									{
-										user!.photoUrl && user.name ? user.name.slice(0, 1)[0].toUpperCase() : null
+										!user!.photoUrl && user.name ? user.name.slice(0, 1)[0].toUpperCase() : null
 									}
 								</Avatar>
 
