@@ -147,6 +147,10 @@ service cloud.firestore {
 				allow delete: if false
 		}	
 
+		match /plantationBuyers/{plantationBuyersId}{
+			allow read:	if true
+			allow write: if true
+		}
 
 		match /assistance/{assistanceId} {
 				allow read:	if isSignedIn() && isOwner(incomingData().userId) //TODO: isAdmin(userId) && isAuditor(userId)
@@ -229,7 +233,7 @@ service cloud.firestore {
 												&&	incomingData().millName is string	
 												&&	(incomingData().millId is string	|| (string(incomingData().millId) == "null")) 
 
-					allow update:	if false											
+					allow update:	if isSignedIn() && isTransactionOwnerRead() 											
 					allow delete:	if isSignedIn() && isTransactionOwnerRead()  
 		}
 	
